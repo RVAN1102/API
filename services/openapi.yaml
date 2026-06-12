@@ -1,0 +1,436 @@
+openapi: 3.0.3
+
+info:
+  title: SME Cloud-Native Microservices API - Topic 10
+  version: 1.0.0
+  description: API contract for gateway routing, authorization enforcement, security testing, and API fuzzing.
+
+servers:
+  - url: https://localhost:8443
+    description: Kong API Gateway HTTPS endpoint
+  - url: http://localhost:8000
+    description: Kong API Gateway HTTP endpoint for local testing
+
+tags:
+  - name: Users
+    description: User service endpoints maintained by TV2
+  - name: Orders
+    description: Order service endpoints maintained by TV2
+  - name: Billing
+    description: Billing service endpoints maintained by TV3
+  - name: Admin
+    description: Admin service endpoints maintained by TV3
+  - name: Webhooks
+    description: Webhook callback endpoints protected by HMAC signature
+
+paths:
+  /api/v1/users/health:
+    get:
+      tags:
+        - Users
+      operationId: usersHealthCheck
+      summary: Healthcheck for User API
+      responses:
+        '200':
+          description: User service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/users/profile:
+    get:
+      tags:
+        - Users
+      operationId: getUserProfile
+      summary: Get current authenticated user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/orders/health:
+    get:
+      tags:
+        - Orders
+      operationId: ordersHealthCheck
+      summary: Healthcheck for Order API
+      responses:
+        '200':
+          description: Order service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      operationId: getOrderById
+      summary: Get order detail by order ID
+      description: This endpoint is used to demonstrate BOLA in the vulnerable version and ownership enforcement in the fixed version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: Order identifier
+          schema:
+            type: string
+          example: "order-001"
+      responses:
+        '200':
+          description: Order detail is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/billing/health:
+    get:
+      tags:
+        - Billing
+      operationId: billingHealthCheck
+      summary: Healthcheck for Billing API
+      responses:
+        '200':
+          description: Billing service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/billing/checkout:
+    post:
+      tags:
+        - Billing
+      operationId: createCheckoutSession
+      summary: Create a checkout request and trigger payment processing
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+      responses:
+        '202':
+          description: Checkout request accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutAcceptedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/admin/health:
+    get:
+      tags:
+        - Admin
+      operationId: adminHealthCheck
+      summary: Healthcheck for Admin API
+      responses:
+        '200':
+          description: Admin service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/admin/maintenance:
+    post:
+      tags:
+        - Admin
+      operationId: runMaintenanceFetch
+      summary: Execute maintenance fetch operation
+      description: This endpoint is used to demonstrate SSRF behavior in the vulnerable version and URL allowlist/blocklist enforcement in the fixed version.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceFetchRequest'
+      responses:
+        '200':
+          description: Maintenance fetch executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceFetchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Request blocked by SSRF protection policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/webhooks/payment:
+    post:
+      tags:
+        - Webhooks
+      operationId: receivePaymentWebhook
+      summary: Receive signed payment webhook callback
+      parameters:
+        - name: X-Timestamp
+          in: header
+          required: true
+          schema:
+            type: string
+          example: "2026-06-13T10:00:00Z"
+        - name: X-Nonce
+          in: header
+          required: true
+          schema:
+            type: string
+          example: "nonce-123456"
+        - name: X-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+          example: "sha256=..."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentWebhookRequest'
+      responses:
+        '200':
+          description: Webhook accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAcceptedResponse'
+        '401':
+          description: Missing or invalid HMAC signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Expired timestamp or replayed nonce
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Invalid request payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Missing, expired, revoked, or invalid JWT
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Authenticated principal does not have permission to access this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+      properties:
+        status:
+          type: string
+          example: "ok"
+        service:
+          type: string
+          example: "user-service"
+
+    UserProfile:
+      type: object
+      required:
+        - user_id
+        - username
+        - roles
+      properties:
+        user_id:
+          type: string
+          example: "alice"
+        username:
+          type: string
+          example: "alice"
+        email:
+          type: string
+          format: email
+          example: "alice@example.local"
+        roles:
+          type: array
+          items:
+            type: string
+          example:
+            - user
+
+    OrderDetail:
+      type: object
+      required:
+        - order_id
+        - owner_id
+        - amount
+        - status
+      properties:
+        order_id:
+          type: string
+          example: "order-001"
+        owner_id:
+          type: string
+          example: "alice"
+        amount:
+          type: number
+          format: float
+          example: 150000
+        status:
+          type: string
+          example: "created"
+
+    CheckoutRequest:
+      type: object
+      required:
+        - order_id
+        - amount
+      properties:
+        order_id:
+          type: string
+          example: "order-001"
+        amount:
+          type: number
+          format: float
+          example: 150000
+        currency:
+          type: string
+          example: "VND"
+
+    CheckoutAcceptedResponse:
+      type: object
+      required:
+        - checkout_id
+        - status
+      properties:
+        checkout_id:
+          type: string
+          example: "checkout-001"
+        status:
+          type: string
+          example: "accepted"
+
+    MaintenanceFetchRequest:
+      type: object
+      required:
+        - fetch_url
+      properties:
+        fetch_url:
+          type: string
+          format: uri
+          example: "http://169.254.169.254/latest/meta-data/"
+          description: URL used for SSRF simulation and protection testing.
+
+    MaintenanceFetchResponse:
+      type: object
+      properties:
+        fetched:
+          type: boolean
+          example: true
+        target:
+          type: string
+          example: "http://169.254.169.254/latest/meta-data/"
+        result:
+          type: string
+          example: "metadata response"
+
+    PaymentWebhookRequest:
+      type: object
+      required:
+        - event_id
+        - event_type
+        - checkout_id
+      properties:
+        event_id:
+          type: string
+          example: "evt-001"
+        event_type:
+          type: string
+          example: "payment.succeeded"
+        checkout_id:
+          type: string
+          example: "checkout-001"
+        amount:
+          type: number
+          format: float
+          example: 150000
+
+    WebhookAcceptedResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: "accepted"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "forbidden"
+        message:
+          type: string
+          example: "Access denied"
+        correlation_id:
+          type: string
+          example: "req-123456"
