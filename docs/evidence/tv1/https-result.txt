@@ -1,0 +1,29 @@
+﻿command: docker run --rm curlimages/curl:latest --insecure --include https://host.docker.internal:8443/api/v1/users/health
+collected_at_utc: 2026-06-13T17:15:26Z
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 40
+Connection: keep-alive
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Reset: 34
+RateLimit-Limit: 60
+RateLimit-Remaining: 59
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+Date: Sat, 13 Jun 2026 17:15:26 GMT
+Server: kong/3.9.2
+X-Correlation-ID: 9a660b01-f2ca-4352-828f-21b209c95299
+vary: Origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Kong-Upstream-Latency: 9
+X-Kong-Proxy-Latency: 3
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: f4ca7b620730d7227e97342088321d72
+
+{"status":"ok","service":"user-service"}
+
+exit_code: 0
+

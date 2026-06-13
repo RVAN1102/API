@@ -1,0 +1,15 @@
+TV1 mTLS status: DESIGN PREPARED, NOT ENABLED IN DEFAULT COMPOSE.
+
+Reason:
+The team-owned backend services do not yet expose TLS listeners. Enabling mTLS
+now would break the baseline.
+
+Prepared artifacts:
+- gateway/mtls.md
+- demo/mtls/generate-mtls-certs.sh
+- demo/mtls/README.md
+
+The design defines an internal demo CA, Kong client identity, backend server
+identity, mutual certificate verification, secret mounting, and rotation
+requirements.
+

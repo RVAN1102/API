@@ -1,0 +1,44 @@
+services:
+  api-mock:
+    image: stoplight/prism:4
+    command: mock -h 0.0.0.0 /tmp/openapi.yaml
+    volumes:
+      - ../services/openapi.yaml:/tmp/openapi.yaml:ro
+    expose:
+      - "4010"
+
+  webhook-demo:
+    image: python:3.13-alpine
+    command: python /app/receiver.py
+    environment:
+      WEBHOOK_SECRET: local-demo-secret-change-me
+      WEBHOOK_MAX_AGE_SECONDS: "300"
+    volumes:
+      - ../demo/webhook/receiver.py:/app/receiver.py:ro
+    expose:
+      - "8080"
+
+  kong:
+    image: kong:3.9
+    depends_on:
+      - api-mock
+      - webhook-demo
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_LOG_LEVEL: notice
+      # Keep local in-memory rate-limit counters deterministic for the demo.
+      KONG_NGINX_WORKER_PROCESSES: "1"
+    volumes:
+      - ../gateway/kong.yml:/kong/declarative/kong.yml:ro
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "127.0.0.1:8001:8001"
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12

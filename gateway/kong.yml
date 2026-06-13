@@ -1,0 +1,204 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: api-mock
+    url: http://api-mock:4010
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: users-health
+        paths: ["/api/v1/users/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: users-api
+        paths: ["/api/v1/users"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+      - name: orders-health
+        paths: ["/api/v1/orders/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: orders-api
+        paths: ["/api/v1/orders"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+      - name: billing-health
+        paths: ["/api/v1/billing/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: billing-api
+        paths: ["/api/v1/billing"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+      - name: admin-health
+        paths: ["/api/v1/admin/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: admin-api
+        paths: ["/api/v1/admin"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+  - name: webhook-demo
+    url: http://webhook-demo:8080
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: webhooks-api
+        paths: ["/api/v1/webhooks"]
+        methods: ["POST", "OPTIONS"]
+        strip_path: false
+
+plugins:
+  - name: cors
+    config:
+      origins:
+        - http://localhost:3000
+        - http://localhost:5173
+        - https://app.localhost
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      headers:
+        - Accept
+        - Authorization
+        - Content-Type
+        - X-Correlation-ID
+        - X-Webhook-Signature
+        - X-Webhook-Timestamp
+        - X-Webhook-Nonce
+      exposed_headers:
+        - X-Correlation-ID
+        - X-RateLimit-Limit-Minute
+        - X-RateLimit-Remaining-Minute
+      credentials: false
+      max_age: 3600
+      preflight_continue: false
+
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 1
+      size_unit: megabytes
+      require_content_length: false
+
+  # Kong OSS does not include a full WAF. This edge filter blocks a small,
+  # documented set of obvious SQLi/XSS probes before proxying the request.
+  - name: pre-function
+    config:
+      access:
+        - |
+          local function reject(message)
+            return kong.response.exit(403, {
+              error = "edge_filter_rejected",
+              message = message,
+              correlation_id = kong.request.get_header("X-Correlation-ID")
+            })
+          end
+
+          local function suspicious(value)
+            if not value then return false end
+            local text = string.lower(tostring(value))
+            return string.find(text, "<script", 1, true)
+              or string.find(text, "javascript:", 1, true)
+              or string.find(text, "union select", 1, true)
+              or string.find(text, "' or 1=1", 1, true)
+          end
+
+          for _, value in pairs(kong.request.get_query()) do
+            if type(value) == "table" then
+              for _, item in ipairs(value) do
+                if suspicious(item) then return reject("Basic SQLi/XSS pattern detected") end
+              end
+            elseif suspicious(value) then
+              return reject("Basic SQLi/XSS pattern detected")
+            end
+          end
+
+          local content_type = kong.request.get_header("content-type") or ""
+          if string.find(content_type, "json", 1, true)
+              or string.find(content_type, "text/", 1, true) then
+            local ok, body = pcall(kong.request.get_raw_body)
+            if ok and suspicious(body) then
+              return reject("Basic SQLi/XSS pattern detected")
+            end
+          end
+
+          local path = kong.request.get_path()
+          if string.sub(path, 1, 16) == "/api/v1/webhooks" then
+            local required = {
+              "X-Webhook-Timestamp",
+              "X-Webhook-Nonce",
+              "X-Webhook-Signature"
+            }
+            for _, header in ipairs(required) do
+              if not kong.request.get_header(header) then
+                return kong.response.exit(401, {
+                  error = "missing_webhook_header",
+                  message = header .. " is required"
+                })
+              end
+            end
+          end
+
+  # HSTS is emitted only when the client-facing request uses HTTPS.
+  - name: post-function
+    config:
+      header_filter:
+        - |
+          if kong.request.get_scheme() == "https" then
+            kong.response.set_header(
+              "Strict-Transport-Security",
+              "max-age=31536000; includeSubDomains"
+            )
+          end
+
+  - name: rate-limiting
+    route: users-health
+    config: &normal_rate_limit
+      minute: 60
+      policy: local
+      limit_by: ip
+      fault_tolerant: true
+      hide_client_headers: false
+  - name: rate-limiting
+    route: orders-health
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: billing-health
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: admin-health
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: billing-api
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: webhooks-api
+    config: *normal_rate_limit
+
+  - name: rate-limiting
+    route: users-api
+    config: &sensitive_rate_limit
+      minute: 10
+      policy: local
+      limit_by: ip
+      fault_tolerant: true
+      hide_client_headers: false
+  - name: rate-limiting
+    route: orders-api
+    config: *sensitive_rate_limit
+  - name: rate-limiting
+    route: admin-api
+    config: *sensitive_rate_limit

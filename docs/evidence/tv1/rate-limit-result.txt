@@ -1,0 +1,30 @@
+command: bash /c/Users/duynh/Documents/Code/Matma/Project/API/demo/curl/test-rate-limit.sh
+collected_at_utc: 2026-06-13T17:14:33Z
+
+request=01 status=401
+request=02 status=401
+request=03 status=401
+request=04 status=401
+request=05 status=401
+request=06 status=401
+request=07 status=401
+request=08 status=401
+request=09 status=401
+request=10 status=401
+request=11 status=429
+request=12 status=429
+request=13 status=429
+request=14 status=429
+request=15 status=429
+request=16 status=429
+request=17 status=429
+request=18 status=429
+request=19 status=429
+request=20 status=429
+request=21 status=429
+request=22 status=429
+request=23 status=429
+request=24 status=429
+request=25 status=429
+
+exit_code: 0

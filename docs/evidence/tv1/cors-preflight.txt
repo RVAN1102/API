@@ -1,0 +1,19 @@
+command: bash /c/Users/duynh/Documents/Code/Matma/Project/API/demo/curl/test-cors.sh
+collected_at_utc: 2026-06-13T17:14:33Z
+
+HTTP/1.1 200 OK
+Date: Sat, 13 Jun 2026 17:14:33 GMT
+Connection: keep-alive
+vary: Origin
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Headers: Accept,Authorization,Content-Type,X-Correlation-ID,X-Webhook-Signature,X-Webhook-Timestamp,X-Webhook-Nonce
+Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS
+Access-Control-Max-Age: 3600
+Content-Length: 0
+X-Correlation-ID: f2630d76-2383-4f0d-96f0-a01294345dc8
+X-Kong-Response-Latency: 2
+Server: kong/3.9.2
+X-Kong-Request-Id: eab2d07b3500092bb4312a70418d700b
+
+
+exit_code: 0

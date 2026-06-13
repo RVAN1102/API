@@ -195,24 +195,24 @@ paths:
       operationId: receivePaymentWebhook
       summary: Receive signed payment webhook callback
       parameters:
-        - name: X-Timestamp
+        - name: X-Webhook-Timestamp
           in: header
           required: true
           schema:
             type: string
-          example: "2026-06-13T10:00:00Z"
-        - name: X-Nonce
+          example: "1718272800"
+        - name: X-Webhook-Nonce
           in: header
           required: true
           schema:
             type: string
           example: "nonce-123456"
-        - name: X-Signature
+        - name: X-Webhook-Signature
           in: header
           required: true
           schema:
             type: string
-          example: "sha256=..."
+          example: "sha256=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       requestBody:
         required: true
         content:

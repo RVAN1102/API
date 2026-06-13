@@ -1,0 +1,74 @@
+command: bash /c/Users/duynh/Documents/Code/Matma/Project/API/demo/curl/test-waf-filter.sh
+collected_at_utc: 2026-06-13T17:14:37Z
+
+===== valid request =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 40
+Connection: keep-alive
+X-RateLimit-Remaining-Minute: 57
+X-RateLimit-Limit-Minute: 60
+RateLimit-Reset: 23
+RateLimit-Limit: 60
+RateLimit-Remaining: 57
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+Date: Sat, 13 Jun 2026 17:14:37 GMT
+Server: kong/3.9.2
+X-Correlation-ID: d017e110-6494-4264-b09c-8cc438be6272
+vary: Origin
+X-Kong-Upstream-Latency: 6
+X-Kong-Proxy-Latency: 0
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 87304a638cd7e756385fcc46f3103c53
+
+{"status":"ok","service":"user-service"}===== SQLi probe (expected HTTP 403) =====
+HTTP/1.1 403 Forbidden
+Date: Sat, 13 Jun 2026 17:14:37 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Content-Length: 76
+X-Correlation-ID: ef4c0d27-27bd-4b31-b3cf-aadb98402802
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Response-Latency: 1
+Server: kong/3.9.2
+X-Kong-Request-Id: 6b45cc4afee4d94e4a16966c4e71ae5d
+
+{"message":"Basic SQLi/XSS pattern detected","error":"edge_filter_rejected"}===== invalid method (expected HTTP 404/405) =====
+HTTP/1.1 405 Not Allowed
+Date: Sat, 13 Jun 2026 17:14:37 GMT
+Content-Type: application/json; charset=utf-8
+Connection: close
+Content-Length: 87
+X-Correlation-ID: 1207ea77-491f-4956-994d-ee3ad3f5b6a0
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Response-Latency: 2
+Server: kong/3.9.2
+X-Kong-Request-Id: 9467a10fd1673f7b73346477608ebd1d
+
+{
+  "message":"Method not allowed",
+  "request_id":"9467a10fd1673f7b73346477608ebd1d"
+}===== oversized body (expected edge rejection) =====
+HTTP/1.1 100 Continue
+
+HTTP/1.1 417 
+Date: Sat, 13 Jun 2026 17:14:38 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Content-Length: 96
+X-Correlation-ID: 6184dafb-4549-4337-81d6-24d47de7a99a
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Response-Latency: 48
+Server: kong/3.9.2
+X-Kong-Request-Id: 45fc26602ced355f2628bf068edf2f3b
+
+{
+  "message":"Request size limit exceeded",
+  "request_id":"45fc26602ced355f2628bf068edf2f3b"
+}
+exit_code: 0

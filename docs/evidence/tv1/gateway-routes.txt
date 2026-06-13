@@ -1,0 +1,13 @@
+command: bash /c/Users/duynh/Documents/Code/Matma/Project/API/demo/curl/test-gateway-routes.sh
+collected_at_utc: 2026-06-13T17:14:31Z
+
+/api/v1/users/health             HTTP 200
+{"status":"ok","service":"user-service"}
+/api/v1/orders/health            HTTP 200
+{"status":"ok","service":"user-service"}
+/api/v1/billing/health           HTTP 200
+{"status":"ok","service":"user-service"}
+/api/v1/admin/health             HTTP 200
+{"status":"ok","service":"user-service"}
+
+exit_code: 0
