@@ -1,0 +1,16 @@
+# Local secrets and generated certificates
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+infra/certs/*
+!infra/certs/.gitkeep
+
+# Generated demo state and reports
+demo/webhook/.nonce-cache.json
+demo/tls/certs/
+demo/mtls/certs/
+*.log
+__pycache__/
+*.py[cod]
