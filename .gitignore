@@ -12,5 +12,30 @@ demo/webhook/.nonce-cache.json
 demo/tls/certs/
 demo/mtls/certs/
 *.log
+
+# Python
 __pycache__/
 *.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+coverage.xml
+.coverage
+
+# Node (Frontend if any)
+node_modules/
+dist/
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Docker and local storage (if mapped locally)
+volume/
+db-data/
+loki-data/
+grafana-data/
