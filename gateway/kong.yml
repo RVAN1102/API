@@ -1,9 +1,14 @@
 _format_version: "3.0"
 _transform: true
 
+# ---------------------------------------------------------------------------
+# Services (upstream backends)
+# TV1 routes all traffic through Kong. Real services added by TV2/TV3.
+# ---------------------------------------------------------------------------
 services:
-  - name: api-mock
-    url: http://api-mock:4010
+  # TV2 – User Service (FastAPI)
+  - name: user-service
+    url: http://user-service:8000
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -14,10 +19,29 @@ services:
         methods: ["GET", "OPTIONS"]
         strip_path: false
         regex_priority: 100
+      - name: users-me
+        paths: ["/api/v1/users/me"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 90
+      - name: users-profile
+        paths: ["/api/v1/users/profile"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 90
       - name: users-api
         paths: ["/api/v1/users"]
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
+
+  # TV2 – Order Service (FastAPI)
+  - name: order-service
+    url: http://order-service:8000
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
       - name: orders-health
         paths: ["/api/v1/orders/health"]
         methods: ["GET", "OPTIONS"]
@@ -27,15 +51,38 @@ services:
         paths: ["/api/v1/orders"]
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
+
+  # TV3 – Billing Service (FastAPI)
+  - name: billing-service
+    url: http://billing-service:8000
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
       - name: billing-health
         paths: ["/api/v1/billing/health"]
         methods: ["GET", "OPTIONS"]
         strip_path: false
         regex_priority: 100
+      - name: billing-webhooks
+        paths: ["/api/v1/webhooks/payment"]
+        methods: ["POST", "OPTIONS"]
+        strip_path: false
+        regex_priority: 150
       - name: billing-api
         paths: ["/api/v1/billing"]
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
+
+  # TV3 – Admin Service (FastAPI)
+  - name: admin-service
+    url: http://admin-service:8000
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
       - name: admin-health
         paths: ["/api/v1/admin/health"]
         methods: ["GET", "OPTIONS"]
@@ -45,6 +92,10 @@ services:
         paths: ["/api/v1/admin"]
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
+
+  # TV1 – Webhook demo receiver (HMAC demo)
+  # Billing service also handles /api/v1/webhooks/payment directly,
+  # but the standalone webhook-demo container is kept for TV1 HMAC scripts.
   - name: webhook-demo
     url: http://webhook-demo:8080
     connect_timeout: 3000
@@ -57,6 +108,10 @@ services:
         methods: ["POST", "OPTIONS"]
         strip_path: false
 
+# ---------------------------------------------------------------------------
+# Plugins (global unless route/service specified)
+# TV1 owns all plugin config. TV2/TV3 must not modify without group agreement.
+# ---------------------------------------------------------------------------
 plugins:
   - name: cors
     config:
@@ -164,6 +219,7 @@ plugins:
             )
           end
 
+  # Rate limiting – per route
   - name: rate-limiting
     route: users-health
     config: &normal_rate_limit
@@ -196,6 +252,12 @@ plugins:
       limit_by: ip
       fault_tolerant: true
       hide_client_headers: false
+  - name: rate-limiting
+    route: users-me
+    config: *sensitive_rate_limit
+  - name: rate-limiting
+    route: users-profile
+    config: *sensitive_rate_limit
   - name: rate-limiting
     route: orders-api
     config: *sensitive_rate_limit

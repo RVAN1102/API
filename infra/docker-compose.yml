@@ -1,35 +1,24 @@
 services:
-  api-mock:
-    image: stoplight/prism:4
-    command: mock -h 0.0.0.0 /tmp/openapi.yaml
-    volumes:
-      - ../services/openapi.yaml:/tmp/openapi.yaml:ro
-    expose:
-      - "4010"
-
-  webhook-demo:
-    image: python:3.13-alpine
-    command: python /app/receiver.py
-    environment:
-      WEBHOOK_SECRET: local-demo-secret-change-me
-      WEBHOOK_MAX_AGE_SECONDS: "300"
-    volumes:
-      - ../demo/webhook/receiver.py:/app/receiver.py:ro
-    expose:
-      - "8080"
-
+  # ---------------------------------------------------------------------------
+  # API Gateway (TV1) - Kong OSS in DB-less mode
+  # ---------------------------------------------------------------------------
   kong:
     image: kong:3.9
     depends_on:
-      - api-mock
-      - webhook-demo
+      user-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      billing-service:
+        condition: service_healthy
+      admin-service:
+        condition: service_healthy
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
       KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
       KONG_ADMIN_LISTEN: "0.0.0.0:8001"
       KONG_LOG_LEVEL: notice
-      # Keep local in-memory rate-limit counters deterministic for the demo.
       KONG_NGINX_WORKER_PROCESSES: "1"
     volumes:
       - ../gateway/kong.yml:/kong/declarative/kong.yml:ro
@@ -42,3 +31,186 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+
+  # ---------------------------------------------------------------------------
+  # TV2 – User Service
+  # ---------------------------------------------------------------------------
+  user-service:
+    build:
+      context: ../services/user
+      dockerfile: Dockerfile
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: topic10-sme-api
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/users/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV2 – Order Service
+  # ---------------------------------------------------------------------------
+  order-service:
+    build:
+      context: ../services/order
+      dockerfile: Dockerfile
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: topic10-sme-api
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/orders/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV3 – Billing Service
+  # ---------------------------------------------------------------------------
+  billing-service:
+    build:
+      context: ../services/billing
+      dockerfile: Dockerfile
+    environment:
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+      WEBHOOK_MAX_AGE_SECONDS: "300"
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV3 – Admin Service
+  # ---------------------------------------------------------------------------
+  admin-service:
+    build:
+      context: ../services/admin
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV2 – Webhook demo receiver (kept from TV1 for HMAC demo scripts)
+  # ---------------------------------------------------------------------------
+  webhook-demo:
+    image: python:3.13-alpine
+    command: python /app/receiver.py
+    environment:
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+      WEBHOOK_MAX_AGE_SECONDS: "300"
+    volumes:
+      - ../demo/webhook/receiver.py:/app/receiver.py:ro
+    expose:
+      - "8080"
+
+  # ---------------------------------------------------------------------------
+  # TV2 – Keycloak Identity Provider
+  # ---------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ../idp/realm-export/topic10-realm.json:/opt/keycloak/data/import/topic10-sme-api-realm.json:ro
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # TV2 – HashiCorp Vault (dev mode)
+  # ---------------------------------------------------------------------------
+  vault:
+    image: hashicorp/vault:1.18
+    command: server -dev -dev-root-token-id=dev-root-token
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: dev-root-token
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://localhost:8200"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV3 – Loki (log aggregation)
+  # ---------------------------------------------------------------------------
+  loki:
+    image: grafana/loki:3.2.0
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ../observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    expose:
+      - "3100"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # TV3 – Promtail (log collector – reads Docker container logs)
+  # ---------------------------------------------------------------------------
+  promtail:
+    image: grafana/promtail:3.2.0
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ../observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+
+  # ---------------------------------------------------------------------------
+  # TV3 – Grafana (dashboard and alerting)
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.3.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - loki
+
+volumes:
+  loki-data:
+  grafana-data:

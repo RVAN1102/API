@@ -1,0 +1,80 @@
+groups:
+  - name: api-security-alerts
+    interval: 1m
+    rules:
+      # Spike in 401 Unauthorized
+      - alert: HighUnauthorizedRate
+        expr: |
+          count_over_time({job="docker"} |= "\"status_code\":401" [5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of 401 Unauthorized responses"
+          description: "More than 10 unauthorized requests in 5 minutes. Possible credential stuffing."
+
+      # Spike in 403 Forbidden
+      - alert: HighForbiddenRate
+        expr: |
+          count_over_time({job="docker"} |= "\"status_code\":403" [5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of 403 Forbidden responses"
+          description: "More than 10 forbidden requests in 5 minutes. Possible authorization abuse."
+
+      # Rate limit triggered
+      - alert: RateLimitTriggered
+        expr: |
+          count_over_time({job="docker"} |= "\"status_code\":429" [5m]) > 5
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rate limit triggered"
+          description: "HTTP 429 responses detected. Possible brute force or rate abuse."
+
+      # BOLA attempt
+      - alert: BOLAAttempt
+        expr: |
+          count_over_time({event_type="bola_attempt"} [5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BOLA attempt detected"
+          description: "A cross-user order access was attempted via the vulnerable endpoint."
+
+      # SSRF blocked
+      - alert: SSRFAttempt
+        expr: |
+          count_over_time({event_type="ssrf_blocked"} [5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SSRF attempt blocked"
+          description: "An SSRF attempt was blocked by the fixed endpoint."
+
+      # Invalid webhook signature
+      - alert: WebhookInvalidSignature
+        expr: |
+          count_over_time({event_type="webhook_invalid_signature"} [5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Webhook with invalid signature received"
+          description: "One or more webhook requests had an invalid HMAC signature."
+
+      # Webhook replay detected
+      - alert: WebhookReplayDetected
+        expr: |
+          count_over_time({event_type="webhook_replay_detected"} [5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Webhook replay attack detected"
+          description: "A webhook with a replayed nonce or expired timestamp was rejected."

@@ -1,0 +1,87 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - "feat/tv3-devsecops-observability-redteam"
+      - "setup/project-contracts"
+      - "main"
+  pull_request:
+    branches:
+      - "setup/project-contracts"
+      - "main"
+
+jobs:
+  bandit:
+    name: Bandit – Python Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Bandit
+        run: pip install bandit==1.8.0
+
+      - name: Run Bandit on services
+        run: |
+          bandit -r services/ \
+            --exclude services/*/test_*.py \
+            --severity-level medium \
+            --confidence-level medium \
+            --format txt \
+            --output bandit-report.txt || true
+          cat bandit-report.txt
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.txt
+        if: always()
+
+  gitleaks:
+    name: Gitleaks – Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+  trivy:
+    name: Trivy – Filesystem Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: "."
+          format: table
+          exit-code: "0"
+          severity: "HIGH,CRITICAL"
+          output: trivy-report.txt
+
+      - name: Show Trivy report
+        run: cat trivy-report.txt || true
+
+      - name: Upload Trivy report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.txt
+        if: always()

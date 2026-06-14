@@ -1,27 +1,61 @@
-# Project tool requirements
+# Project Tool Requirements
 #
 # This file documents the local tools needed to run and test the capstone
-# prototype. It is intentionally not a pip-only dependency file.
+# prototype. It is not a pip-only dependency file.
 
+# --------------------------------------------------
 # Container runtime
+# --------------------------------------------------
 Docker Desktop >= 29.5
 Docker Compose >= 5.1
 
-# Gateway and test images pulled by Docker Compose / Docker run
+# --------------------------------------------------
+# Docker images used by Docker Compose / docker run
+# --------------------------------------------------
 kong:3.9
-stoplight/prism:4
 python:3.13-alpine
-curlimages/curl:latest
+python:3.13-slim
+quay.io/keycloak/keycloak:26.0
+hashicorp/vault:1.18
+grafana/loki:3.2.0
+grafana/promtail:3.2.0
+grafana/grafana:11.3.0
 grafana/k6:latest
+curlimages/curl:latest
+ghcr.io/zaproxy/zaproxy:stable
 
+# --------------------------------------------------
 # Local command-line tools
+# --------------------------------------------------
 Git for Windows with Git Bash
 curl >= 8.0
 OpenSSL >= 3.0
 Python >= 3.13
 
-# Python packages used for local static checks
+# --------------------------------------------------
+# Python packages (installed per service via Dockerfile)
+# --------------------------------------------------
+# services/user/requirements.txt
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-jose[cryptography]==3.3.0
+httpx==0.28.0
+pydantic==2.10.3
+
+# --------------------------------------------------
+# Python packages for local CI scanning
+# --------------------------------------------------
+bandit==1.8.0
 PyYAML >= 6.0
 
-# Optional native install. The project can also run k6 through Docker.
+# --------------------------------------------------
+# Security scanning tools (for CI and local scan)
+# --------------------------------------------------
+# bandit: pip install bandit
+# gitleaks: https://github.com/gitleaks/gitleaks/releases
+# trivy: https://aquasecurity.github.io/trivy/
+
+# --------------------------------------------------
+# Optional – native install (can also run via Docker)
+# --------------------------------------------------
 k6 >= 2.0

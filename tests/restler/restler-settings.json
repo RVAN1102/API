@@ -1,0 +1,29 @@
+{
+  "TargetEndpoint": "http://localhost:8000",
+  "MaxDurationSeconds": 300,
+  "MaxRequestExecutionTime": 30,
+  "MaxCombinations": 20,
+  "ResultsPath": "docs/evidence/tv3/restler-check-summary.txt",
+  "GrammarFilePath": "tests/restler/grammar.py",
+  "CustomDictionary": "tests/restler/dict.json",
+  "IgnoreDeclinedResponseCodes": true,
+  "FuzzBudget": 10,
+  "TestingSuffix": "fuzz",
+  "EngineSettingsFilePath": "tests/restler/engine_settings.json",
+  "HostEndpoints": {
+    "Host": "localhost",
+    "Port": 8000
+  },
+  "ApiSpecFilePath": "services/openapi.yaml",
+  "CheckerSettings": {
+    "LeakageChecker": {
+      "Enabled": true
+    },
+    "ResourceHierarchyChecker": {
+      "Enabled": true
+    },
+    "UseAfterFreeChecker": {
+      "Enabled": false
+    }
+  }
+}

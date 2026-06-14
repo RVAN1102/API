@@ -3,239 +3,231 @@
 ## Overview
 
 This project is a prototype for **Cloud API-Based Network Application Security
-for Small Company Services**. The goal is to design, implement, and evaluate a
-practical API security architecture suitable for a small company with limited
-operations budget.
+for Small Company Services** (Topic 10). The goal is to design, implement, and
+evaluate a practical API security architecture suitable for a small company.
 
-The prototype focuses on:
+## Team Members & Responsibilities
 
-- API Gateway routing and edge security.
-- CORS policy.
-- Rate limiting against brute force and abuse.
-- Gateway-level filtering for abnormal requests.
-- HTTPS/TLS termination and HSTS.
-- mTLS design for gateway-to-backend traffic.
-- Signed webhook protection using HMAC-SHA256, timestamp, and nonce.
-- Correlation ID propagation for tracing.
-- Gateway latency benchmark with k6.
+| Member | Role | Branch |
+|--------|------|--------|
+| **TV1** | Edge, Network & Webhook Security Engineer | `feat/tv1-gateway-edge-security` |
+| **TV2** | Identity & Core Application Architect | `feat/tv2-idp-authz-core-services` |
+| **TV3** | DevSecOps, Observability & Red Team Analyst | `feat/tv3-devsecops-observability-redteam` |
 
-## Current Prototype Architecture
+## Architecture
 
 ```text
-Client / Test Scripts
-        |
-        v
-Kong API Gateway
-  - Routes
-  - CORS
-  - Rate limiting
-  - Request size limit
-  - Basic edge filter
-  - HTTPS + HSTS
-  - Correlation ID
-        |
-        +--> Prism API mock from services/openapi.yaml
-        |
-        +--> Webhook receiver demo with HMAC/replay verification
+Browser (Frontend UI) / Test Scripts
+        │
+        ▼
+Kong API Gateway (TV1)
+  - Routing, CORS, Rate limiting
+  - Edge filtering (SQLi/XSS)
+  - HTTPS/HSTS, Correlation ID
+  - Webhook HMAC header enforcement
+        │
+        ├──▶ User Service    (TV2) – /api/v1/users/*
+        ├──▶ Order Service   (TV2) – /api/v1/orders/*
+        ├──▶ Billing Service (TV3) – /api/v1/billing/* (and /webhooks/payment)
+        ├──▶ Admin Service   (TV3) – /api/v1/admin/*
+        └──▶ Webhook Demo    (TV1) – /api/v1/webhooks/*
+
+Supporting Services:
+  Keycloak   (TV2) – OAuth2/OIDC Identity Provider
+  Vault      (TV2) – Secret Management
+  Loki       (TV3) – Log Aggregation
+  Promtail   (TV3) – Log Collector
+  Grafana    (TV3) – Dashboards & Alerting
 ```
 
-The non-webhook APIs are mocked with Prism based on
-`services/openapi.yaml`. This allows the gateway and security controls to be
-tested before the real backend services are integrated.
+## Security Features
 
-## Main Folders
+### TV1 – Gateway Edge Security
+- Kong API Gateway routing
+- CORS policy (origins, methods, headers)
+- Rate limiting (60/min standard, 10/min sensitive routes)
+- WAF/edge filter (SQLi/XSS patterns, payload size)
+- HTTPS/TLS termination + HSTS header
+- mTLS design (documented)
+- Webhook HMAC-SHA256 + nonce/timestamp enforcement
+- Correlation ID propagation
 
-| Path | Purpose |
-|---|---|
-| `gateway/` | Kong configuration and gateway security documentation |
-| `infra/` | Docker Compose runtime |
-| `services/openapi.yaml` | Shared API contract |
-| `demo/curl/` | Curl-based gateway test scripts |
-| `demo/webhook/` | Webhook signing scripts and demo receiver |
-| `demo/k6/` | Gateway latency benchmark |
-| `demo/tls/` | Self-signed TLS certificate helper |
-| `demo/mtls/` | mTLS certificate helper and notes |
-| `docs/evidence/tv1/` | Recorded test evidence |
-| `docs/chapter3/` | Report content for gateway edge design |
+### TV2 – Identity & Authorization
+- Keycloak OAuth2/OIDC realm (`topic10-sme-api`)
+- Authorization Code + PKCE for user login
+- Client Credentials for service-to-service
+- JWT validation with JWKS (RS256)
+- RBAC backend authorization (roles: user, admin, billing-service)
+- BOLA vulnerable/fixed demo (Order Service)
+- HashiCorp Vault secret management
 
-## Requirements
+### TV3 – DevSecOps & Observability
+- Billing Service with HMAC webhook handling
+- Admin Service with SSRF vulnerable/fixed demo
+- Structured JSON logging (Promtail/Loki compatible)
+- Loki/Promtail/Grafana observability stack
+- Security alert rules (BOLA, SSRF, webhook, rate-limit)
+- Attack simulation scripts (SSRF, token replay, webhook forgery, BOLA, rate-limit)
+- OWASP ZAP baseline scan
+- RESTler API fuzzing plan
+- CI security scan (Bandit, Gitleaks, Trivy)
+- MTTD/MTTR measurement
 
-See `requirements.txt` for the required tools. Minimum practical setup:
-
-- Docker Desktop
-- Docker Compose
-- Git Bash
-- Python 3.13
-- OpenSSL
-- curl
-
-k6 can be installed locally, but this project also supports running k6 through
-Docker.
-
-## Run The Prototype
-
-From the project root:
+## Quick Start
 
 ```bash
+# Start all services
 docker compose -f infra/docker-compose.yml up -d --build
+
+# If you encounter issues with Keycloak or Gateway, use the clean restart script:
+bash fix-and-restart.sh
+
+# Check status
 docker compose -f infra/docker-compose.yml ps
 ```
 
-Expected services:
+### Run the Frontend Security Dashboard
+```bash
+python frontend/serve.py
+```
+Open `http://localhost:3000` in your browser to interactively test BOLA, SSRF, and Webhooks.
 
+Expected services:
 - `infra-kong-1`
-- `infra-api-mock-1`
+- `infra-user-service-1`
+- `infra-order-service-1`
+- `infra-billing-service-1`
+- `infra-admin-service-1`
+- `infra-keycloak-1`
+- `infra-vault-1`
+- `infra-loki-1`
+- `infra-promtail-1`
+- `infra-grafana-1`
 - `infra-webhook-demo-1`
 
-Gateway endpoints:
+## Service URLs
 
-- HTTP: `http://localhost:8000`
-- HTTPS: `https://localhost:8443`
-- Kong Admin API: `http://127.0.0.1:8001`
+| Service     | URL                                  |
+|-------------|--------------------------------------|
+| Kong HTTP   | http://localhost:8000               |
+| Kong HTTPS  | https://localhost:8443              |
+| Kong Admin  | http://127.0.0.1:8001              |
+| Keycloak    | http://localhost:8080               |
+| Vault       | http://localhost:8200               |
+| Grafana     | http://localhost:3001               |
 
-## Test Gateway Routes
-
-```bash
-bash demo/curl/test-gateway-routes.sh
-```
-
-Expected result: all health endpoints return `HTTP 200`.
-
-## Test CORS
+## Health Checks
 
 ```bash
-bash demo/curl/test-cors.sh
+curl http://localhost:8000/api/v1/users/health
+curl http://localhost:8000/api/v1/orders/health
+curl http://localhost:8000/api/v1/billing/health
+curl http://localhost:8000/api/v1/admin/health
 ```
 
-Expected result: response includes allowed CORS headers for
-`http://localhost:5173`.
-
-## Test Rate Limiting
+## Get Tokens
 
 ```bash
-bash demo/curl/test-rate-limit.sh
+# User token (alice)
+bash demo/auth/get-user-token.sh alice
+ALICE_TOKEN=$(cat /tmp/user-token.txt)
+
+# User token (bob)
+bash demo/auth/get-user-token.sh bob
+BOB_TOKEN=$(cat /tmp/user-token.txt)
 ```
 
-Expected result: repeated requests eventually return `HTTP 429`.
-
-## Test Edge Filtering
+## Test Auth
 
 ```bash
-bash demo/curl/test-waf-filter.sh
+bash tests/auth/test-user-profile.sh
+bash tests/auth/test-order-access.sh
 ```
 
-Expected results:
-
-- valid request passes,
-- SQLi/XSS sample is rejected,
-- invalid method is rejected,
-- oversized body is rejected by the gateway.
-
-## Test Correlation ID
+## Test BOLA
 
 ```bash
-bash demo/curl/test-correlation-id.sh
+ALICE_TOKEN=<alice_token> BOB_TOKEN=<bob_token> bash tests/attack/bola-object-access.sh
 ```
 
-Expected result: `X-Correlation-ID` is preserved and echoed in the response.
-
-## Test HTTPS And HSTS
-
-On Windows, native `curl` may fail against local self-signed certificates due
-to Schannel behavior. Use Docker curl for reliable testing:
+## Test SSRF
 
 ```bash
-docker run --rm curlimages/curl:latest --insecure --include \
-  https://host.docker.internal:8443/api/v1/users/health
-
-docker run --rm curlimages/curl:latest --insecure --dump-header - \
-  --output /dev/null https://host.docker.internal:8443/api/v1/users/health
-```
-
-Expected result: HTTPS request succeeds and the response includes:
-
-```text
-Strict-Transport-Security: max-age=31536000; includeSubDomains
+ACCESS_TOKEN=<token> bash tests/attack/ssrf-attack.sh
 ```
 
 ## Test Webhook Security
 
-In Git Bash, set `PYTHON_BIN` if `python` points to the Windows Store alias:
+```bash
+bash tests/attack/token-replay.sh
+bash tests/attack/webhook-forgery.sh
+```
+
+## Test Rate Limiting
 
 ```bash
-export PYTHON_BIN=/c/Users/duynh/AppData/Local/Programs/Python/Python313/python.exe
+bash tests/attack/rate-limit-trigger.sh
 ```
 
-Valid webhook:
+## CI Security Scan (Local)
 
 ```bash
-bash demo/webhook/send-valid-webhook.sh
+bash ci/run-local-security-scan.sh
 ```
 
-Expected result: `HTTP_STATUS:200`.
-
-Invalid signature:
+## MTTD/MTTR Measurement
 
 ```bash
-bash demo/webhook/send-invalid-signature.sh
+bash tests/metrics/measure-mttd-mttr.sh
 ```
 
-Expected result: `HTTP_STATUS:401`.
-
-Replay nonce:
+## TV1 Tests (Gateway Edge)
 
 ```bash
-bash demo/webhook/send-replay-webhook.sh
+bash demo/curl/test-gateway-routes.sh
+bash demo/curl/test-cors.sh
+bash demo/curl/test-rate-limit.sh
+bash demo/curl/test-waf-filter.sh
+bash demo/curl/test-correlation-id.sh
 ```
 
-Expected result: first request returns `HTTP_STATUS:200`, second request
-returns `HTTP_STATUS:403`.
-
-## Run k6 Benchmark
-
-```bash
-docker run --rm -e BASE_URL=http://host.docker.internal:8000 \
-  -v "$PWD/demo/k6:/scripts:ro" \
-  grafana/k6 run /scripts/gateway-latency.js
-```
-
-The benchmark checks:
-
-- p50 latency,
-- p95 latency,
-- request rate,
-- failed request rate.
-
-## Collect Evidence
-
-```bash
-export PYTHON_BIN=/c/Users/duynh/AppData/Local/Programs/Python/Python313/python.exe
-bash demo/curl/collect-tv1-evidence.sh
-```
-
-Evidence is saved under:
-
-```text
-docs/evidence/tv1/
-```
-
-The k6 output should be saved as:
-
-```text
-docs/evidence/tv1/k6-gateway-summary.txt
-```
-
-## Stop The Stack
+## Stop Services
 
 ```bash
 docker compose -f infra/docker-compose.yml down
 ```
 
+## Project Structure
+
+| Path | Owner | Purpose |
+|------|-------|---------|
+| `gateway/` | TV1 | Kong configuration |
+| `infra/` | All | Docker Compose |
+| `idp/` | TV2 | Keycloak IDP docs & realm |
+| `vault/` | TV2 | Secret management |
+| `services/user/` | TV2 | User Service (FastAPI) |
+| `services/order/` | TV2 | Order Service (FastAPI) |
+| `services/billing/` | TV3 | Billing Service (FastAPI) |
+| `services/admin/` | TV3 | Admin Service (FastAPI) |
+| `observability/` | TV3 | Loki/Grafana configs |
+| `demo/auth/` | TV2 | Token demo scripts |
+| `demo/curl/` | TV1 | Gateway test scripts |
+| `demo/webhook/` | TV1 | Webhook HMAC scripts |
+| `frontend/` | All | Interactive Red Team Dashboard |
+| `tests/auth/` | TV2 | Auth test scripts |
+| `tests/attack/` | TV3 | Attack simulation |
+| `tests/zap/` | TV3 | ZAP scan |
+| `tests/restler/` | TV3 | API fuzzing |
+| `tests/metrics/` | TV3 | MTTD/MTTR |
+| `ci/` | TV3 | CI security scan |
+| `.github/workflows/` | TV3 | GitHub Actions |
+| `docs/` | All | Documentation |
+| `services/openapi.yaml` | TV2 | Shared API contract |
+
 ## Notes
 
 - Do not commit real secrets, private keys, `.env`, `.pem`, or `.key` files.
-- Demo certificates are generated only for local testing.
 - Kong OSS is used for gateway-level filtering, not as a full enterprise WAF.
-- Runtime mTLS is documented and prepared, but not enabled by default because
-  backend services do not yet expose TLS listeners.
-
+- Keycloak runs in dev mode for this prototype.
+- Vault runs in dev mode for this prototype.
+- For full testing guide see `TESTING_GUIDE.md`.
