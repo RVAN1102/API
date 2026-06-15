@@ -111,3 +111,49 @@ Authorization: Bearer fake.jwt.token   → 202 Accepted
 Authorization: Bearer                  → 403 Forbidden
 Authorization: Basic abc123            → 403 Forbidden
 No Authorization header                → 403 Forbidden
+
+## BUG-003: Billing/Admin services use HTTPBearer as authentication instead of JWT verification
+
+- Severity: Critical
+- Area: Billing/Admin/Auth
+- Affected files:
+  - `services/billing/main.py`
+  - `services/admin/main.py`
+
+- Evidence:
+  - `docs/evidence/qa/fake-token-checks.txt`
+  - `docs/evidence/qa/billing-auth-checks.txt`
+  - `docs/evidence/qa/billing-malformed-token-variants.txt`
+
+- Root cause:
+  - Billing and Admin use `HTTPBearer(auto_error=True)` and `credentials = Depends(security)` as if it were JWT authentication.
+  - `HTTPBearer` only validates that the request has an Authorization header using the Bearer scheme. It does not verify JWT signature, issuer, expiration, audience, realm, role, or scope.
+  - As a result, any non-empty Bearer token such as `Bearer abc` or `Bearer fake.jwt.token` can pass the dependency.
+
+- Expected:
+  - Malformed token must return `401 Unauthorized`.
+  - Expired token must return `401 Unauthorized`.
+  - Valid token without required role must return `403 Forbidden`.
+  - Admin maintenance must require role `admin`.
+  - Billing checkout must require a valid user token or valid service token, depending on the intended flow.
+
+- Actual:
+  - Billing checkout accepts `Authorization: Bearer abc` and creates a payment.
+  - Admin maintenance accepts `Authorization: Bearer fake.jwt.token` and executes the action.
+
+- Security impact:
+  - Broken Authentication.
+  - Broken Function Level Authorization.
+  - Payment/checkout action can be triggered with fake credentials.
+  - Admin maintenance action can be triggered with fake credentials.
+  - This contradicts the project requirement of centralized IdP and backend-side authorization.
+
+- Suggested fix:
+  - Reuse the JWT validation logic from `services/user/auth.py` or `services/order/auth.py`.
+  - Create a shared auth helper if possible.
+  - Billing checkout should call `require_user_or_service_token`.
+  - Admin maintenance should call `require_admin`.
+  - Reject malformed/invalid/expired tokens with `401`.
+  - Reject valid but unauthorized tokens with `403`.
+
+- Status: Open
