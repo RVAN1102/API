@@ -374,4 +374,19 @@ Authorization: Bearer abc
   - Re-run `openssl s_client -tls1_3` and `openssl s_client -tls1_2`.
   - Expected retest result: TLS 1.3 succeeds; TLS 1.2 fails.
 
-- Status: Open
+- Fix applied:
+  - Configured Kong proxy TLS listener to use TLS 1.3 only.
+  - Added Kong TLS protocol hardening in `infra/docker-compose.yml`.
+  - Verified generated Kong Nginx proxy configuration contains `ssl_protocols TLSv1.3`.
+
+- Retest evidence:
+  - `docs/evidence/qa/tls-protocol-version-after-fix.txt`
+  - `docs/evidence/qa/tls-hsts-after-protocol-fix.txt`
+
+- Retest result:
+  - TLS 1.3 handshake succeeds with `TLS_AES_256_GCM_SHA384`.
+  - TLS 1.2 handshake fails with `tlsv1 alert protocol version`.
+  - HTTPS endpoint remains available.
+  - HSTS header remains present.
+
+- Status: Fixed - Retest Passed
