@@ -1,0 +1,106 @@
+===== git =====
+* main...origin/main
+?? docs/evidence/final/
+f68a472 merge qa hardening fixes into main
+9cfc7d3 fix: upgrade python-jose and capture security scan evidence
+e4c7fb0 qa: capture local security scan tool availability
+adce964 qa: document demo secret management limitation
+2bc77e3 qa: audit secret-like references in repository
+f96cdeb fix: align user and order jwt issuer validation
+d26c1d7 fix: emit valid structured json logs for user and order services
+6ac100a qa: document invalid structured json logging bug
+5821e85 qa: report invalid structured json log output
+1a3db4d qa: verify correlation id propagation in service logs
+
+===== compose =====
+NAME                      IMAGE                            COMMAND                  SERVICE           CREATED          STATUS                      PORTS
+infra-admin-service-1     infra-admin-service              "uvicorn main:app --…"   admin-service     13 minutes ago   Up 13 minutes (healthy)     8000/tcp
+infra-billing-service-1   infra-billing-service            "uvicorn main:app --…"   billing-service   13 minutes ago   Up 13 minutes (healthy)     8000/tcp
+infra-grafana-1           grafana/grafana:11.3.0           "/run.sh"                grafana           13 minutes ago   Up 13 minutes               0.0.0.0:3001->3000/tcp, [::]:3001->3000/tcp
+infra-keycloak-1          quay.io/keycloak/keycloak:26.0   "/opt/keycloak/bin/k…"   keycloak          13 minutes ago   Up 13 minutes (unhealthy)   8443/tcp, 0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp, 9000/tcp
+infra-kong-1              kong:3.9                         "/docker-entrypoint.…"   kong              13 minutes ago   Up 13 minutes (healthy)     0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp, 0.0.0.0:8443->8443/tcp, [::]:8443->8443/tcp, 127.0.0.1:8001->8001/tcp, 8444/tcp
+infra-loki-1              grafana/loki:3.2.0               "/usr/bin/loki -conf…"   loki              13 minutes ago   Up 13 minutes (healthy)     3100/tcp
+infra-order-service-1     infra-order-service              "uvicorn main:app --…"   order-service     13 minutes ago   Up 13 minutes (healthy)     8000/tcp
+infra-promtail-1          grafana/promtail:3.2.0           "/usr/bin/promtail -…"   promtail          13 minutes ago   Up 13 minutes               
+infra-user-service-1      infra-user-service               "uvicorn main:app --…"   user-service      13 minutes ago   Up 13 minutes (healthy)     8000/tcp
+infra-vault-1             hashicorp/vault:1.18             "docker-entrypoint.s…"   vault             13 minutes ago   Up 13 minutes (healthy)     0.0.0.0:8200->8200/tcp, [::]:8200->8200/tcp
+infra-webhook-demo-1      python:3.13-alpine               "python /app/receive…"   webhook-demo      13 minutes ago   Up 13 minutes               8080/tcp
+
+===== health =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 40
+Connection: keep-alive
+RateLimit-Remaining: 59
+RateLimit-Reset: 8
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+date: Mon, 15 Jun 2026 13:40:51 GMT
+server: uvicorn
+x-correlation-id: 10c0b158-c53c-4f8e-9a83-ca45586dfff7
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 3
+X-Kong-Proxy-Latency: 0
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 077f864188831703af708618fcfc3f3b
+
+{"status":"ok","service":"user-service"}HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 41
+Connection: keep-alive
+RateLimit-Remaining: 59
+RateLimit-Reset: 8
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+date: Mon, 15 Jun 2026 13:40:51 GMT
+server: uvicorn
+x-correlation-id: bb00aa2b-b5d4-48b5-9429-cc46aea7f492
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: c53fac0351a04a2af1d593290414ce7d
+
+{"status":"ok","service":"order-service"}HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+Connection: keep-alive
+RateLimit-Remaining: 59
+RateLimit-Reset: 8
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+date: Mon, 15 Jun 2026 13:40:51 GMT
+server: uvicorn
+x-correlation-id: 4f2ec0f9-a4c1-447d-8bec-59699f5d2e30
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: cc19d72ea57634187866a0187965446b
+
+{"status":"ok","service":"billing-service"}HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 41
+Connection: keep-alive
+RateLimit-Remaining: 59
+RateLimit-Reset: 8
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+date: Mon, 15 Jun 2026 13:40:51 GMT
+server: uvicorn
+x-correlation-id: d92912a2-5dda-467a-b83f-2d6c7ea14010
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 0
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: ce7df76266b86e3189336b44da73372c
+
+{"status":"ok","service":"admin-service"}
