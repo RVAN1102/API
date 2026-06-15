@@ -521,3 +521,65 @@ Authorization: Bearer abc
   * Bob can access his own order through the fixed endpoint.
 
 * Status: Fixed - Retest Passed
+
+## BUG-009: Prototype contains hardcoded demo secrets and runtime secret handling is not fully Vault-backed
+
+* Severity: Medium
+
+* Area: Secrets Management / DevSecOps
+
+* Affected components:
+
+  * `frontend/app.js`
+  * `infra/docker-compose.yml`
+  * `demo/webhook/*`
+  * `tests/attack/*`
+  * `vault/scripts/init-dev-vault.sh`
+
+* Evidence:
+
+  * `docs/evidence/qa/secret-reference-audit.txt`
+
+* Expected:
+
+  * Real secrets, passwords, client secrets, webhook secrets, and root tokens must not be hardcoded in source-controlled runtime configuration.
+  * Sensitive values should be injected through a secret manager, environment variables, or deployment secret mechanism.
+  * If demo values are required, they must be clearly labeled as local development only.
+  * The project should not claim full Vault-backed runtime secret retrieval unless services actually read secrets from Vault at runtime.
+
+* Actual:
+
+  * The audit found multiple hardcoded local/demo secrets and passwords:
+
+    * `alice-password-123`
+    * `bob-password-123`
+    * `admin-password-123`
+    * `KEYCLOAK_ADMIN_PASSWORD: admin`
+    * `VAULT_DEV_ROOT_TOKEN_ID: dev-root-token`
+    * `WEBHOOK_SECRET` default value `dev-webhook-secret-change-me`
+  * Vault paths and policies exist, but Billing/Webhook runtime still uses environment/default secret values.
+  * The current implementation demonstrates a Vault contract and dev secret paths, but does not yet enforce runtime secret retrieval from Vault.
+
+* Security impact:
+
+  * For a local prototype, these are acceptable only if clearly marked as demo-only values.
+  * For production, hardcoded/default secrets would be unsafe.
+  * A leaked repository would expose working demo credentials.
+  * The gap weakens the claim that secrets are centrally managed by Vault at runtime.
+
+* Suggested fix:
+
+  * Keep demo credentials only in `.env.example`, README, or clearly labeled dev-only files.
+  * Do not use hardcoded credentials in frontend code beyond local demonstration.
+  * Use environment variables without sensitive defaults for runtime secrets.
+  * For a stronger implementation, make Billing read webhook secret from Vault at startup or document clearly that Vault is architectural/prototype evidence only.
+  * Add secret scanning evidence using Gitleaks or the existing local security scan script.
+
+* Retest requirements:
+
+  * Run a secret scan.
+  * Confirm no real production secrets exist.
+  * Confirm demo secrets are documented as local-only.
+  * Confirm runtime secret source is either Vault-backed or explicitly documented as environment-injected for prototype mode.
+
+* Status: Open
