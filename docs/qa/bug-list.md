@@ -183,3 +183,41 @@ Authorization: Bearer abc
 
 - Status: Open
 
+## BUG-004: Webhook HMAC demo scripts call `python` instead of `python3`
+
+* Severity: Medium
+
+* Area: Webhook/Test Automation
+
+* Affected files:
+
+  * `demo/webhook/send-valid-webhook.sh`
+  * `demo/webhook/send-invalid-signature.sh`
+  * `demo/webhook/send-replay-webhook.sh`
+
+* Evidence:
+
+  * `docs/evidence/qa/webhook-hmac-checks.txt`
+
+* Expected:
+
+  * Webhook test scripts should run successfully on Ubuntu using the default Python 3 interpreter.
+  * Valid webhook should reach the service.
+  * Invalid signature and replay tests should produce security rejection evidence.
+
+* Actual:
+
+  * All webhook test scripts fail before sending requests because they call `python`, but the system only has `python3`.
+
+* Security/QA impact:
+
+  * Webhook HMAC cannot be verified through the provided test scripts.
+  * The project currently has webhook demo files, but the evidence is not reproducible on a clean Ubuntu environment.
+
+* Suggested fix:
+
+  * Replace `python` with `python3` in webhook shell scripts.
+  * Optionally use `#!/usr/bin/env python3` in Python scripts.
+  * Re-run valid, invalid signature, and replay webhook tests after fixing.
+
+* Status: Open
