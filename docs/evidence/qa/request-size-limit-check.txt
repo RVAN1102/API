@@ -1,0 +1,40 @@
+===== small request should pass route parsing/auth layer =====
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 78
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+date: Mon, 15 Jun 2026 09:48:13 GMT
+server: uvicorn
+x-correlation-id: c2ad6ff2-8534-4ade-afa8-7abd48df4c64
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 3
+X-Kong-Proxy-Latency: 5
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 2c327728f537733e88ce9f1e8ee84f0b
+
+{"detail":{"error":"invalid_token","message":"Error decoding token headers."}}
+===== oversized request should be blocked by gateway or app =====
+HTTP/1.1 100 Continue
+
+HTTP/1.1 417 
+Date: Mon, 15 Jun 2026 09:48:14 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Content-Length: 96
+X-Correlation-ID: 6aff21a3-55fe-4408-8f65-23cb2e9dc777
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Response-Latency: 5
+Server: kong/3.9.2
+X-Kong-Request-Id: 9bba3104c4dc30252c7a1702b3024f07
+
+{
+  "message":"Request size limit exceeded",
+  "request_id":"9bba3104c4dc30252c7a1702b3024f07"
+}
