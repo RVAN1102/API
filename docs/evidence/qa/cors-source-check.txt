@@ -1,0 +1,7 @@
+===== CORS references =====
+gateway/correlation-id.md:8:- CORS permits and exposes the header.
+gateway/kong.yml:116:  - name: cors
+gateway/kong.yml:118:      origins:
+gateway/README.md:35:The gateway applies CORS, correlation IDs, request-size limiting, basic edge
+gateway/README.md:39:## CORS
+gateway/README.md:41:Allowed origins are `http://localhost:3000`, `http://localhost:5173`, and
