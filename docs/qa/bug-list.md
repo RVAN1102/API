@@ -450,4 +450,22 @@ Authorization: Bearer abc
   * Confirm the service log line contains the same correlation ID.
   * Confirm the full log line is valid JSON using `json.loads()`.
 
-* Status: Open
+* Fix applied:
+
+  * Updated `user-service` and `order-service` request logging to emit one JSON object directly per log line.
+  * Replaced nested JSON-in-message logging with `json.dumps(record)`.
+  * Preserved correlation ID propagation.
+
+* Retest evidence:
+
+  * `docs/evidence/qa/structured-log-json-validity-after-fix.txt`
+  * `docs/evidence/qa/user-structured-log-json-retest.txt`
+
+* Retest result:
+
+  * User-service request log line is parseable by `json.loads()`.
+  * Order-service request log line is parseable by `json.loads()`.
+  * Correlation ID remains present in valid JSON log fields.
+
+* Status: Fixed - Retest Passed
+
