@@ -299,4 +299,32 @@ Authorization: Bearer abc
   * Expected result: first request `200 OK`, second request `403 Forbidden`.
   * Save retest evidence to `docs/evidence/qa/webhook-hmac-checks-after-fix.txt`.
 
-* Status: Open
+* Confirmed root cause:
+
+  * The webhook demo scripts used default secret `local-demo-secret-change-me`.
+  * The Billing service runtime uses `dev-webhook-secret-change-me`.
+  * Because the signing script and backend used different secrets, even the valid webhook request was rejected with `401 invalid_signature`.
+
+* Fix applied:
+
+  * Updated webhook demo scripts to use `dev-webhook-secret-change-me` as the default `WEBHOOK_SECRET`, matching the Billing service runtime configuration.
+  * Re-ran valid, invalid signature, and replay webhook tests.
+
+* Retest evidence:
+
+  * `docs/evidence/qa/webhook-hmac-checks-after-secret-fix.txt`
+
+* Retest result:
+
+  * `send-valid-webhook.sh` returned `200 OK`.
+  * `send-invalid-signature.sh` returned `401 Unauthorized`.
+  * `send-replay-webhook.sh` returned first request `200 OK`, second request `403 Forbidden`.
+
+* Final assessment:
+
+  * Webhook HMAC signing and verification now works.
+  * Invalid signature rejection works.
+  * Nonce replay protection works for the tested runtime session.
+
+* Status: Fixed - Retest Passed
+
