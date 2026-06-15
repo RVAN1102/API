@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
-WEBHOOK_SECRET="${WEBHOOK_SECRET:-local-demo-secret-change-me}"
+WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 TIMESTAMP="$(date +%s)"
 NONCE="replay-demo-$(date +%s)"

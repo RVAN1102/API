@@ -11,7 +11,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-SECRET = os.environ.get("WEBHOOK_SECRET", "local-demo-secret-change-me").encode()
+SECRET = os.environ.get("WEBHOOK_SECRET", "dev-webhook-secret-change-me").encode()
 MAX_AGE = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
 NONCES: dict[str, int] = {}
 NONCE_LOCK = threading.Lock()
