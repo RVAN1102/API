@@ -1,0 +1,26 @@
+===== request with custom correlation id =====
+CORR_ID=qa-corr-1781518178
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 40
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+RateLimit-Reset: 22
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+date: Mon, 15 Jun 2026 10:09:38 GMT
+server: uvicorn
+x-correlation-id: qa-corr-1781518178
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: bb6dc4455447e85f424a8d25d76e2c2b
+
+{"status":"ok","service":"user-service"}
+===== search recent service logs for correlation id =====
+{"timestamp":"2026-06-15 10:09:38,747","level":"INFO","service":"user-service","message":"{"service":"user-service","method":"GET","path":"/api/v1/users/health","status_code":200,"client_ip":"172.20.0.12","correlation_id":"qa-corr-1781518178","event_type":"api_request"}"}
+
+===== search recent kong logs for correlation id =====
