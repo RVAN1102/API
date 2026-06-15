@@ -469,3 +469,55 @@ Authorization: Bearer abc
 
 * Status: Fixed - Retest Passed
 
+## BUG-008: User and Order services reject valid local Keycloak tokens due issuer mismatch
+
+* Severity: Medium
+
+* Area: Identity / JWT Validation
+
+* Affected components:
+
+  * `user-service`
+  * `order-service`
+
+* Evidence:
+
+  * `docs/evidence/qa/bola-runtime-check-before-user-order-issuer-fix.txt`
+  * `docs/evidence/qa/bola-runtime-check.txt`
+
+* Expected:
+
+  * User and Order services should validate JWT signatures using the internal Keycloak JWKS URL.
+  * They should compare the token `iss` claim against the externally issued Keycloak issuer.
+  * Valid local demo tokens issued from `http://localhost:8080/realms/topic10-sme-api` should be accepted.
+
+* Actual:
+
+  * Valid Alice/Bob tokens were rejected with `401 Unauthorized`.
+  * Error message: `Unexpected issuer: http://localhost:8080/realms/topic10-sme-api`.
+  * This prevented BOLA and ownership tests from reaching authorization logic.
+
+* Root cause:
+
+  * The services used the same Keycloak base URL for both JWKS fetch and issuer validation.
+  * Inside Docker, JWKS must be fetched from `http://keycloak:8080`.
+  * But tokens obtained from the host contain issuer `http://localhost:8080/realms/topic10-sme-api`.
+
+* Fix applied:
+
+  * Added `KEYCLOAK_ISSUER` support for User and Order JWT validation.
+  * Kept JWKS fetching based on internal Docker URL `KEYCLOAK_URL=http://keycloak:8080`.
+  * Added `KEYCLOAK_ISSUER=http://localhost:8080/realms/topic10-sme-api` to User and Order service runtime configuration.
+
+* Retest evidence:
+
+  * `docs/evidence/qa/bola-runtime-check.txt`
+
+* Retest result:
+
+  * Alice can access her own order through the fixed endpoint.
+  * Alice can access Bob's order through the vulnerable endpoint, demonstrating the intended BOLA flaw.
+  * Alice is blocked from Bob's order through the fixed endpoint with `403 Forbidden`.
+  * Bob can access his own order through the fixed endpoint.
+
+* Status: Fixed - Retest Passed
