@@ -77,11 +77,14 @@ services:
     build:
       context: ../services/billing
       dockerfile: Dockerfile
-    environment:
-      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
-      WEBHOOK_MAX_AGE_SECONDS: "300"
     expose:
       - "8000"
+    environment:
+      WEBHOOK_MAX_AGE_SECONDS: "300"
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "topic10-sme-api"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
       interval: 10s
@@ -98,6 +101,10 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8000"
+    environment:
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "topic10-sme-api"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
       interval: 10s

@@ -44,7 +44,10 @@ curl -i -X POST http://localhost:8000/api/v1/admin/maintenance \
   * Kiểm tra role `admin`.
   * Chỉ cho phép request hợp lệ thực thi action quản trị.
 
-* Status: Open
+* Status: Fixed - Retest Passed 
+- Retest evidence:
+  - `docs/evidence/qa/auth-bypass-after-patch.txt`
+  - `docs/evidence/qa/valid-token-authz-after-patch.txt`
 
 ## BUG-002: Billing checkout accepts malformed fake token
 
@@ -74,7 +77,7 @@ curl -i -X POST http://localhost:8000/api/v1/billing/checkout \
 ```json
 {"payment_id":"pay-9a5ed563","order_id":"ord-alice-1001","status":"accepted","amount":120000.0,"currency":"VND","correlation_id":"eeaa16ab-c13b-4aa7-a684-f60a480876b0"}
 ```
-
+Passed
 * Evidence:
 
   * `docs/evidence/qa/billing-auth-checks.txt`
@@ -95,7 +98,11 @@ curl -i -X POST http://localhost:8000/api/v1/billing/checkout \
   * Kiểm tra role/scope phù hợp, ví dụ `user`, `billing-service` hoặc rule cụ thể cho checkout.
   * Không tạo `payment_id` nếu token chưa được xác thực hợp lệ.
 
-* Status: Open
+* Status: Fixed - Retest Passed
+
+- Retest evidence:
+  - `docs/evidence/qa/auth-bypass-after-patch.txt`
+  - `docs/evidence/qa/valid-token-authz-after-patch.txt`
 
 ### Additional evidence
 
@@ -181,7 +188,10 @@ Authorization: Bearer abc
 * This contradicts the project security requirement that admin functions must be protected by centralized authentication and authorization.
 
 
-- Status: Open
+- Status: Fixed - Retest Passed
+- Retest evidence:
+  - `docs/evidence/qa/auth-bypass-after-patch.txt`
+  - `docs/evidence/qa/valid-token-authz-after-patch.txt`
 
 ## BUG-004: Webhook HMAC demo scripts call `python` instead of `python3`
 

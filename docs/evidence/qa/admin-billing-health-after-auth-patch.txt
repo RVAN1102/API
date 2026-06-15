@@ -1,0 +1,42 @@
+===== billing health =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+date: Mon, 15 Jun 2026 08:59:13 GMT
+server: uvicorn
+x-correlation-id: 89769a80-dd09-48a2-9bfa-5cff06c3f78e
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 5
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 5ca1987794cd37153fc2eb3ce230d220
+
+{"status":"ok","service":"billing-service"}
+===== admin health =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 41
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+date: Mon, 15 Jun 2026 08:59:13 GMT
+server: uvicorn
+x-correlation-id: 3a2f97ed-7f76-4a25-94a2-9ba224124110
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 192af95188b2da36193c574025454c26
+
+{"status":"ok","service":"admin-service"}
