@@ -3,7 +3,7 @@ set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
 WEBHOOK_SECRET="${WEBHOOK_SECRET:-local-demo-secret-change-me}"
-PYTHON_BIN="${PYTHON_BIN:-python}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 TIMESTAMP="$(date +%s)"
 NONCE="${NONCE:-$("${PYTHON_BIN}" -c 'import uuid; print(uuid.uuid4())')}"
 BODY='{"event_id":"evt-tv1-valid","event_type":"payment.succeeded","checkout_id":"checkout-001","amount":150000}'
