@@ -229,25 +229,33 @@ document.getElementById('btnWebhookInvalid').addEventListener('click', () => tes
 
 // --- TV1: Rate Limiting Test ---
 document.getElementById('btnRateLimit').addEventListener('click', async () => {
-  logToConsole('info', 'Starting Rate Limit Test (11 reqs in 1s)...');
-  const promises = [];
-  for(let i=0; i<11; i++) {
-    promises.push(fetch(`${GATEWAY_URL}/api/v1/users/me`, {
-      method: 'GET',
+  logToConsole('info', 'Starting Rate Limit Test on protected admin route (15 reqs)...');
+
+  const statusCodes = [];
+
+  for (let i = 0; i < 15; i++) {
+    const res = await fetch(`${GATEWAY_URL}/api/v1/admin/maintenance`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${tokens.alice || 'fake-token'}`,
+        'Authorization': 'Bearer fake.jwt.token',
+        'Content-Type': 'application/json',
         'X-Correlation-ID': `rl-test-${Date.now()}-${i}`
-      }
-    }));
+      },
+      body: JSON.stringify({
+        action: 'health-check',
+        reason: 'ui-rate-limit-test'
+      })
+    });
+
+    statusCodes.push(res.status);
   }
-  const results = await Promise.all(promises);
-  const statusCodes = results.map(r => r.status);
+
   const has429 = statusCodes.includes(429);
-  
+
   if (has429) {
     logToConsole('pass', 'Kong enforced Rate Limit (429 Too Many Requests)', { statusCodes }, 429);
   } else {
-    logToConsole('fail', 'Rate limit failed. All requests went through.', { statusCodes }, 200);
+    logToConsole('fail', 'Rate limit test did not observe 429. Check Kong rate-limit plugin or route binding.', { statusCodes }, statusCodes[statusCodes.length - 1]);
   }
 });
 
