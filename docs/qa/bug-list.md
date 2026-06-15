@@ -338,3 +338,40 @@ Authorization: Bearer abc
 
 * Status: Fixed - Retest Passed
 
+## BUG-006: Kong HTTPS endpoint allows TLS 1.2 although TLS 1.3-only hardening is expected
+
+- Severity: Medium
+- Area: Edge Security / TLS Hardening
+- Affected component:
+  - Kong HTTPS listener on port `8443`
+
+- Evidence:
+  - `docs/evidence/qa/tls-https-hsts-check.txt`
+  - `docs/evidence/qa/tls-protocol-version-check.txt`
+
+- Expected:
+  - HTTPS endpoint should support TLS 1.3.
+  - If the project claims TLS 1.3-only hardening, TLS 1.2 handshake should be rejected.
+
+- Actual:
+  - TLS 1.3 handshake succeeds.
+  - TLS 1.2 handshake also succeeds.
+  - HSTS header is present on HTTPS responses.
+
+- Observed TLS 1.3 result:
+  - `New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384`
+
+- Observed TLS 1.2 result:
+  - `New, TLSv1.2, Cipher is ECDHE-ECDSA-AES256-GCM-SHA384`
+
+- Security impact:
+  - The edge gateway supports HTTPS and HSTS, but it is not configured as TLS 1.3-only.
+  - This weakens the strict TLS hardening claim.
+  - The issue is not a complete TLS failure, because HTTPS still works and HSTS is enabled.
+
+- Suggested fix:
+  - Configure Kong to allow only TLS 1.3 on the HTTPS listener.
+  - Re-run `openssl s_client -tls1_3` and `openssl s_client -tls1_2`.
+  - Expected retest result: TLS 1.3 succeeds; TLS 1.2 fails.
+
+- Status: Open
