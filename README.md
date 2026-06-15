@@ -90,7 +90,7 @@ docker compose -f infra/docker-compose.yml ps
 ```bash
 python frontend/serve.py
 ```
-Open `http://localhost:3000` in your browser to interactively test BOLA, SSRF, and Webhooks.
+Open `http://localhost:3002` in your browser to interactively test BOLA, SSRF, and Webhooks.
 
 Expected services:
 - `infra-kong-1`

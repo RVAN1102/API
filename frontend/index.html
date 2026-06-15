@@ -18,11 +18,12 @@
     <header class="glass-panel">
       <div class="header-content">
         <h1>API Security <span>Dashboard</span></h1>
-        <p>Interactive Red Team Testing Suite (TV2 & TV3)</p>
+        <p>Interactive Red Team Testing Suite (TV1, TV2, TV3)</p>
       </div>
       <div class="token-status">
         <div class="badge badge-error" id="tokenBadgeAlice">Alice: Missing</div>
         <div class="badge badge-error" id="tokenBadgeBob">Bob: Missing</div>
+        <div class="badge badge-error" id="tokenBadgeAdmin">Admin: Missing</div>
       </div>
     </header>
 
@@ -30,16 +31,29 @@
       <!-- Controls Panel -->
       <div class="controls-panel">
         
+        <!-- Gateway Security Section -->
+        <section class="glass-panel section-card">
+          <h2><i class="icon">🚧</i> Gateway Security (TV1)</h2>
+          <p class="desc">Test Kong API Gateway Edge Security features.</p>
+          <div class="btn-group">
+            <button id="btnRateLimit" class="btn btn-danger">Test Rate Limiting</button>
+            <button id="btnWafSqli" class="btn btn-danger">Test WAF SQLi Filter</button>
+            <button id="btnMissingWebhookHeader" class="btn btn-danger">Test Webhook Header Auth</button>
+          </div>
+        </section>
+
         <!-- Identity Section -->
         <section class="glass-panel section-card">
           <h2><i class="icon">🔑</i> Identity Management (TV2)</h2>
           <p class="desc">Authenticate against Keycloak to get JWTs for test scenarios.</p>
           <div class="btn-group">
-            <button id="btnGetAlice" class="btn btn-primary">Get Token (Alice)</button>
-            <button id="btnGetBob" class="btn btn-primary">Get Token (Bob)</button>
+            <button id="btnGetAlice" class="btn btn-primary">Alice Token</button>
+            <button id="btnGetBob" class="btn btn-primary">Bob Token</button>
+            <button id="btnGetAdmin" class="btn btn-primary">Admin Token</button>
           </div>
           <div class="btn-group mt-2">
-            <button id="btnTestAuth" class="btn btn-secondary">Test User Profile API (/me)</button>
+            <button id="btnTestAuth" class="btn btn-secondary">Test /me API</button>
+            <button id="btnRbacTest" class="btn btn-secondary">Test RBAC (Admin API)</button>
           </div>
         </section>
 
@@ -53,10 +67,19 @@
           </div>
         </section>
 
+        <!-- Billing Section -->
+        <section class="glass-panel section-card">
+          <h2><i class="icon">💳</i> Billing Service (TV3)</h2>
+          <p class="desc">Test internal service integrations and observability.</p>
+          <div class="btn-group">
+            <button id="btnBillingCheckout" class="btn btn-success">Run Checkout Flow</button>
+          </div>
+        </section>
+
         <!-- SSRF Section -->
         <section class="glass-panel section-card">
           <h2><i class="icon">🌐</i> SSRF Testing (TV3)</h2>
-          <p class="desc">Server-Side Request Forgery targeting cloud metadata (<code>http://169.254.169.254/...</code>).</p>
+          <p class="desc">Server-Side Request Forgery targeting cloud metadata (<code>http://169.254.169.254/...</code>). <strong>⚠️ Requires Admin Token.</strong></p>
           <div class="btn-group">
             <button id="btnSsrfVuln" class="btn btn-danger">Run Vulnerable Endpoint</button>
             <button id="btnSsrfFixed" class="btn btn-success">Run Fixed Endpoint</button>
