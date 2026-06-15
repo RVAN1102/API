@@ -390,3 +390,64 @@ Authorization: Bearer abc
   - HSTS header remains present.
 
 - Status: Fixed - Retest Passed
+
+## BUG-007: Service structured log output is not valid JSON
+
+* Severity: Medium
+
+* Area: Observability / Structured Logging
+
+* Affected component:
+
+  * `user-service`
+  * Potentially other FastAPI services using the same logging pattern
+
+* Evidence:
+
+  * `docs/evidence/qa/correlation-id-runtime-check.txt`
+  * `docs/evidence/qa/structured-log-json-validity-check.txt`
+
+* Expected:
+
+  * Service logs should be valid single-line JSON.
+  * Each log line should be parseable by `json.loads()`.
+  * Fields such as `service`, `method`, `path`, `status_code`, `client_ip`, `correlation_id`, and `event_type` should be machine-readable by log pipelines such as Loki/SIEM.
+
+* Actual:
+
+  * The service log line contains a JSON-like object embedded inside the `message` string without proper escaping.
+  * The resulting log line is not valid JSON.
+  * Runtime validation returned `INVALID_JSON`.
+
+* Observed error:
+
+  * `JSONDecodeError("Expecting ',' delimiter: line 1 column 93 (char 92)")`
+
+* Example problematic pattern:
+
+  * Top-level field `message` contains unescaped JSON text:
+
+    * `"message":"{"service":"user-service","method":"GET",...}"`
+
+* Security/operations impact:
+
+  * Correlation ID propagation works at response header and application log content level.
+  * However, invalid JSON logs weaken the structured logging claim.
+  * Log collectors, SIEM rules, alerting queries, and dashboards may fail to parse fields reliably.
+  * This reduces incident triage quality and weakens observability evidence.
+
+* Suggested fix:
+
+  * Replace the current logging formatter or logging call pattern so each emitted line is valid JSON.
+  * Prefer emitting one JSON object directly per log line.
+  * Do not embed a raw JSON string inside another JSON string unless it is correctly escaped.
+  * Re-test by parsing matched log lines with `json.loads()`.
+
+* Retest requirements:
+
+  * Send a request with a custom `X-Correlation-ID`.
+  * Confirm the response returns the same `x-correlation-id`.
+  * Confirm the service log line contains the same correlation ID.
+  * Confirm the full log line is valid JSON using `json.loads()`.
+
+* Status: Open
