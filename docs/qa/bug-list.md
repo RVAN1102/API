@@ -156,4 +156,30 @@ No Authorization header                → 403 Forbidden
   - Reject malformed/invalid/expired tokens with `401`.
   - Reject valid but unauthorized tokens with `403`.
 
+### Additional evidence: Admin SSRF endpoints also accept fake Bearer token
+
+File evidence:
+
+- `docs/evidence/qa/admin-ssrf-fake-token-checks.txt`
+
+Observed behavior:
+
+```text
+POST /api/v1/admin/metadata-fetch/vulnerable
+Authorization: Bearer abc
+→ 200 OK
+
+POST /api/v1/admin/metadata-fetch/fixed
+Authorization: Bearer abc
+→ 200 OK
+### Impact
+
+* Admin SSRF demo endpoints are accessible with malformed Bearer tokens.
+* Even the "fixed" SSRF endpoint only validates the target URL, not the caller identity.
+* This means the Admin service has broken authentication/authorization across multiple protected endpoints.
+* An attacker can call admin-level SSRF functionality by sending any non-empty Bearer token such as `Authorization: Bearer abc`.
+* This contradicts the project security requirement that admin functions must be protected by centralized authentication and authorization.
+
+
 - Status: Open
+
