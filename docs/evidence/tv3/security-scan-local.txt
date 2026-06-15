@@ -1,11 +1,434 @@
 === LOCAL SECURITY SCAN RESULTS ===
-Date: Mon Jun 15 05:59:22 PM +07 2026
+Date: Mon Jun 15 06:44:24 PM +07 2026
 
 === BANDIT ===
-bandit not installed
+Run started:2026-06-15 11:44:23.575850+00:00
+
+Test results:
+	No issues identified.
+
+Code scanned:
+	Total lines of code: 1307
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 0
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 0
+		High: 0
+Files skipped (0):
 
 === GITLEAKS ===
-gitleaks not installed
+[
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 41,
+  "EndLine": 41,
+  "StartColumn": 40,
+  "EndColumn": 73,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "services/billing/main.py",
+  "SymlinkFile": "",
+  "Commit": "19d37a23c193c6b063eda7eca4d62a323b7b99c8",
+  "Link": "https://github.com/RVAN1102/API/blob/19d37a23c193c6b063eda7eca4d62a323b7b99c8/services/billing/main.py#L41",
+  "Entropy": 3.5068905,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T09:37:44Z",
+  "Message": "fix: enforce jwt validation on billing and admin endpoints",
+  "Tags": [],
+  "Fingerprint": "19d37a23c193c6b063eda7eca4d62a323b7b99c8:services/billing/main.py:generic-api-key:41"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 85,
+  "EndLine": 85,
+  "StartColumn": 8,
+  "EndColumn": 40,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "infra/docker-compose.yml",
+  "SymlinkFile": "",
+  "Commit": "19d37a23c193c6b063eda7eca4d62a323b7b99c8",
+  "Link": "https://github.com/RVAN1102/API/blob/19d37a23c193c6b063eda7eca4d62a323b7b99c8/infra/docker-compose.yml#L85",
+  "Entropy": 3.5068905,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T09:37:44Z",
+  "Message": "fix: enforce jwt validation on billing and admin endpoints",
+  "Tags": [],
+  "Fingerprint": "19d37a23c193c6b063eda7eca4d62a323b7b99c8:infra/docker-compose.yml:generic-api-key:85"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 106,
+  "EndLine": 106,
+  "StartColumn": 8,
+  "EndColumn": 40,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "infra/docker-compose.yml",
+  "SymlinkFile": "",
+  "Commit": "19d37a23c193c6b063eda7eca4d62a323b7b99c8",
+  "Link": "https://github.com/RVAN1102/API/blob/19d37a23c193c6b063eda7eca4d62a323b7b99c8/infra/docker-compose.yml#L106",
+  "Entropy": 3.5068905,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T09:37:44Z",
+  "Message": "fix: enforce jwt validation on billing and admin endpoints",
+  "Tags": [],
+  "Fingerprint": "19d37a23c193c6b063eda7eca4d62a323b7b99c8:infra/docker-compose.yml:generic-api-key:106"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 87,
+  "EndLine": 87,
+  "StartColumn": 40,
+  "EndColumn": 73,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "services/admin/main.py",
+  "SymlinkFile": "",
+  "Commit": "19d37a23c193c6b063eda7eca4d62a323b7b99c8",
+  "Link": "https://github.com/RVAN1102/API/blob/19d37a23c193c6b063eda7eca4d62a323b7b99c8/services/admin/main.py#L87",
+  "Entropy": 3.5068905,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T09:37:44Z",
+  "Message": "fix: enforce jwt validation on billing and admin endpoints",
+  "Tags": [],
+  "Fingerprint": "19d37a23c193c6b063eda7eca4d62a323b7b99c8:services/admin/main.py:generic-api-key:87"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 437,
+  "EndLine": 437,
+  "StartColumn": 40,
+  "EndColumn": 73,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "docs/evidence/qa/structured-logging-source-audit.txt",
+  "SymlinkFile": "",
+  "Commit": "d26c1d7511f3360463d20ab3ed18a759d8462b4f",
+  "Link": "https://github.com/RVAN1102/API/blob/d26c1d7511f3360463d20ab3ed18a759d8462b4f/docs/evidence/qa/structured-logging-source-audit.txt#L437",
+  "Entropy": 3.5068905,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T10:35:15Z",
+  "Message": "fix: emit valid structured json logs for user and order services",
+  "Tags": [],
+  "Fingerprint": "d26c1d7511f3360463d20ab3ed18a759d8462b4f:docs/evidence/qa/structured-logging-source-audit.txt:generic-api-key:437"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 573,
+  "EndLine": 573,
+  "StartColumn": 40,
+  "EndColumn": 73,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "docs/evidence/qa/structured-logging-source-audit.txt",
+  "SymlinkFile": "",
+  "Commit": "d26c1d7511f3360463d20ab3ed18a759d8462b4f",
+  "Link": "https://github.com/RVAN1102/API/blob/d26c1d7511f3360463d20ab3ed18a759d8462b4f/docs/evidence/qa/structured-logging-source-audit.txt#L573",
+  "Entropy": 3.5068905,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T10:35:15Z",
+  "Message": "fix: emit valid structured json logs for user and order services",
+  "Tags": [],
+  "Fingerprint": "d26c1d7511f3360463d20ab3ed18a759d8462b4f:docs/evidence/qa/structured-logging-source-audit.txt:generic-api-key:573"
+ },
+ {
+  "RuleID": "curl-auth-header",
+  "Description": "Discovered a potential authorization token provided in a curl command header, which could compromise the curl accessed resource.",
+  "StartLine": 92,
+  "EndLine": 97,
+  "StartColumn": 2,
+  "EndColumn": 44,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "docs/qa/codex-auth-audit.md",
+  "SymlinkFile": "",
+  "Commit": "ca178c340c0c2aabb9e8e217efee2e18542d36f1",
+  "Link": "https://github.com/RVAN1102/API/blob/ca178c340c0c2aabb9e8e217efee2e18542d36f1/docs/qa/codex-auth-audit.md?plain=1#L92-L97",
+  "Entropy": 3.2359264,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T07:32:09Z",
+  "Message": "qa: add codex auth bypass audit",
+  "Tags": [],
+  "Fingerprint": "ca178c340c0c2aabb9e8e217efee2e18542d36f1:docs/qa/codex-auth-audit.md:curl-auth-header:92"
+ },
+ {
+  "RuleID": "curl-auth-header",
+  "Description": "Discovered a potential authorization token provided in a curl command header, which could compromise the curl accessed resource.",
+  "StartLine": 58,
+  "EndLine": 59,
+  "StartColumn": 2,
+  "EndColumn": 44,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "docs/qa/bug-list.md",
+  "SymlinkFile": "",
+  "Commit": "d8bc4b61a78b26bbc5ee17abc6000dd53b779557",
+  "Link": "https://github.com/RVAN1102/API/blob/d8bc4b61a78b26bbc5ee17abc6000dd53b779557/docs/qa/bug-list.md?plain=1#L58-L59",
+  "Entropy": 3.2359264,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T06:38:49Z",
+  "Message": "qa: report billing checkout fake token bypass",
+  "Tags": [],
+  "Fingerprint": "d8bc4b61a78b26bbc5ee17abc6000dd53b779557:docs/qa/bug-list.md:curl-auth-header:58"
+ },
+ {
+  "RuleID": "curl-auth-header",
+  "Description": "Discovered a potential authorization token provided in a curl command header, which could compromise the curl accessed resource.",
+  "StartLine": 12,
+  "EndLine": 13,
+  "StartColumn": 2,
+  "EndColumn": 44,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "docs/qa/bug-list.md",
+  "SymlinkFile": "",
+  "Commit": "e47567a11a4dd67526095422974afad70faecd36",
+  "Link": "https://github.com/RVAN1102/API/blob/e47567a11a4dd67526095422974afad70faecd36/docs/qa/bug-list.md?plain=1#L12-L13",
+  "Entropy": 3.2359264,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-15T06:32:51Z",
+  "Message": "qa: report admin maintenance fake token bypass",
+  "Tags": [],
+  "Fingerprint": "e47567a11a4dd67526095422974afad70faecd36:docs/qa/bug-list.md:curl-auth-header:12"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 20,
+  "EndLine": 20,
+  "StartColumn": 40,
+  "EndColumn": 73,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "services/order/auth.py",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/services/order/auth.py#L20",
+  "Entropy": 3.5068905,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:services/order/auth.py:generic-api-key:20"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 44,
+  "EndLine": 44,
+  "StartColumn": 8,
+  "EndColumn": 38,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "infra/docker-compose.yml",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/infra/docker-compose.yml#L44",
+  "Entropy": 3.5068905,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:infra/docker-compose.yml:generic-api-key:44"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 63,
+  "EndLine": 63,
+  "StartColumn": 8,
+  "EndColumn": 38,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "infra/docker-compose.yml",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/infra/docker-compose.yml#L63",
+  "Entropy": 3.5068905,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:infra/docker-compose.yml:generic-api-key:63"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 51,
+  "EndLine": 51,
+  "StartColumn": 4,
+  "EndColumn": 35,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "vault/scripts/init-dev-vault.sh",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/vault/scripts/init-dev-vault.sh#L51",
+  "Entropy": 3.5068905,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:vault/scripts/init-dev-vault.sh:generic-api-key:51"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 57,
+  "EndLine": 57,
+  "StartColumn": 4,
+  "EndColumn": 35,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "vault/scripts/init-dev-vault.sh",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/vault/scripts/init-dev-vault.sh#L57",
+  "Entropy": 3.5068905,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:vault/scripts/init-dev-vault.sh:generic-api-key:57"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 26,
+  "EndLine": 26,
+  "StartColumn": 40,
+  "EndColumn": 73,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "services/user/auth.py",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/services/user/auth.py#L26",
+  "Entropy": 3.5068905,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:services/user/auth.py:generic-api-key:26"
+ },
+ {
+  "RuleID": "jwt",
+  "Description": "Uncovered a JSON Web Token, which may lead to unauthorized access to web applications and sensitive user data.",
+  "StartLine": 39,
+  "EndLine": 39,
+  "StartColumn": 17,
+  "EndColumn": 242,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "tests/attack/token-replay.sh",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/tests/attack/token-replay.sh#L39",
+  "Entropy": 5.500959,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:tests/attack/token-replay.sh:jwt:39"
+ },
+ {
+  "RuleID": "curl-auth-header",
+  "Description": "Discovered a potential authorization token provided in a curl command header, which could compromise the curl accessed resource.",
+  "StartLine": 61,
+  "EndLine": 63,
+  "StartColumn": 11,
+  "EndColumn": 44,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "tests/attack/token-replay.sh",
+  "SymlinkFile": "",
+  "Commit": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba",
+  "Link": "https://github.com/RVAN1102/API/blob/eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba/tests/attack/token-replay.sh#L61-L63",
+  "Entropy": 3.182006,
+  "Author": "duynhat326",
+  "Email": "duynhatnguyen03@gmail.com",
+  "Date": "2026-06-14T09:25:24Z",
+  "Message": "push original code: first version of the project",
+  "Tags": [],
+  "Fingerprint": "eb7eac8bb2116898a71a9e6f5bbad97cc2f6f4ba:tests/attack/token-replay.sh:curl-auth-header:61"
+ },
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 157,
+  "EndLine": 157,
+  "StartColumn": 28,
+  "EndColumn": 76,
+  "Match": "<redacted>",
+  "Secret": "<redacted>",
+  "File": "docs/evidence/setup/compose-logs-tail.txt",
+  "SymlinkFile": "",
+  "Commit": "2f9fb444a92e37266b3490fb937c796f9095d437",
+  "Link": "https://github.com/RVAN1102/API/blob/2f9fb444a92e37266b3490fb937c796f9095d437/docs/evidence/setup/compose-logs-tail.txt#L157",
+  "Entropy": 4.7433004,
+  "Author": "RVAN1102",
+  "Email": "24162144@student.hcmute.edu.vn",
+  "Date": "2026-06-13T12:48:42Z",
+  "Message": "test: validate initial compose skeleton on ubuntu",
+  "Tags": [],
+  "Fingerprint": "2f9fb444a92e37266b3490fb937c796f9095d437:docs/evidence/setup/compose-logs-tail.txt:generic-api-key:157"
+ }
+]
 
 === TRIVY ===
-trivy not installed
+
+Report Summary
+
+┌───────────────────────────────────────────┬──────┬─────────────────┬─────────┐
+│                  Target                   │ Type │ Vulnerabilities │ Secrets │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ requirements.txt                          │ pip  │        0        │    -    │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ services/admin/requirements.txt           │ pip  │        0        │    -    │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ services/billing/requirements.txt         │ pip  │        0        │    -    │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ services/order/requirements.txt           │ pip  │        0        │    -    │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ services/user/requirements.txt            │ pip  │        0        │    -    │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ docs/evidence/tv3/gitleaks-report.json    │ text │        -        │    0    │
+├───────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ docs/evidence/tv3/security-scan-local.txt │ text │        -        │    0    │
+└───────────────────────────────────────────┴──────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+

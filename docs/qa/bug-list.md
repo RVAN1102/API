@@ -582,4 +582,55 @@ Authorization: Bearer abc
   * Confirm demo secrets are documented as local-only.
   * Confirm runtime secret source is either Vault-backed or explicitly documented as environment-injected for prototype mode.
 
-* Status: Open
+## BUG-010: Vulnerable python-jose dependency detected by Trivy
+
+* Severity: High
+
+* Area: Dependency Security / JWT Validation
+
+* Affected components:
+
+  * `requirements.txt`
+  * `services/user/requirements.txt`
+  * `services/order/requirements.txt`
+  * `services/admin/requirements.txt`
+  * `services/billing/requirements.txt`
+
+* Evidence:
+
+  * `docs/evidence/qa/local-security-scan-after-tools-install.txt`
+  * `docs/evidence/qa/local-security-scan-after-python-jose-fix.txt`
+  * `docs/evidence/tv3/security-scan-local.txt`
+  * `docs/evidence/tv3/trivy-report.txt`
+
+* Expected:
+
+  * JWT validation dependencies should not contain known critical vulnerabilities.
+  * Local security scan should report zero critical/high dependency findings for the Python requirements used by the services.
+
+* Actual:
+
+  * Trivy initially detected `python-jose` version `3.3.0` as vulnerable.
+  * The finding was reported as `CVE-2024-33663`, severity `CRITICAL`.
+  * The fixed version reported by Trivy was `3.4.0`.
+
+* Fix applied:
+
+  * Upgraded `python-jose` from `3.3.0` to `3.4.0` in root and service requirements files.
+  * Rebuilt User, Order, Admin, and Billing services.
+  * Re-ran local security scan after the upgrade.
+
+* Retest result:
+
+  * Bandit reported no Python static-analysis issues.
+  * Trivy reported `0 vulnerabilities` for:
+
+    * `requirements.txt`
+    * `services/user/requirements.txt`
+    * `services/order/requirements.txt`
+    * `services/admin/requirements.txt`
+    * `services/billing/requirements.txt`
+  * Gitleaks findings were triaged separately as demo/test/false-positive or historical evidence findings.
+
+* Status: Fixed - Retest Passed
+
