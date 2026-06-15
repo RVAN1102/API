@@ -1,0 +1,84 @@
+===== fixed metadata 169.254.169.254 =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 136
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 9
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+date: Mon, 15 Jun 2026 06:56:13 GMT
+server: uvicorn
+x-correlation-id: ad83a1dc-4a96-4d23-9876-1139c8031357
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 3
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: b45a10028f64e13cd3e39e5728d08522
+
+{"detail":{"error":"ssrf_blocked","message":"Host '169.254.169.254' is blocked by SSRF protection policy.","event_type":"ssrf_blocked"}}
+===== fixed localhost =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 130
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 8
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 8
+date: Mon, 15 Jun 2026 06:56:13 GMT
+server: uvicorn
+x-correlation-id: c44b3964-f469-4b51-bde5-057437a37b89
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: c994604622c73d21ee1bb12f8878f365
+
+{"detail":{"error":"ssrf_blocked","message":"Host 'localhost' is blocked by SSRF protection policy.","event_type":"ssrf_blocked"}}
+===== fixed 127.0.0.1 =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 135
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 7
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 7
+date: Mon, 15 Jun 2026 06:56:13 GMT
+server: uvicorn
+x-correlation-id: 48cbfd36-a9b3-4233-b839-d401cf610633
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 9b86d97472c67e602f2bdc06afc27471
+
+{"detail":{"error":"ssrf_blocked","message":"Host '127.0.0.1' resolves to a private/internal IP address.","event_type":"ssrf_blocked"}}
+===== fixed file scheme =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 132
+Connection: keep-alive
+RateLimit-Reset: 46
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 6
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 6
+date: Mon, 15 Jun 2026 06:56:13 GMT
+server: uvicorn
+x-correlation-id: 9c3c512c-2401-4ebe-aa2a-488377711925
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 1
+X-Kong-Proxy-Latency: 0
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: e296ce4b008fe4373e4fac62f80d360a
+
+{"detail":{"error":"ssrf_blocked","message":"Scheme 'file' is not allowed. Only http/https permitted.","event_type":"ssrf_blocked"}}

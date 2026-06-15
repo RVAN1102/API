@@ -20,6 +20,9 @@ services:
       KONG_ADMIN_LISTEN: "0.0.0.0:8001"
       KONG_LOG_LEVEL: notice
       KONG_NGINX_WORKER_PROCESSES: "1"
+      KONG_SSL_CIPHER_SUITE: "custom"
+      KONG_SSL_PROTOCOLS: "TLSv1.3"
+      KONG_NGINX_PROXY_SSL_PROTOCOLS: "TLSv1.3"
     volumes:
       - ../gateway/kong.yml:/kong/declarative/kong.yml:ro
     ports:
@@ -42,6 +45,7 @@ services:
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: topic10-sme-api
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
     expose:
       - "8000"
     healthcheck:
@@ -61,6 +65,7 @@ services:
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: topic10-sme-api
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
     expose:
       - "8000"
     healthcheck:
@@ -77,11 +82,14 @@ services:
     build:
       context: ../services/billing
       dockerfile: Dockerfile
-    environment:
-      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
-      WEBHOOK_MAX_AGE_SECONDS: "300"
     expose:
       - "8000"
+    environment:
+      WEBHOOK_MAX_AGE_SECONDS: "300"
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "topic10-sme-api"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
       interval: 10s
@@ -98,6 +106,10 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8000"
+    environment:
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "topic10-sme-api"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
       interval: 10s

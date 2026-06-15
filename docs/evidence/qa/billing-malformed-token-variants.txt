@@ -1,0 +1,63 @@
+===== billing checkout with random bearer =====
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+Content-Length: 168
+Connection: keep-alive
+RateLimit-Reset: 50
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+date: Mon, 15 Jun 2026 06:39:09 GMT
+server: uvicorn
+x-correlation-id: 45e47f9f-fe2d-465a-9cda-7699ff12c90c
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 4
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 143c9b7c70d04f6bd06308318e8c3771
+
+{"payment_id":"pay-b5b6f54b","order_id":"ord-alice-1001","status":"accepted","amount":120000.0,"currency":"VND","correlation_id":"45e47f9f-fe2d-465a-9cda-7699ff12c90c"}
+===== billing checkout with empty bearer =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 30
+Connection: keep-alive
+RateLimit-Reset: 50
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 58
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 58
+date: Mon, 15 Jun 2026 06:39:09 GMT
+server: uvicorn
+x-correlation-id: af7fb98e-667e-4b8a-b03a-8cd6ac36ddc2
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 1577673e9faffc219e3e042085acfc39
+
+{"detail":"Not authenticated"}
+===== billing checkout with basic auth garbage =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 47
+Connection: keep-alive
+RateLimit-Reset: 50
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 57
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 57
+date: Mon, 15 Jun 2026 06:39:09 GMT
+server: uvicorn
+x-correlation-id: 4f80a0b2-c5ca-4904-8d5e-25cb0b80eb5f
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: fd837b06d5ed9a730a045f535c311e32
+
+{"detail":"Invalid authentication credentials"}

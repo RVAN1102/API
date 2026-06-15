@@ -18,8 +18,8 @@ from jose import JWTError, jwk, jwt
 
 KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
-EXPECTED_ISSUER: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}"
-JWKS_URL: str = f"{EXPECTED_ISSUER}/protocol/openid-connect/certs"
+EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 
 _jwks_cache: Optional[Dict[str, Any]] = None
 

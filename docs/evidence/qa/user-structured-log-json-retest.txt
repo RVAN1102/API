@@ -1,0 +1,33 @@
+===== user correlation id =====
+qa-user-json-retest-1781519603
+
+===== user response =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 40
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+RateLimit-Reset: 37
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+date: Mon, 15 Jun 2026 10:33:22 GMT
+server: uvicorn
+x-correlation-id: qa-user-json-retest-1781519603
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 3
+X-Kong-Proxy-Latency: 58
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 31887f6672337f337637a1605abab611
+
+{"status":"ok","service":"user-service"}
+===== raw user matched log line =====
+{"timestamp": "2026-06-15T10:33:23Z", "level": "INFO", "service": "user-service", "method": "GET", "path": "/api/v1/users/health", "status_code": 200, "client_ip": "172.20.0.12", "correlation_id": "qa-user-json-retest-1781519603", "event_type": "api_request"}
+
+===== user json parse result =====
+line_1: VALID_JSON
+top_level_keys: ['client_ip', 'correlation_id', 'event_type', 'level', 'method', 'path', 'service', 'status_code', 'timestamp']
+service: user-service
+event_type: api_request
+correlation_id: qa-user-json-retest-1781519603

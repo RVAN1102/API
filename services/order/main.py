@@ -17,7 +17,9 @@ Sample data (contract-defined):
 
 from __future__ import annotations
 
+import json
 import logging
+import time
 from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -30,9 +32,35 @@ from authz import check_order_ownership, require_user_or_admin
 # ---------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
-    format='{"timestamp":"%(asctime)s","level":"%(levelname)s","service":"order-service","message":"%(message)s"}',
+    format="%(message)s",
 )
 logger = logging.getLogger("order-service")
+
+
+def log_event(
+    level: str,
+    event_type: str,
+    method: str,
+    path: str,
+    status_code: int,
+    client_ip: str,
+    correlation_id: str,
+    extra: Optional[Dict[str, Any]] = None,
+) -> None:
+    record: Dict[str, Any] = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "level": level,
+        "service": "order-service",
+        "method": method,
+        "path": path,
+        "status_code": status_code,
+        "client_ip": client_ip,
+        "correlation_id": correlation_id,
+        "event_type": event_type,
+    }
+    if extra:
+        record.update(extra)
+    getattr(logger, level.lower(), logger.info)(json.dumps(record))
 
 # ---------------------------------------------------------------------------
 # App
@@ -62,14 +90,14 @@ ORDERS: Dict[str, Dict[str, Any]] = {
 async def log_requests(request: Request, call_next):
     correlation_id: str = request.headers.get("X-Correlation-ID", "")
     response: Response = await call_next(request)
-    logger.info(
-        '{"service":"order-service","method":"%s","path":"%s","status_code":%d,'
-        '"client_ip":"%s","correlation_id":"%s","event_type":"api_request"}',
-        request.method,
-        request.url.path,
-        response.status_code,
-        request.client.host if request.client else "unknown",
-        correlation_id,
+    log_event(
+        level="INFO",
+        event_type="api_request",
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        client_ip=request.client.host if request.client else "unknown",
+        correlation_id=correlation_id,
     )
     if correlation_id:
         response.headers["X-Correlation-ID"] = correlation_id
@@ -166,13 +194,20 @@ async def get_order_vulnerable(
 
     # Log BOLA attempt for observability demo (but still return 200 to show vulnerability)
     if order["owner_id"] != caller:
-        logger.warning(
-            '{"service":"order-service","event_type":"bola_attempt","actor":"%s",'
-            '"target":"%s","decision":"allowed","reason":"vulnerable_endpoint",'
-            '"correlation_id":"%s"}',
-            caller,
-            order_id,
-            request.headers.get("X-Correlation-ID", ""),
+        log_event(
+            level="WARNING",
+            event_type="bola_attempt",
+            method="GET",
+            path=f"/api/v1/orders/{order_id}/vulnerable",
+            status_code=200,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=request.headers.get("X-Correlation-ID", ""),
+            extra={
+                "actor": caller,
+                "target": order_id,
+                "decision": "allowed",
+                "reason": "vulnerable_endpoint",
+            },
         )
 
     correlation_id = request.headers.get("X-Correlation-ID", "")
@@ -214,13 +249,20 @@ async def get_order_fixed(
     # Ownership check – raises 403 if caller is not owner and not admin
     check_order_ownership(payload, order["owner_id"])
 
-    logger.info(
-        '{"service":"order-service","event_type":"authz_allowed","actor":"%s",'
-        '"target":"%s","decision":"allowed","reason":"ownership_verified",'
-        '"correlation_id":"%s"}',
-        caller,
-        order_id,
-        request.headers.get("X-Correlation-ID", ""),
+    log_event(
+        level="INFO",
+        event_type="authz_allowed",
+        method="GET",
+        path=f"/api/v1/orders/{order_id}/fixed",
+        status_code=200,
+        client_ip=request.client.host if request.client else "unknown",
+        correlation_id=request.headers.get("X-Correlation-ID", ""),
+        extra={
+            "actor": caller,
+            "target": order_id,
+            "decision": "allowed",
+            "reason": "ownership_verified",
+        },
     )
 
     correlation_id = request.headers.get("X-Correlation-ID", "")
