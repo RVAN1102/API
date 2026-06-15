@@ -96,3 +96,18 @@ curl -i -X POST http://localhost:8000/api/v1/billing/checkout \
   * Không tạo `payment_id` nếu token chưa được xác thực hợp lệ.
 
 * Status: Open
+
+### Additional evidence
+
+File evidence bổ sung:
+
+- `docs/evidence/qa/billing-malformed-token-variants.txt`
+
+Kết quả kiểm thử cho thấy endpoint chỉ reject khi thiếu token, token rỗng hoặc sai scheme, nhưng lại chấp nhận mọi chuỗi Bearer không rỗng:
+
+```text
+Authorization: Bearer abc              → 202 Accepted
+Authorization: Bearer fake.jwt.token   → 202 Accepted
+Authorization: Bearer                  → 403 Forbidden
+Authorization: Basic abc123            → 403 Forbidden
+No Authorization header                → 403 Forbidden
