@@ -221,3 +221,82 @@ Authorization: Bearer abc
   * Re-run valid, invalid signature, and replay webhook tests after fixing.
 
 * Status: Open
+
+## BUG-005: Valid webhook demo request is rejected with invalid HMAC signature
+
+* Severity: High
+
+* Area: Webhook/HMAC/Test Automation
+
+* Affected endpoint:
+
+  * `POST /api/v1/webhooks/payment`
+
+* Affected files:
+
+  * `demo/webhook/send-valid-webhook.sh`
+  * `demo/webhook/send-invalid-signature.sh`
+  * `demo/webhook/send-replay-webhook.sh`
+  * `demo/webhook/sign_webhook.py`
+  * `services/billing/main.py`
+
+* Evidence:
+
+  * `docs/evidence/qa/webhook-hmac-checks-after-python3-fix.txt`
+
+* Expected:
+
+  * `send-valid-webhook.sh` should return `200 OK`.
+  * `send-invalid-signature.sh` should return `401 Unauthorized`.
+  * `send-replay-webhook.sh` should return first request `200 OK`, second request `403 Forbidden`.
+
+* Actual:
+
+  * Valid webhook returns `401 Unauthorized`.
+  * Invalid signature returns `401 Unauthorized`.
+  * Replay attempt 1 already returns `401 Unauthorized`.
+
+* Observed response:
+
+```json
+{"detail":{"error":"invalid_signature","message":"HMAC-SHA256 signature verification failed"}}
+```
+
+* Root cause hypothesis:
+
+  * The signing script and backend do not compute HMAC over the exact same message.
+  * Possible mismatch in raw body, JSON formatting, newline, timestamp, nonce, secret, or signature prefix format.
+  * The script may sign one representation of the JSON body, while `curl` sends a different raw body.
+  * The script and backend may use different `WEBHOOK_SECRET` values.
+  * The script may send signature in a different format from what the backend expects, for example raw hex vs `sha256=<hex>`.
+  * Replay protection cannot be verified because the first supposedly valid request is rejected before nonce storage.
+
+* Security/QA impact:
+
+  * The project currently cannot prove that webhook HMAC protection works.
+  * Replay protection evidence is invalid because valid signature verification fails first.
+  * This weakens the claim that webhook secure channel is implemented.
+  * The current demo scripts are not sufficient evidence for webhook authenticity and replay protection.
+  * If this remains unfixed, the report must clearly state that webhook HMAC was designed but the runnable validation evidence is failing.
+
+* Suggested fix:
+
+  * Ensure `sign_webhook.py` signs the exact raw body bytes that `curl` sends.
+  * Store the request body in a variable or temporary file and use the same bytes for both signing and sending.
+  * Ensure script and backend use the same `WEBHOOK_SECRET`.
+  * Ensure the backend expects the same signature format that the script sends, for example `sha256=<hex>`.
+  * Prefer `hmac.compare_digest()` for timing-safe signature comparison.
+  * Re-run valid, invalid signature, and replay tests after fixing.
+  * Valid request must pass before replay test is meaningful.
+
+* Retest requirements:
+
+  * Run `bash demo/webhook/send-valid-webhook.sh`.
+  * Expected result: `200 OK`.
+  * Run `bash demo/webhook/send-invalid-signature.sh`.
+  * Expected result: `401 Unauthorized`.
+  * Run `bash demo/webhook/send-replay-webhook.sh`.
+  * Expected result: first request `200 OK`, second request `403 Forbidden`.
+  * Save retest evidence to `docs/evidence/qa/webhook-hmac-checks-after-fix.txt`.
+
+* Status: Open
