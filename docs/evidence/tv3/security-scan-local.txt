@@ -1,0 +1,11 @@
+=== LOCAL SECURITY SCAN RESULTS ===
+Date: Mon Jun 15 05:59:22 PM +07 2026
+
+=== BANDIT ===
+bandit not installed
+
+=== GITLEAKS ===
+gitleaks not installed
+
+=== TRIVY ===
+trivy not installed

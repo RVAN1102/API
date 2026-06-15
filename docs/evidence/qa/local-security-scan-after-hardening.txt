@@ -1,0 +1,19 @@
+=== Local Security Scan ===
+Output: docs/evidence/tv3/
+
+--- [1/3] Bandit – Python Static Analysis ---
+[WARN] bandit not found. Install: pip install bandit
+
+--- [2/3] Gitleaks – Secret Detection ---
+[WARN] gitleaks not found. Download from https://github.com/gitleaks/gitleaks/releases
+
+--- [3/3] Trivy – Filesystem Vulnerability Scan ---
+[WARN] trivy not found. Install from https://aquasecurity.github.io/trivy/
+
+=== Scan complete ===
+Reports saved to docs/evidence/tv3/
+-rw-rw-r-- 1 rvan1102 rvan1102 21 Jun 15 17:59 docs/evidence/tv3/bandit-report.txt
+-rw-rw-r-- 1 rvan1102 rvan1102 23 Jun 15 17:59 docs/evidence/tv3/gitleaks-report.json
+-rw-rw-r-- 1 rvan1102 rvan1102 20 Jun 15 17:59 docs/evidence/tv3/trivy-report.txt
+
+Combined evidence: docs/evidence/tv3/security-scan-local.txt
