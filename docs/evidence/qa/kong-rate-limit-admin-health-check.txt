@@ -1,0 +1,16 @@
+===== admin route rate limit test =====
+request_1: HTTP 200
+request_2: HTTP 200
+request_3: HTTP 200
+request_4: HTTP 200
+request_5: HTTP 200
+request_6: HTTP 200
+request_7: HTTP 200
+request_8: HTTP 200
+request_9: HTTP 200
+request_10: HTTP 200
+request_11: HTTP 200
+request_12: HTTP 200
+request_13: HTTP 200
+request_14: HTTP 200
+request_15: HTTP 200
