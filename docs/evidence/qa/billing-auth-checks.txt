@@ -1,0 +1,42 @@
+===== billing checkout without token =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 30
+Connection: keep-alive
+RateLimit-Reset: 13
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+date: Mon, 15 Jun 2026 06:35:47 GMT
+server: uvicorn
+x-correlation-id: d3ee8957-a211-4e37-bb93-677e998abad9
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 3
+X-Kong-Proxy-Latency: 2
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 747575203a307f094fe39e49c64b2b0d
+
+{"detail":"Not authenticated"}
+===== billing checkout with fake token =====
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+Content-Length: 168
+Connection: keep-alive
+RateLimit-Reset: 13
+RateLimit-Limit: 60
+X-RateLimit-Remaining-Minute: 58
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 58
+date: Mon, 15 Jun 2026 06:35:47 GMT
+server: uvicorn
+x-correlation-id: eeaa16ab-c13b-4aa7-a684-f60a480876b0
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 3
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: bee3921f78bf9b5383aacd30a7b2e820
+
+{"payment_id":"pay-9a5ed563","order_id":"ord-alice-1001","status":"accepted","amount":120000.0,"currency":"VND","correlation_id":"eeaa16ab-c13b-4aa7-a684-f60a480876b0"}

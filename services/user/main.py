@@ -17,8 +17,10 @@ Headers propagated:
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+import time
 from typing import Any, Dict, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -32,9 +34,32 @@ from authz import require_user_or_admin
 # ---------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
-    format='{"timestamp":"%(asctime)s","level":"%(levelname)s","service":"user-service","message":"%(message)s"}',
+    format="%(message)s",
 )
 logger = logging.getLogger("user-service")
+
+
+def log_event(
+    level: str,
+    event_type: str,
+    method: str,
+    path: str,
+    status_code: int,
+    client_ip: str,
+    correlation_id: str,
+) -> None:
+    record: Dict[str, Any] = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "level": level,
+        "service": "user-service",
+        "method": method,
+        "path": path,
+        "status_code": status_code,
+        "client_ip": client_ip,
+        "correlation_id": correlation_id,
+        "event_type": event_type,
+    }
+    getattr(logger, level.lower(), logger.info)(json.dumps(record))
 
 # ---------------------------------------------------------------------------
 # App
@@ -55,14 +80,14 @@ app = FastAPI(
 async def log_requests(request: Request, call_next):
     correlation_id: str = request.headers.get("X-Correlation-ID", "")
     response: Response = await call_next(request)
-    logger.info(
-        '{"service":"user-service","method":"%s","path":"%s","status_code":%d,'
-        '"client_ip":"%s","correlation_id":"%s","event_type":"api_request"}',
-        request.method,
-        request.url.path,
-        response.status_code,
-        request.client.host if request.client else "unknown",
-        correlation_id,
+    log_event(
+        level="INFO",
+        event_type="api_request",
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        client_ip=request.client.host if request.client else "unknown",
+        correlation_id=correlation_id,
     )
     # Echo correlation-id back in response
     if correlation_id:

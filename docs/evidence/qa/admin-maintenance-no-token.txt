@@ -1,0 +1,21 @@
+===== admin maintenance without token =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 30
+Connection: keep-alive
+RateLimit-Reset: 47
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 9
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+date: Mon, 15 Jun 2026 06:35:13 GMT
+server: uvicorn
+x-correlation-id: 38a8badd-32a5-4467-8ad0-9b622eb8dba6
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 6d35fa66b594ab614beea874f8b0cc14
+
+{"detail":"Not authenticated"}

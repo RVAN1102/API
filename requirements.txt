@@ -38,7 +38,7 @@ Python >= 3.13
 # services/user/requirements.txt
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.4.0
 httpx==0.28.0
 pydantic==2.10.3
 

@@ -1,0 +1,9 @@
+===== correlation id =====
+qa-json-1781518267
+
+===== raw matched log line =====
+{"timestamp":"2026-06-15 10:11:07,054","level":"INFO","service":"user-service","message":"{"service":"user-service","method":"GET","path":"/api/v1/users/health","status_code":200,"client_ip":"172.20.0.12","correlation_id":"qa-json-1781518267","event_type":"api_request"}"}
+
+===== json parse result =====
+line_1: INVALID_JSON
+error: JSONDecodeError("Expecting ',' delimiter: line 1 column 93 (char 92)")

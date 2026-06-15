@@ -1,0 +1,84 @@
+===== user /me with alice token should be 200 =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 172
+Connection: keep-alive
+RateLimit-Reset: 55
+X-RateLimit-Remaining-Minute: 9
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+RateLimit-Limit: 10
+date: Mon, 15 Jun 2026 11:43:05 GMT
+server: uvicorn
+x-correlation-id: ab46718a-3dc7-4978-af3a-aa4f9711c92f
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 48
+X-Kong-Proxy-Latency: 63
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: da57b7607b4cfe5c5bbc2139d1809364
+
+{"user_id":"3d080e2b-78fb-417c-8b58-909eb715a565","username":"alice","email":"alice@example.local","roles":["user"],"correlation_id":"ab46718a-3dc7-4978-af3a-aa4f9711c92f"}
+===== order fixed with alice token should be 200 =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 196
+Connection: keep-alive
+RateLimit-Reset: 55
+X-RateLimit-Remaining-Minute: 9
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+RateLimit-Limit: 10
+date: Mon, 15 Jun 2026 11:43:05 GMT
+server: uvicorn
+x-correlation-id: 575c8f2b-cbe0-4894-856a-b5a5c81df068
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 39
+X-Kong-Proxy-Latency: 35
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 16272a2d30fe8710aea4c31ef5ce0355
+
+{"order_id":"ord-alice-1001","owner_id":"alice","amount":150000,"status":"created","currency":"VND","note":"BOLA FIXED: ownership verified","correlation_id":"575c8f2b-cbe0-4894-856a-b5a5c81df068"}
+===== billing checkout with alice token should be 202 =====
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+Content-Length: 168
+Connection: keep-alive
+RateLimit-Reset: 55
+X-RateLimit-Remaining-Minute: 59
+X-RateLimit-Limit-Minute: 60
+RateLimit-Remaining: 59
+RateLimit-Limit: 60
+date: Mon, 15 Jun 2026 11:43:05 GMT
+server: uvicorn
+x-correlation-id: 5667874a-04eb-4145-b914-3f82257a38e4
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 43
+X-Kong-Proxy-Latency: 68
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 72a56e371d21f143af855e4d1cab1777
+
+{"payment_id":"pay-5ec8b963","order_id":"ord-alice-1001","status":"accepted","amount":150000.0,"currency":"VND","correlation_id":"5667874a-04eb-4145-b914-3f82257a38e4"}
+===== admin maintenance with admin token should be 200 =====
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/json
+Content-Length: 82
+Connection: keep-alive
+RateLimit-Reset: 54
+X-RateLimit-Remaining-Minute: 9
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+RateLimit-Limit: 10
+date: Mon, 15 Jun 2026 11:43:05 GMT
+server: uvicorn
+x-correlation-id: 27b93294-6fa4-48a8-a9ee-9e4deb5d06a5
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 38
+X-Kong-Proxy-Latency: 44
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: d65ce8299f16c56164cf4719014b7c2b
+
+{"detail":[{"type":"missing","loc":["body"],"msg":"Field required","input":null}]}

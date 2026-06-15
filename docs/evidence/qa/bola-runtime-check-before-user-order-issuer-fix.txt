@@ -1,0 +1,84 @@
+===== alice gets her own order fixed endpoint should be 200 =====
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 112
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+RateLimit-Reset: 45
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 9
+date: Mon, 15 Jun 2026 10:37:14 GMT
+server: uvicorn
+x-correlation-id: 58b4fc1e-40a9-4e56-8386-4c07714f6fff
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 97
+X-Kong-Proxy-Latency: 9
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 89fb761964033f057b72f23afbe85006
+
+{"detail":{"error":"invalid_token","message":"Unexpected issuer: http://localhost:8080/realms/topic10-sme-api"}}
+===== alice gets bob order vulnerable endpoint should be 200 - demonstrates BOLA flaw =====
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 112
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 8
+RateLimit-Reset: 44
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 8
+date: Mon, 15 Jun 2026 10:37:16 GMT
+server: uvicorn
+x-correlation-id: 2d27b2be-cf1d-4633-bdf6-4527860b32e1
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 4
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: c765ac2a9f8fb94859a7f01eddc1fe44
+
+{"detail":{"error":"invalid_token","message":"Unexpected issuer: http://localhost:8080/realms/topic10-sme-api"}}
+===== alice gets bob order fixed endpoint should be 403 =====
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 112
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 7
+RateLimit-Reset: 44
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 7
+date: Mon, 15 Jun 2026 10:37:16 GMT
+server: uvicorn
+x-correlation-id: 81c083cb-042e-4040-81d3-6ef27f496ced
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 6
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 8f81b558fe47734fdd5cd6524aef791e
+
+{"detail":{"error":"invalid_token","message":"Unexpected issuer: http://localhost:8080/realms/topic10-sme-api"}}
+===== bob gets bob order fixed endpoint should be 200 =====
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 112
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 6
+RateLimit-Reset: 44
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 6
+date: Mon, 15 Jun 2026 10:37:16 GMT
+server: uvicorn
+x-correlation-id: 7a1c5f1f-d277-4ab6-9e88-889ff5808990
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 2
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 538f5b2f1fa76378225ea64930caea5a
+
+{"detail":{"error":"invalid_token","message":"Unexpected issuer: http://localhost:8080/realms/topic10-sme-api"}}

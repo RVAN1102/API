@@ -1,0 +1,84 @@
+===== alice gets her own order fixed endpoint should be 200 =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 196
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+RateLimit-Reset: 32
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 9
+date: Mon, 15 Jun 2026 10:45:27 GMT
+server: uvicorn
+x-correlation-id: 1853d4d1-a583-4e46-bbd3-3e306c15056e
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 59
+X-Kong-Proxy-Latency: 3
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: e786620c857c4906592a2268e7773925
+
+{"order_id":"ord-alice-1001","owner_id":"alice","amount":150000,"status":"created","currency":"VND","note":"BOLA FIXED: ownership verified","correlation_id":"1853d4d1-a583-4e46-bbd3-3e306c15056e"}
+===== alice gets bob order vulnerable endpoint should be 200 - demonstrates BOLA flaw =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 206
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 8
+RateLimit-Reset: 32
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 8
+date: Mon, 15 Jun 2026 10:45:27 GMT
+server: uvicorn
+x-correlation-id: 4b8ef6b7-ce9a-4086-a3df-41ac0e52413b
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 1
+X-Kong-Proxy-Latency: 2
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 9a88211f4310db037f094a5559bceb29
+
+{"order_id":"ord-bob-2001","owner_id":"bob","amount":80000,"status":"created","currency":"VND","note":"BOLA VULNERABLE: no ownership check performed","correlation_id":"4b8ef6b7-ce9a-4086-a3df-41ac0e52413b"}
+===== alice gets bob order fixed endpoint should be 403 =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 147
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 7
+RateLimit-Reset: 32
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 7
+date: Mon, 15 Jun 2026 10:45:27 GMT
+server: uvicorn
+x-correlation-id: 0c07401f-ae5b-41dc-8280-433407e46ce7
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 2
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 446eba4b6df47a36ad90232576f63932
+
+{"detail":{"error":"forbidden","message":"You do not have permission to access this order. Owner: bob, caller: alice","event_type":"bola_attempt"}}
+===== bob gets bob order fixed endpoint should be 200 =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 191
+Connection: keep-alive
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 6
+RateLimit-Reset: 32
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 6
+date: Mon, 15 Jun 2026 10:45:27 GMT
+server: uvicorn
+x-correlation-id: e3a2e502-3d95-4e3c-adc5-07a60e6f468c
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 1
+X-Kong-Proxy-Latency: 3
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: df27fa6923c8c405d0b0f04368237103
+
+{"order_id":"ord-bob-2001","owner_id":"bob","amount":80000,"status":"created","currency":"VND","note":"BOLA FIXED: ownership verified","correlation_id":"e3a2e502-3d95-4e3c-adc5-07a60e6f468c"}
