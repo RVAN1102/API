@@ -1,0 +1,17 @@
+==============================================
+  WEBHOOK SECURITY TESTS
+  Tue Jun 16 03:32:34 PM +07 2026
+==============================================
+
+===== Valid webhook =====
+[PASS] valid webhook accepted
+
+===== Invalid webhook (bad signature) =====
+[PASS] invalid webhook rejected (401)
+
+===== Replay webhook =====
+[PASS] replay webhook test completed with expected behavior
+
+==============================================
+  WEBHOOK RESULT: 3/3 passed, 0 failed
+==============================================
