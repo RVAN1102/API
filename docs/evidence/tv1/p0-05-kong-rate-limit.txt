@@ -1,0 +1,17 @@
+===== TV1 P0.5 Rate limit on protected route =====
+request=1 status=401
+request=2 status=401
+request=3 status=401
+request=4 status=401
+request=5 status=401
+request=6 status=401
+request=7 status=401
+request=8 status=401
+request=9 status=401
+request=10 status=401
+request=11 status=429
+request=12 status=429
+request=13 status=429
+request=14 status=429
+request=15 status=429
+[0;32m[PASS][0m Rate limit enforced – 429 received when threshold exceeded

@@ -1,0 +1,15 @@
+===== TV1 P0.7 Valid webhook =====
+Timestamp : 1781596595
+Nonce     : valid-8c5eb59bd50b2b6a6763e46f80537d9c
+Signature : sha256=fd8533fce76a8604261c84defcb33ca93f911f0fd97795777573e47bb21859f2
+Valid webhook status: 200
+[0;32m[PASS][0m Valid webhook accepted (HTTP 200)
+
+===== TV1 P0.7 Invalid webhook (bad signature) =====
+Invalid signature status: 401
+[0;32m[PASS][0m Invalid signature correctly rejected (401)
+
+===== TV1 P0.7 Replay webhook (same nonce twice) =====
+Replay send #1 status: 200
+Replay send #2 status: 403
+[0;32m[PASS][0m Replay attack blocked: send#1=200 send#2=403 (replayed_nonce)

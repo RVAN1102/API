@@ -1,0 +1,4 @@
+===== TV1 P0.3 HSTS header =====
+HTTP/1.1 200 OK
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+[0;32m[PASS][0m HSTS header present
