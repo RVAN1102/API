@@ -6,7 +6,7 @@ This document describes how to start the system, run tests, and interpret result
 
 ## 1. Prerequisites
 
-- **Docker Desktop** installed and running
+- **Docker Engine** on Linux or **Docker Desktop** on Windows/macOS installed and running
 - **Git Bash** (on Windows) or any bash-compatible shell
 - **curl** available in PATH
 - **python3** available in PATH (for token scripts and payload generation)
@@ -22,7 +22,7 @@ cd API
 # Start all services
 docker compose -f infra/docker-compose.yml up -d --build
 
-# Wait for all services to be healthy (~60-90 seconds for Keycloak)
+# Wait until services are running; services with healthchecks should become healthy (~60-90 seconds for Keycloak)
 docker compose -f infra/docker-compose.yml ps
 ```
 
@@ -36,7 +36,7 @@ bash fix-and-restart.sh
 docker compose -f infra/docker-compose.yml up -d --build --force-recreate
 ```
 
-### Expected services (all should be "healthy"):
+### Expected services
 
 | Container | Port | Purpose |
 |-----------|------|---------|
@@ -201,3 +201,12 @@ docker compose -f infra/docker-compose.yml down
 # To also remove volumes (clean state):
 docker compose -f infra/docker-compose.yml down -v
 ```
+
+## Rate-limit test note
+
+`tests/security/edge-hardening-tests.sh` intentionally triggers HTTP 429 on a sensitive endpoint. Running smoke/regression immediately after that can fail with `429` until Kong's rate-limit window resets.
+
+Recommended reset:
+
+    docker compose -f infra/docker-compose.yml restart kong
+    sleep 15

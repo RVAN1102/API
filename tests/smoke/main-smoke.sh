@@ -73,13 +73,21 @@ echo ""
 
 # ── Keycloak discovery ────────────────────────────
 echo "===== Smoke: Keycloak OIDC discovery ====="
+DISCOVERY_URL="${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration"
 
-assert_status "keycloak discovery" 200 \
-  "$(curl -s -o /dev/null -w "%{http_code}" \
-    "${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration")"
+echo "Waiting for Keycloak discovery endpoint..."
+DISCOVERY_CODE="000"
+for i in {1..40}; do
+  DISCOVERY_CODE="$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${DISCOVERY_URL}" || true)"
+  if [[ "${DISCOVERY_CODE}" == "200" ]]; then
+    break
+  fi
+  sleep 3
+done
+
+assert_status "keycloak discovery" 200 "${DISCOVERY_CODE}"
 
 echo ""
-
 # ── Alice token + /users/me ───────────────────────
 echo "===== Smoke: Alice token and /users/me ====="
 

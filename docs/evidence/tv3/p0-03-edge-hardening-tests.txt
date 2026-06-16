@@ -1,0 +1,29 @@
+==============================================
+  EDGE HARDENING TESTS
+  Tue Jun 16 03:32:34 PM +07 2026
+==============================================
+
+===== TLS 1.3 should succeed =====
+[PASS] TLS 1.3 handshake completed
+
+===== TLS 1.2 should fail =====
+[PASS] TLS 1.2 rejected (connection failed)
+
+===== HSTS header =====
+[PASS] HSTS header present
+
+===== CORS allowed origin =====
+[PASS] allowed origin (localhost:3002) has CORS allow header
+
+===== CORS evil origin =====
+[PASS] evil origin not allowed
+
+===== Request size limit =====
+[PASS] large payload blocked -> 417
+
+===== Rate limit (sensitive endpoint) =====
+[PASS] rate limit triggered (429 received)
+
+==============================================
+  EDGE HARDENING RESULT: 7/7 passed, 0 failed, 0 skipped
+==============================================
