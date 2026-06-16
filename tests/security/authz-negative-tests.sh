@@ -6,8 +6,10 @@
 #
 # Tests:
 #   - Fake/malformed tokens rejected (401)
-#   - RBAC: user cannot access admin endpoints (403)
+#   - RBAC: user cannot access service-only admin automation (403)
+#   - Service client can access service-only admin automation (200)
 #   - BOLA fixed: ci-alice cannot read Bob's order (403)
+#   - Billing: checkout ownership enforced (202/403)
 #   - Billing: malformed tokens rejected (401)
 #
 # Usage:
@@ -64,13 +66,19 @@ bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-bob > /tmp/tv3-ci-bob-toke
 cp /tmp/user-token.txt /tmp/tv3-ci-bob-token.txt
 echo "[INFO] ci-bob automation token obtained"
 
-bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-admin > /tmp/tv3-ci-admin-token.log 2>&1
-cp /tmp/user-token.txt /tmp/tv3-ci-admin-token.txt
-echo "[INFO] ci-admin automation token obtained"
+if [ -z "${SERVICE_CLIENT_SECRET:-}" ]; then
+  echo "[ERROR] SERVICE_CLIENT_SECRET is required for service-client admin automation checks."
+  echo "[ERROR] Set it from Keycloak/Vault; this test will not print the secret."
+  exit 1
+fi
+
+bash "${PROJECT_ROOT}/demo/auth/get-service-token.sh" > /tmp/tv3-service-token.log 2>&1
+cp /tmp/service-token.txt /tmp/tv3-service-token.txt
+echo "[INFO] service client token obtained"
 
 CI_ALICE_TOKEN="$(cat /tmp/tv3-ci-alice-token.txt)"
 CI_BOB_TOKEN="$(cat /tmp/tv3-ci-bob-token.txt)"
-CI_ADMIN_TOKEN="$(cat /tmp/tv3-ci-admin-token.txt)"
+SERVICE_TOKEN="$(cat /tmp/tv3-service-token.txt)"
 
 echo ""
 
@@ -94,10 +102,10 @@ assert_status "ci-alice automation admin maintenance forbidden" 403 \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
-assert_status "ci-admin automation maintenance allowed" 200 \
+assert_status "service client maintenance allowed" 200 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer ${CI_ADMIN_TOKEN}" \
+    -H "Authorization: Bearer ${SERVICE_TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
@@ -142,6 +150,20 @@ assert_status "billing ci-alice automation checkout accepted" 202 \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
+assert_status "billing ci-alice automation bob checkout forbidden" 403 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
+
+assert_status "billing ci-bob automation checkout accepted" 202 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer ${CI_BOB_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
+
 assert_status "billing fake token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
@@ -153,6 +175,20 @@ assert_status "billing malformed token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
     -H "Authorization: Bearer abc" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
+
+assert_status "billing malformed compact token rejected" 401 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer eyJ.invalid" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
+
+assert_status "billing extremely malformed token rejected" 401 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer not-a-jwt-@@@" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 

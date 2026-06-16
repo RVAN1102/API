@@ -56,6 +56,7 @@ echo "  $(date)"
 echo "=============================================="
 
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
+run_suite "Client Credentials" "tests/security/client-credentials-tests.sh"
 run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
 run_suite "Edge Hardening" "tests/security/edge-hardening-tests.sh"
 reset_kong_after_edge

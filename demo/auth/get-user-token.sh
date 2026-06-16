@@ -5,7 +5,7 @@
 # This is for DEMO/DEV purposes only.
 #
 # Usage:
-#   bash demo/auth/get-user-token.sh [alice|bob|admin01|ci-alice|ci-bob|ci-admin]
+#   bash demo/auth/get-user-token.sh [alice|bob|admin01|ci-alice|ci-bob]
 #
 # Environment variables:
 #   KEYCLOAK_URL   – default: http://localhost:8080
@@ -29,7 +29,6 @@ case "${USERNAME}" in
   admin01)  PASSWORD="${PASSWORD:-admin-password-123}" ;;
   ci-alice) PASSWORD="${PASSWORD:-ci-alice-password-123}" ;;
   ci-bob)   PASSWORD="${PASSWORD:-ci-bob-password-123}" ;;
-  ci-admin) PASSWORD="${PASSWORD:-ci-admin-password-123}" ;;
   *)        PASSWORD="${PASSWORD:-}" ;;
 esac
 

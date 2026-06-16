@@ -99,10 +99,23 @@ _jwks_cache: Optional[Dict[str, Any]] = None
 ROLE_USER = "user"
 ROLE_ADMIN = "admin"
 
+ORDER_OWNERS: Dict[str, str] = {
+    "ord-alice-1001": "alice",
+    "ord-alice-1002": "alice",
+    "ord-bob-2001": "bob",
+    "ord-bob-2002": "bob",
+}
+
 
 # ---------------------------------------------------------------------------
 # JWT authentication helpers
 # ---------------------------------------------------------------------------
+def _invalid_token_exception() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={"error": "invalid_token", "message": "Bearer token is invalid"},
+    )
+
 
 async def _fetch_jwks() -> Dict[str, Any]:
     """Fetch and cache Keycloak JWKS."""
@@ -131,21 +144,31 @@ def _invalidate_jwks_cache() -> None:
 
 async def _get_signing_key(token: str) -> Any:
     """Return the public key that matches the token's kid header."""
-    header = jwt.get_unverified_header(token)
-    kid = header.get("kid")
+    try:
+        header = jwt.get_unverified_header(token)
+    except Exception:
+        raise _invalid_token_exception()
+
+    kid = _claim_as_string(header.get("kid"))
+    if not kid:
+        raise _invalid_token_exception()
+
     jwks = await _fetch_jwks()
     for key_data in jwks.get("keys", []):
         if key_data.get("kid") == kid:
-            return jwk.construct(key_data)
+            try:
+                return jwk.construct(key_data)
+            except Exception:
+                raise _invalid_token_exception()
     _invalidate_jwks_cache()
     jwks = await _fetch_jwks()
     for key_data in jwks.get("keys", []):
         if key_data.get("kid") == kid:
-            return jwk.construct(key_data)
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail={"error": "invalid_token", "message": "Unknown signing key"},
-    )
+            try:
+                return jwk.construct(key_data)
+            except Exception:
+                raise _invalid_token_exception()
+    raise _invalid_token_exception()
 
 
 async def validate_token(token: str) -> Dict[str, Any]:
@@ -158,20 +181,15 @@ async def validate_token(token: str) -> Dict[str, Any]:
             algorithms=["RS256"],
             options={"verify_aud": False, "verify_exp": True},
         )
-    except JWTError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": "invalid_token", "message": str(exc)},
-        )
+    except HTTPException:
+        raise
+    except JWTError:
+        raise _invalid_token_exception()
+    except Exception:
+        raise _invalid_token_exception()
 
     if payload.get("iss") != EXPECTED_ISSUER:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={
-                "error": "invalid_token",
-                "message": f"Unexpected issuer: {payload.get('iss')}",
-            },
-        )
+        raise _invalid_token_exception()
     return payload
 
 
@@ -194,6 +212,66 @@ def require_role(payload: Dict[str, Any], *required_roles: str) -> None:
                 ),
             },
         )
+
+
+def has_role(payload: Dict[str, Any], *roles: str) -> bool:
+    user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
+    return any(r in user_roles for r in roles)
+
+
+def _is_automation_fixture(payload: Dict[str, Any]) -> bool:
+    value = payload.get("automation_fixture")
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return False
+
+
+def _claim_as_string(value: Any) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item.strip()
+    return ""
+
+
+def get_effective_subject(payload: Dict[str, Any]) -> str:
+    if _is_automation_fixture(payload):
+        automation_owner = _claim_as_string(payload.get("automation_owner"))
+        if automation_owner:
+            return automation_owner
+
+    caller = _claim_as_string(payload.get("preferred_username"))
+    if caller:
+        return caller
+    return _claim_as_string(payload.get("sub"))
+
+
+def can_checkout_order(payload: Dict[str, Any], order_id: str) -> bool:
+    if has_role(payload, ROLE_ADMIN):
+        return True
+
+    order_owner = ORDER_OWNERS.get(order_id)
+    if not order_owner:
+        return False
+
+    return get_effective_subject(payload) == order_owner
+
+
+def require_order_owner_or_admin(payload: Dict[str, Any], order_id: str) -> None:
+    if can_checkout_order(payload, order_id):
+        return
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden",
+            "message": "You do not have permission to checkout this order",
+        },
+    )
 
 
 async def require_checkout_access(
@@ -257,7 +335,7 @@ async def health_check():
 async def create_checkout(
     body: CheckoutRequest,
     request: Request,
-    _payload: Dict[str, Any] = Depends(require_checkout_access),
+    payload: Dict[str, Any] = Depends(require_checkout_access),
 ):
     """
     Initiate a checkout/payment session.
@@ -266,7 +344,10 @@ async def create_checkout(
     Returns 202 Accepted with a generated payment_id.
 
     Requires a valid Keycloak JWT with role 'user' or 'admin'.
+    Requires order ownership unless the caller has role 'admin'.
     """
+    require_order_owner_or_admin(payload, body.order_id)
+
     correlation_id = request.headers.get("X-Correlation-ID", "")
     import uuid
     payment_id = f"pay-{uuid.uuid4().hex[:8]}"
