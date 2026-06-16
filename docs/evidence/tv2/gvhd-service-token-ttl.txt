@@ -1,0 +1,7 @@
+service_token_obtained=true
+client_id=sme-service-client
+token_length=1081
+token_ttl_seconds=300
+roles=internal-service
+scopes=profile email
+service_token_script_exit=0

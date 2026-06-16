@@ -174,7 +174,9 @@
       "serviceAccountsEnabled": true,
       "protocol": "openid-connect",
       "secret": "<redacted>",
-      "attributes": {}
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
     }
   ],
   "users": [
@@ -297,29 +299,12 @@
       "requiredActions": []
     },
     {
-      "username": "ci-admin",
-      "email": "ci-admin@example.local",
-      "firstName": "CI",
-      "lastName": "Admin",
+      "username": "service-account-sme-service-client",
       "enabled": true,
-      "emailVerified": true,
-      "attributes": {
-        "automation_owner": [
-          "admin01"
-        ],
-        "automation_fixture": [
-          "true"
-        ]
-      },
-      "credentials": [
-        {
-          "type": "password",
-          "value": "ci-admin-password-123",
-          "temporary": false
-        }
-      ],
+      "emailVerified": false,
+      "serviceAccountClientId": "sme-service-client",
       "realmRoles": [
-        "admin"
+        "internal-service"
       ],
       "requiredActions": []
     }

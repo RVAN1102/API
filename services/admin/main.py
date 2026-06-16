@@ -3,7 +3,7 @@ main.py – Admin Service (TV3)
 
 FastAPI application providing:
   GET  /api/v1/admin/health                      – public
-  POST /api/v1/admin/maintenance                 – protected (Bearer JWT)
+  POST /api/v1/admin/maintenance                 – protected (service Bearer JWT)
   POST /api/v1/admin/metadata-fetch/vulnerable   – SSRF vulnerable (no URL validation)
   POST /api/v1/admin/metadata-fetch/fixed        – SSRF fixed (URL blocklist)
 
@@ -89,6 +89,8 @@ EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 
 ROLE_ADMIN = "admin"
+ROLE_INTERNAL_SERVICE = "internal-service"
+SERVICE_CLIENT_ID = os.environ.get("SERVICE_CLIENT_ID", "sme-service-client")
 
 
 # ---------------------------------------------------------------------------
@@ -172,6 +174,25 @@ async def get_current_token_payload(
     return await validate_token(credentials.credentials)
 
 
+def _claim_as_string(value: Any) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item.strip()
+    return ""
+
+
+def _token_client_id(payload: Dict[str, Any]) -> str:
+    return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
+
+
+def has_role(payload: Dict[str, Any], *roles: str) -> bool:
+    user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
+    return any(r in user_roles for r in roles)
+
+
 def require_role(payload: Dict[str, Any], *required_roles: str) -> None:
     user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
     if not any(r in user_roles for r in required_roles):
@@ -192,6 +213,27 @@ async def require_admin_access(
 ) -> Dict[str, Any]:
     require_role(payload, ROLE_ADMIN)
     return payload
+
+
+async def require_maintenance_access(
+    payload: Dict[str, Any] = Depends(get_current_token_payload),
+) -> Dict[str, Any]:
+    token_client_id = _token_client_id(payload)
+    if token_client_id == SERVICE_CLIENT_ID and has_role(payload, ROLE_INTERNAL_SERVICE):
+        return payload
+
+    user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden",
+            "message": (
+                f"Required service client '{SERVICE_CLIENT_ID}' with role "
+                f"'{ROLE_INTERNAL_SERVICE}'. Token client: '{token_client_id}'. "
+                f"Token roles: {user_roles}"
+            ),
+        },
+    )
 
 # ---------------------------------------------------------------------------
 # SSRF Protection helpers
@@ -333,11 +375,11 @@ async def health_check():
 async def run_maintenance(
     body: MaintenanceRequest,
     request: Request,
-    _payload: Dict[str, Any] = Depends(require_admin_access),
+    _payload: Dict[str, Any] = Depends(require_maintenance_access),
 ):
     """
     Execute a maintenance action.
-    Protected: requires a valid Bearer JWT with role 'admin'.
+    Protected: requires a service-account Bearer JWT with role 'internal-service'.
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
     log_event("INFO", "api_request", "POST", "/api/v1/admin/maintenance",

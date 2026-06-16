@@ -37,8 +37,8 @@ assert_status() {
 
 if [ -z "${ACCESS_TOKEN}" ]; then
   echo "ERROR: ACCESS_TOKEN is required."
-  echo "  bash demo/auth/get-user-token.sh admin01"
-  echo "  ACCESS_TOKEN=\$(cat /tmp/user-token.txt) bash tests/attack/ssrf-attack.sh"
+  echo "  Obtain an MFA-protected human admin token outside this script."
+  echo "  ACCESS_TOKEN=<admin-token> bash tests/attack/ssrf-attack.sh"
   exit 1
 fi
 
