@@ -145,8 +145,12 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user"],
-      "requiredActions": []
+      "realmRoles": [
+        "user"
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
     },
     {
       "username": "bob",
@@ -162,8 +166,12 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user"],
-      "requiredActions": []
+      "realmRoles": [
+        "user"
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
     },
     {
       "username": "admin01",
@@ -179,8 +187,13 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "admin"],
-      "requiredActions": []
+      "realmRoles": [
+        "user",
+        "admin"
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
     }
   ],
   "scopeMappings": [],

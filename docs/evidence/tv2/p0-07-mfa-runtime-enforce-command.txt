@@ -1,0 +1,3 @@
+mfa_required_action=CONFIGURE_TOTP username=alice user_id=e52dbd1e-f5e5-4ce3-b258-05eb96d4b54e status=ENFORCED
+mfa_required_action=CONFIGURE_TOTP username=bob user_id=03bfd5cf-f101-47d7-853a-65cc291ddc05 status=ENFORCED
+mfa_required_action=CONFIGURE_TOTP username=admin01 user_id=562f744a-001f-4e19-9ee7-40d22a04893a status=ENFORCED

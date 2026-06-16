@@ -38,11 +38,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
-  /api/v1/users/profile:
+  /api/v1/users/me:
     get:
       tags:
         - Users
-      operationId: getUserProfile
+      operationId: getCurrentUserProfile
       summary: Get current authenticated user profile
       security:
         - bearerAuth: []
@@ -55,7 +55,8 @@ paths:
                 $ref: '#/components/schemas/UserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/v1/orders/health:
     get:
       tags:
@@ -70,26 +71,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
-  /api/v1/orders/{orderId}:
+  /api/v1/orders/{order_id}/vulnerable:
     get:
       tags:
         - Orders
-      operationId: getOrderById
-      summary: Get order detail by order ID
-      description: This endpoint is used to demonstrate BOLA in the vulnerable version and ownership enforcement in the fixed version.
+      operationId: getOrderByIdVulnerable
+      summary: Get order detail through intentionally vulnerable BOLA endpoint
+      description: This endpoint intentionally omits ownership enforcement to demonstrate Broken Object Level Authorization in a controlled lab scenario. It must not be treated as the protected production endpoint.
       security:
         - bearerAuth: []
       parameters:
-        - name: orderId
+        - name: order_id
           in: path
           required: true
           description: Order identifier
           schema:
             type: string
-          example: "order-001"
+          example: "ord-bob-2001"
       responses:
         '200':
-          description: Order detail is returned
+          description: Order detail is returned for BOLA demonstration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/orders/{order_id}/fixed:
+    get:
+      tags:
+        - Orders
+      operationId: getOrderByIdFixed
+      summary: Get order detail through ownership-protected endpoint
+      description: This endpoint enforces server-side ownership or admin authorization and is the mitigation endpoint for the BOLA scenario.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          description: Order identifier
+          schema:
+            type: string
+          example: "ord-alice-1001"
+      responses:
+        '200':
+          description: Order detail is returned when the caller is authorized
           content:
             application/json:
               schema:
@@ -100,7 +130,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
   /api/v1/billing/health:
     get:
       tags:

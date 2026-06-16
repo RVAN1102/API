@@ -1,0 +1,25 @@
+===== MFA status grep =====
+idp/README.md:104:## MFA / OTP Requirement
+idp/README.md:106:OTP is **not enforced by default** in the dev realm to simplify demo automation.
+idp/README.md:107:In a production deployment, the `CONFIGURE_TOTP` required action should be added
+idp/README.md:108:to users who need MFA.
+idp/README.md:110:To enable OTP for a user:
+idp/README.md:111:1. Open Keycloak Admin UI → Users → alice → Required Actions → Add: `Configure OTP`.
+idp/README.md:112:2. The user will be prompted to scan a TOTP QR code on next login.
+idp/realm-export/topic10-realm.json:31:      "alias": "CONFIGURE_TOTP",
+idp/realm-export/topic10-realm.json:32:      "name": "Configure OTP",
+idp/realm-export/topic10-realm.json:33:      "providerId": "CONFIGURE_TOTP",
+idp/pkce-flow.md:26:     |  (User logs in + optional MFA)                      |
+idp/pkce-flow.md:109:## MFA / OTP
+idp/pkce-flow.md:111:When MFA is enabled for a user, step 2 in the flow adds an OTP challenge screen
+idp/pkce-flow.md:114:To configure: Keycloak Admin UI → Users → alice → Required Actions → Configure OTP.
+docs/chapter4/tv2-idp-user-order-vault-implementation.md:10:- **MFA:** OTP is configured as an optional required action.
+docs/evidence/tv2/p0-07-mfa-status-grep.txt:1:===== MFA status grep =====
+docs/evidence/qa/secret-reference-audit.txt:376:./docs/TV2_Identity_Core_Application_WorkPlan.md:371:Thiết kế cấu hình Keycloak để cả nhóm thống nhất realm, role, client, user, token flow, JWT claims và MFA.
+docs/evidence/qa/secret-reference-audit.txt:377:./docs/TV2_Identity_Core_Application_WorkPlan.md:381:- Ghi rõ MFA/OTP là bắt buộc cho luồng đăng nhập user, không chỉ username/password.
+docs/TV2_Identity_Core_Application_WorkPlan.md:371:Thiết kế cấu hình Keycloak để cả nhóm thống nhất realm, role, client, user, token flow, JWT claims và MFA.
+docs/TV2_Identity_Core_Application_WorkPlan.md:381:- Ghi rõ MFA/OTP là bắt buộc cho luồng đăng nhập user, không chỉ username/password.
+docs/TV2_Identity_Core_Application_WorkPlan.md:393:MFA/OTP requirement
+docs/TV2_Identity_Core_Application_WorkPlan.md:446:- Ghi rõ MFA/OTP xảy ra ở bước đăng nhập người dùng.
+docs/TV2_Identity_Core_Application_WorkPlan.md:1062:MFA/OTP
+docs/TV2_Identity_Core_Application_WorkPlan.md:1318:- Có MFA/OTP requirement cho user login.
