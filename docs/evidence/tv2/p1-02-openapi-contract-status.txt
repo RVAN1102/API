@@ -1,0 +1,14 @@
+===== TV2 P1.2 OpenAPI contract check after patch =====
+Tue Jun 16 09:12:48 AM +07 2026
+
+OpenAPI file: services/openapi.yaml
+
+27:  /api/v1/users/health:
+41:  /api/v1/users/me:
+60:  /api/v1/orders/health:
+74:  /api/v1/orders/{order_id}/vulnerable:
+103:  /api/v1/orders/{order_id}/fixed:
+133:  /api/v1/billing/health:
+147:  /api/v1/billing/checkout:
+173:  /api/v1/admin/health:
+187:  /api/v1/admin/maintenance:

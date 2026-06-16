@@ -1,0 +1,63 @@
+===== users/me with Alice token =====
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 172
+Connection: keep-alive
+RateLimit-Reset: 37
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 9
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 9
+date: Tue, 16 Jun 2026 01:27:23 GMT
+server: uvicorn
+x-correlation-id: ec0f6d51-dccf-4107-b456-183850ee7002
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 107
+X-Kong-Proxy-Latency: 1
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 8c56fb0ff75e9b3f2af0a8055c6f870a
+
+{"user_id":"e52dbd1e-f5e5-4ce3-b258-05eb96d4b54e","username":"alice","email":"alice@example.local","roles":["user"],"correlation_id":"ec0f6d51-dccf-4107-b456-183850ee7002"}
+===== users/me without token =====
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 30
+Connection: keep-alive
+RateLimit-Reset: 37
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 8
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 8
+date: Tue, 16 Jun 2026 01:27:23 GMT
+server: uvicorn
+x-correlation-id: 1a0bb8e2-c311-4b7b-ab2a-1901f7e35a02
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 2
+X-Kong-Proxy-Latency: 0
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: 6653c450a023ba7f0d7b3540a7e4964b
+
+{"detail":"Not authenticated"}
+===== users/me with fake token =====
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 78
+Connection: keep-alive
+RateLimit-Reset: 37
+RateLimit-Limit: 10
+X-RateLimit-Remaining-Minute: 7
+X-RateLimit-Limit-Minute: 10
+RateLimit-Remaining: 7
+date: Tue, 16 Jun 2026 01:27:23 GMT
+server: uvicorn
+x-correlation-id: d5b1b17e-64b5-4cb3-a679-390f6222aee4
+vary: Origin
+Access-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute
+X-Kong-Upstream-Latency: 1
+X-Kong-Proxy-Latency: 2
+Via: 1.1 kong/3.9.2
+X-Kong-Request-Id: bfa64f4684db0b623287414345ede60a
+
+{"detail":{"error":"invalid_token","message":"Error decoding token headers."}}

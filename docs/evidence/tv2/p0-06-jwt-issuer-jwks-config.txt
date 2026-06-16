@@ -1,0 +1,33 @@
+===== JWT issuer/JWKS config grep =====
+
+===== user auth =====
+25:KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
+27:EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+28:JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+49:            response = await client.get(JWKS_URL)
+52:            logger.info("JWKS fetched from %s", JWKS_URL)
+55:        logger.error("Failed to fetch JWKS from %s: %s", JWKS_URL, exc)
+116:    if payload.get("iss") != EXPECTED_ISSUER:
+
+===== order auth =====
+19:KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
+21:EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+22:JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+37:            response = await client.get(JWKS_URL)
+40:            logger.info("JWKS fetched from %s", JWKS_URL)
+43:        logger.error("Failed to fetch JWKS from %s: %s", JWKS_URL, exc)
+88:    if payload.get("iss") != EXPECTED_ISSUER:
+
+===== admin auth =====
+
+===== billing auth =====
+
+===== compose env =====
+46:      KEYCLOAK_URL: http://keycloak:8080
+48:      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+66:      KEYCLOAK_URL: http://keycloak:8080
+68:      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+89:      KEYCLOAK_URL: "http://keycloak:8080"
+91:      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+110:      KEYCLOAK_URL: "http://keycloak:8080"
+112:      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
