@@ -18,6 +18,7 @@ REGRESSION_FAILED=0
 run_suite() {
   local name="$1"
   local script="$2"
+  local exit_code=0
 
   echo ""
   echo "┌──────────────────────────────────────────────┐"
@@ -25,15 +26,28 @@ run_suite() {
   echo "└──────────────────────────────────────────────┘"
   echo ""
 
-  if bash "${PROJECT_ROOT}/${script}"; then
+  bash "${PROJECT_ROOT}/${script}" || exit_code=$?
+
+  if [ "${exit_code}" -eq 0 ]; then
     REGRESSION_PASSED=$((REGRESSION_PASSED + 1))
     echo ""
     echo "  ✓ ${name} PASSED"
   else
     REGRESSION_FAILED=$((REGRESSION_FAILED + 1))
     echo ""
-    echo "  ✗ ${name} FAILED"
+    echo "  ✗ ${name} FAILED (exit ${exit_code})"
   fi
+}
+
+reset_kong_after_edge() {
+  echo ""
+  echo "[INFO] Resetting Kong after edge rate-limit test"
+  if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
+    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+  else
+    echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
+  fi
+  sleep 20
 }
 
 echo "=============================================="
@@ -44,6 +58,7 @@ echo "=============================================="
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
 run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
 run_suite "Edge Hardening" "tests/security/edge-hardening-tests.sh"
+reset_kong_after_edge
 run_suite "Webhook Security" "tests/security/webhook-tests.sh"
 run_suite "Fuzz/Negative" "tests/security/fuzz-negative-tests.sh"
 

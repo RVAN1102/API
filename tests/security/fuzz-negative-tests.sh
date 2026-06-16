@@ -37,22 +37,43 @@ fail() {
   echo "[FAIL] $1"
 }
 
+finish() {
+  echo ""
+  echo "=============================================="
+  echo "  FUZZ/NEGATIVE RESULT: ${PASSED}/${TOTAL} passed, ${FAILED} failed"
+  echo "=============================================="
+
+  if [ "$FAILED" -gt 0 ]; then
+    echo ""
+    echo "[WARNING] Fuzz/negative tests have failures."
+    exit 1
+  fi
+}
+
 echo "=============================================="
 echo "  FUZZ / NEGATIVE INPUT TESTS"
 echo "  $(date)"
 echo "=============================================="
 echo ""
 
-# Get a valid token for tests that need auth
-bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" alice > /tmp/tv3-fuzz-token.log 2>&1
-ALICE_TOKEN="$(cat /tmp/user-token.txt)"
+# Get a valid automation token for tests that need normal user auth
+echo "===== Prepare automation token ====="
+if bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-alice > /tmp/tv3-fuzz-token.log 2>&1; then
+  CI_ALICE_TOKEN="$(cat /tmp/user-token.txt)"
+  pass "ci-alice automation token obtained"
+else
+  fail "ci-alice automation token failed (see /tmp/tv3-fuzz-token.log)"
+  finish
+fi
+
+echo ""
 
 # ── Billing: empty body ──────────────────────────
 echo "===== Billing: empty body ====="
 
 code="$(curl -s -o /dev/null -w "%{http_code}" -X POST \
   "${BASE_URL}/api/v1/billing/checkout" \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
+  -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '' 2>/dev/null || echo "000")"
 
@@ -72,7 +93,7 @@ echo "===== Billing: wrong data type ====="
 
 code="$(curl -s -o /dev/null -w "%{http_code}" -X POST \
   "${BASE_URL}/api/v1/billing/checkout" \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
+  -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"order_id":"ord-alice-1001","amount":"not-a-number","currency":"VND"}' \
   2>/dev/null || echo "000")"
@@ -81,10 +102,11 @@ case "$code" in
   400|422)
     pass "billing wrong data type rejected -> $code"
     ;;
+  2*)
+    fail "billing wrong data type must not return 2xx got $code"
+    ;;
   *)
-    # Some APIs may coerce or accept strings – note as limitation
-    echo "[INFO] billing wrong data type returned $code (may be acceptable depending on API design)"
-    pass "billing wrong data type handled -> $code"
+    fail "billing wrong data type expected 400/422 got $code"
     ;;
 esac
 
@@ -95,7 +117,7 @@ echo "===== Billing: missing required fields ====="
 
 code="$(curl -s -o /dev/null -w "%{http_code}" -X POST \
   "${BASE_URL}/api/v1/billing/checkout" \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
+  -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{}' 2>/dev/null || echo "000")"
 
@@ -155,7 +177,7 @@ echo "===== Invalid JSON body ====="
 
 code="$(curl -s -o /dev/null -w "%{http_code}" -X POST \
   "${BASE_URL}/api/v1/billing/checkout" \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
+  -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d 'this-is-not-json{{{' 2>/dev/null || echo "000")"
 
@@ -190,13 +212,4 @@ esac
 
 echo ""
 
-# ── Summary ───────────────────────────────────────
-echo "=============================================="
-echo "  FUZZ/NEGATIVE RESULT: ${PASSED}/${TOTAL} passed, ${FAILED} failed"
-echo "=============================================="
-
-if [ "$FAILED" -gt 0 ]; then
-  echo ""
-  echo "[WARNING] Fuzz/negative tests have failures."
-  exit 1
-fi
+finish
