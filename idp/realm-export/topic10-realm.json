@@ -111,6 +111,53 @@
         "http://localhost:5173",
         "https://app.localhost"
       ],
+      "protocolMappers": [
+        {
+          "name": "automation-owner-preferred-username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "automation_owner",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "automation-owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "automation_owner",
+            "claim.name": "automation_owner",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "automation-fixture",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "automation_fixture",
+            "claim.name": "automation_fixture",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
@@ -145,8 +192,12 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user"],
-      "requiredActions": []
+      "realmRoles": [
+        "user"
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
     },
     {
       "username": "bob",
@@ -162,8 +213,12 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user"],
-      "requiredActions": []
+      "realmRoles": [
+        "user"
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
     },
     {
       "username": "admin01",
@@ -179,7 +234,93 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "admin"],
+      "realmRoles": [
+        "user",
+        "admin"
+      ],
+      "requiredActions": [
+        "CONFIGURE_TOTP"
+      ]
+    },
+    {
+      "username": "ci-alice",
+      "email": "ci-alice@example.local",
+      "firstName": "CI",
+      "lastName": "Alice",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "automation_owner": [
+          "alice"
+        ],
+        "automation_fixture": [
+          "true"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ci-alice-password-123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "ci-bob",
+      "email": "ci-bob@example.local",
+      "firstName": "CI",
+      "lastName": "Bob",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "automation_owner": [
+          "bob"
+        ],
+        "automation_fixture": [
+          "true"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ci-bob-password-123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "ci-admin",
+      "email": "ci-admin@example.local",
+      "firstName": "CI",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "automation_owner": [
+          "admin01"
+        ],
+        "automation_fixture": [
+          "true"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ci-admin-password-123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ],
       "requiredActions": []
     }
   ],

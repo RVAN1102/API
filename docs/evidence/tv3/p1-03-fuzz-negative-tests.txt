@@ -1,0 +1,29 @@
+==============================================
+  FUZZ / NEGATIVE INPUT TESTS
+  Tue Jun 16 03:32:35 PM +07 2026
+==============================================
+
+===== Billing: empty body =====
+[PASS] billing empty body rejected -> 422
+
+===== Billing: wrong data type =====
+[PASS] billing wrong data type rejected -> 422
+
+===== Billing: missing required fields =====
+[PASS] billing missing fields rejected -> 422
+
+===== SQLi in query parameter =====
+[PASS] SQLi in query blocked by WAF -> 403
+
+===== XSS in query parameter =====
+[PASS] XSS in query blocked by WAF -> 403
+
+===== Invalid JSON body =====
+[PASS] invalid JSON body rejected -> 422
+
+===== Webhook: missing required headers =====
+[PASS] webhook missing headers rejected -> 401
+
+==============================================
+  FUZZ/NEGATIVE RESULT: 7/7 passed, 0 failed
+==============================================

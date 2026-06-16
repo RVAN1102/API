@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 
 from auth import extract_identity, get_current_token_payload
-from authz import check_order_ownership, require_user_or_admin
+from authz import check_order_ownership, get_effective_subject, require_user_or_admin
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -243,11 +243,10 @@ async def get_order_fixed(
             detail={"error": "not_found", "message": f"Order {order_id} not found"},
         )
 
-    identity = extract_identity(payload)
-    caller = identity["preferred_username"] or identity["sub"]
+    caller = get_effective_subject(payload, allow_automation_owner=True)
 
     # Ownership check – raises 403 if caller is not owner and not admin
-    check_order_ownership(payload, order["owner_id"])
+    check_order_ownership(payload, order["owner_id"], allow_automation_owner=True)
 
     log_event(
         level="INFO",

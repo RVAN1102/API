@@ -73,28 +73,36 @@ echo ""
 
 # ── Keycloak discovery ────────────────────────────
 echo "===== Smoke: Keycloak OIDC discovery ====="
+DISCOVERY_URL="${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration"
 
-assert_status "keycloak discovery" 200 \
-  "$(curl -s -o /dev/null -w "%{http_code}" \
-    "${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration")"
+echo "Waiting for Keycloak discovery endpoint..."
+DISCOVERY_CODE="000"
+for i in {1..40}; do
+  DISCOVERY_CODE="$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${DISCOVERY_URL}" || true)"
+  if [[ "${DISCOVERY_CODE}" == "200" ]]; then
+    break
+  fi
+  sleep 3
+done
+
+assert_status "keycloak discovery" 200 "${DISCOVERY_CODE}"
 
 echo ""
+# ── ci-alice automation token + /users/me ─────────
+echo "===== Smoke: ci-alice automation token and /users/me ====="
 
-# ── Alice token + /users/me ───────────────────────
-echo "===== Smoke: Alice token and /users/me ====="
+# Get ci-alice automation token
+if bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-alice > /tmp/tv3-ci-alice-smoke.log 2>&1; then
+  CI_ALICE_TOKEN="$(cat /tmp/user-token.txt)"
+  pass "ci-alice automation token obtained"
 
-# Get Alice token
-if bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" alice > /tmp/tv3-alice-smoke.log 2>&1; then
-  ALICE_TOKEN="$(cat /tmp/user-token.txt)"
-  pass "alice token obtained"
-
-  assert_status "users me alice" 200 \
+  assert_status "users me ci-alice automation" 200 \
     "$(curl -s -o /dev/null -w "%{http_code}" \
       "${BASE_URL}/api/v1/users/me" \
-      -H "Authorization: Bearer ${ALICE_TOKEN}")"
+      -H "Authorization: Bearer ${CI_ALICE_TOKEN}")"
 else
-  fail "alice token failed (see /tmp/tv3-alice-smoke.log)"
-  fail "users me alice (skipped – no token)"
+  fail "ci-alice automation token failed (see /tmp/tv3-ci-alice-smoke.log)"
+  fail "users me ci-alice automation (skipped - no token)"
 fi
 
 echo ""
