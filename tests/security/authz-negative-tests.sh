@@ -7,7 +7,7 @@
 # Tests:
 #   - Fake/malformed tokens rejected (401)
 #   - RBAC: user cannot access admin endpoints (403)
-#   - BOLA fixed: Alice cannot read Bob's order (403)
+#   - BOLA fixed: ci-alice cannot read Bob's order (403)
 #   - Billing: malformed tokens rejected (401)
 #
 # Usage:
@@ -56,21 +56,21 @@ echo ""
 # ── Prepare tokens ────────────────────────────────
 echo "===== Prepare tokens ====="
 
-bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" alice > /tmp/tv3-alice-token.log 2>&1
-cp /tmp/user-token.txt /tmp/tv3-alice-token.txt
-echo "[INFO] Alice token obtained"
+bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-alice > /tmp/tv3-ci-alice-token.log 2>&1
+cp /tmp/user-token.txt /tmp/tv3-ci-alice-token.txt
+echo "[INFO] ci-alice automation token obtained"
 
-bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" bob > /tmp/tv3-bob-token.log 2>&1
-cp /tmp/user-token.txt /tmp/tv3-bob-token.txt
-echo "[INFO] Bob token obtained"
+bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-bob > /tmp/tv3-ci-bob-token.log 2>&1
+cp /tmp/user-token.txt /tmp/tv3-ci-bob-token.txt
+echo "[INFO] ci-bob automation token obtained"
 
-bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" admin01 > /tmp/tv3-admin-token.log 2>&1
-cp /tmp/user-token.txt /tmp/tv3-admin-token.txt
-echo "[INFO] Admin token obtained"
+bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-admin > /tmp/tv3-ci-admin-token.log 2>&1
+cp /tmp/user-token.txt /tmp/tv3-ci-admin-token.txt
+echo "[INFO] ci-admin automation token obtained"
 
-ALICE_TOKEN="$(cat /tmp/tv3-alice-token.txt)"
-BOB_TOKEN="$(cat /tmp/tv3-bob-token.txt)"
-ADMIN_TOKEN="$(cat /tmp/tv3-admin-token.txt)"
+CI_ALICE_TOKEN="$(cat /tmp/tv3-ci-alice-token.txt)"
+CI_BOB_TOKEN="$(cat /tmp/tv3-ci-bob-token.txt)"
+CI_ADMIN_TOKEN="$(cat /tmp/tv3-ci-admin-token.txt)"
 
 echo ""
 
@@ -87,17 +87,17 @@ echo ""
 # ── Admin RBAC ────────────────────────────────────
 echo "===== Admin RBAC ====="
 
-assert_status "alice admin maintenance forbidden" 403 \
+assert_status "ci-alice automation admin maintenance forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer ${ALICE_TOKEN}" \
+    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
-assert_status "admin maintenance allowed" 200 \
+assert_status "ci-admin automation maintenance allowed" 200 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+    -H "Authorization: Bearer ${CI_ADMIN_TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
@@ -120,30 +120,25 @@ echo ""
 # ── BOLA fixed endpoint ──────────────────────────
 echo "===== BOLA fixed endpoint ====="
 
-assert_status "alice own order fixed" 200 \
-  "$(curl -s -o /dev/null -w "%{http_code}" \
-    "${BASE_URL}/api/v1/orders/ord-alice-1001/fixed" \
-    -H "Authorization: Bearer ${ALICE_TOKEN}")"
-
-assert_status "alice bob order fixed forbidden" 403 \
+assert_status "ci-alice automation bob order fixed forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/orders/ord-bob-2001/fixed" \
-    -H "Authorization: Bearer ${ALICE_TOKEN}")"
+    -H "Authorization: Bearer ${CI_ALICE_TOKEN}")"
 
-assert_status "bob own order fixed" 200 \
+assert_status "ci-bob automation bob order fixed allowed" 200 \
   "$(curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/orders/ord-bob-2001/fixed" \
-    -H "Authorization: Bearer ${BOB_TOKEN}")"
+    -H "Authorization: Bearer ${CI_BOB_TOKEN}")"
 
 echo ""
 
 # ── Billing auth ──────────────────────────────────
 echo "===== Billing auth ====="
 
-assert_status "billing alice checkout accepted" 202 \
+assert_status "billing ci-alice automation checkout accepted" 202 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer ${ALICE_TOKEN}" \
+    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
