@@ -1,0 +1,25 @@
+===== TV1 P0.1 Kong route smoke =====
+Tue Jun 16 05:32:07 PM +07 2026
+feat/tv1-edge-webhook-closeout
+355d7f7 Merge remote-tracking branch 'origin/main' into feat/tv1-edge-webhook-closeout
+834852b merge tv2 authz core closeout into main
+b196d9e fix: stabilize post-mfa regression automation
+af31643 merge tv2 authz core closeout into main
+6b3aa24 docs: capture tv2 pre-merge regression evidence
+
+===== Health via Kong =====
+users/health -> 200
+[0;32m[PASS][0m users/health 200
+orders/health -> 200
+[0;32m[PASS][0m orders/health 200
+billing/health -> 200
+[0;32m[PASS][0m billing/health 200
+admin/health -> 200
+[0;32m[PASS][0m admin/health 200
+
+===== Kong Admin API =====
+"name":"billing-service"
+"name":"order-service"
+"name":"admin-service"
+"name":"user-service"
+"name":"webhook-demo"

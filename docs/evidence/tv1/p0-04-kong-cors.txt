@@ -1,0 +1,12 @@
+===== TV1 P0.4 Allowed origin =====
+HTTP/1.1 200 OK
+vary: Origin
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS
+[0;32m[PASS][0m Allowed origin http://localhost:3000 is permitted
+
+===== TV1 P0.4 Evil origin =====
+HTTP/1.1 200 OK
+vary: Origin
+Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS
+[0;32m[PASS][0m Evil origin https://evil.example is NOT allowed

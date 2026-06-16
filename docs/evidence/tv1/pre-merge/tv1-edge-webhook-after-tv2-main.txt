@@ -1,0 +1,168 @@
+[0;36m[TV1][0m ===== P0.1 Kong route smoke test =====
+===== TV1 P0.1 Kong route smoke =====
+Tue Jun 16 05:32:07 PM +07 2026
+feat/tv1-edge-webhook-closeout
+355d7f7 Merge remote-tracking branch 'origin/main' into feat/tv1-edge-webhook-closeout
+834852b merge tv2 authz core closeout into main
+b196d9e fix: stabilize post-mfa regression automation
+af31643 merge tv2 authz core closeout into main
+6b3aa24 docs: capture tv2 pre-merge regression evidence
+
+===== Health via Kong =====
+users/health -> 200
+[0;32m[PASS][0m users/health 200
+orders/health -> 200
+[0;32m[PASS][0m orders/health 200
+billing/health -> 200
+[0;32m[PASS][0m billing/health 200
+admin/health -> 200
+[0;32m[PASS][0m admin/health 200
+
+===== Kong Admin API =====
+"name":"billing-service"
+"name":"order-service"
+"name":"admin-service"
+"name":"user-service"
+"name":"webhook-demo"
+
+[0;36m[TV1][0m ===== P0.2 TLS 1.3 only =====
+===== TV1 P0.2 TLS test =====
+--- TLS 1.3 should succeed ---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Verify return code: 18 (self-signed certificate)
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Verify return code: 18 (self-signed certificate)
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Verify return code: 18 (self-signed certificate)
+[0;32m[PASS][0m TLS 1.3 handshake succeeded
+
+--- TLS 1.2 should fail ---
+40D7A4A28B750000:error:0A00042E:SSL routines:ssl3_read_bytes:tlsv1 alert protocol version:../ssl/record/rec_layer_s3.c:1599:SSL alert number 70
+New, (NONE), Cipher is (NONE)
+    Protocol  : TLSv1.2
+    Cipher    : 0000
+[0;32m[PASS][0m TLS 1.2 correctly rejected
+
+[0;36m[TV1][0m ===== P0.3 HSTS =====
+===== TV1 P0.3 HSTS header =====
+HTTP/1.1 200 OK
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+[0;32m[PASS][0m HSTS header present
+
+[0;36m[TV1][0m ===== P0.4 CORS strict =====
+===== TV1 P0.4 Allowed origin =====
+HTTP/1.1 200 OK
+vary: Origin
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS
+[0;32m[PASS][0m Allowed origin http://localhost:3000 is permitted
+
+===== TV1 P0.4 Evil origin =====
+HTTP/1.1 200 OK
+vary: Origin
+Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS
+[0;32m[PASS][0m Evil origin https://evil.example is NOT allowed
+
+[0;36m[TV1][0m ===== P0.5 Rate limiting =====
+===== TV1 P0.5 Rate limit on protected route =====
+request=1 status=401
+request=2 status=401
+request=3 status=401
+request=4 status=401
+request=5 status=401
+request=6 status=401
+request=7 status=401
+request=8 status=401
+request=9 status=401
+request=10 status=401
+request=11 status=429
+request=12 status=429
+request=13 status=429
+request=14 status=429
+request=15 status=429
+[0;32m[PASS][0m Rate limit enforced – 429 received when threshold exceeded
+
+[0;36m[TV1][0m ===== P0.6 Request size limit =====
+===== TV1 P0.6 Small payload reaches upstream =====
+Small payload status: 401
+[0;32m[PASS][0m Small payload reached upstream (auth error 401 – not blocked by size)
+
+===== TV1 P0.6 Large payload blocked by gateway =====
+Large payload (2MB+) status: 417
+[0;32m[PASS][0m Large payload blocked by Kong (417)
+
+[0;36m[TV1][0m ===== P0.7 Webhook HMAC =====
+===== TV1 P0.7 Valid webhook =====
+Timestamp : 1781605927
+Nonce     : valid-e79af796de33ffbbf1707e130cf7c90f
+Signature : sha256=4a2280af018e070ba937fbf9a26e8eb7f0650815095cfe6031676bd78348e685
+Valid webhook status: 200
+[0;32m[PASS][0m Valid webhook accepted (HTTP 200)
+
+===== TV1 P0.7 Invalid webhook (bad signature) =====
+Invalid signature status: 401
+[0;32m[PASS][0m Invalid signature correctly rejected (401)
+
+===== TV1 P0.7 Replay webhook (same nonce twice) =====
+Replay send #1 status: 200
+Replay send #2 status: 403
+[0;32m[PASS][0m Replay attack blocked: send#1=200 send#2=403 (replayed_nonce)
+
+[0;36m[TV1][0m ===== P0.8 Webhook timestamp freshness =====
+===== TV1 P0.8 Timestamp freshness =====
+--- Code verification: WEBHOOK_MAX_AGE_SECONDS ---
+38:WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
+341:    if age > WEBHOOK_MAX_AGE_SECONDS:
+345:                  {"security_event": True, "decision": "rejected", "reason": "timestamp_expired", "age_seconds": age})
+348:            detail={"error": "timestamp_expired", "message": f"Webhook timestamp is {age}s old (max {WEBHOOK_MAX_AGE_SECONDS}s)"},
+
+--- Test: fresh timestamp -> should pass ---
+Fresh timestamp status: 200
+[0;32m[PASS][0m Fresh timestamp accepted (200)
+
+--- Test: old timestamp (400s ago) -> should fail with 403 ---
+Old timestamp (400s ago) status: 403
+[0;32m[PASS][0m Old timestamp correctly rejected with 403 (timestamp_expired)
+
+[0;36m[TV1][0m ===== P0.9 Webhook mTLS status =====
+===== TV1 P0.9 mTLS check =====
+No mTLS configuration found.
+[1;33m[LIMITATION][0m mTLS not implemented – documented in p0-09-webhook-mtls-status.md
+
+
+========================================
+  TV1 Test Summary
+========================================
+PASS:        17
+FAIL:        0
+0
+LIMITATION:  1
+
+PASS items:
+  ✓ users/health 200
+  ✓ orders/health 200
+  ✓ billing/health 200
+  ✓ admin/health 200
+  ✓ TLS 1.3 handshake succeeded
+  ✓ TLS 1.2 correctly rejected
+  ✓ HSTS header present
+  ✓ Allowed origin http://localhost:3000 is permitted
+  ✓ Evil origin https://evil.example is NOT allowed
+  ✓ Rate limit enforced – 429 received when threshold exceeded
+  ✓ Small payload reached upstream (auth error 401 – not blocked by size)
+  ✓ Large payload blocked by Kong (417)
+  ✓ Valid webhook accepted (HTTP 200)
+  ✓ Invalid signature correctly rejected (401)
+  ✓ Replay attack blocked: send#1=200 send#2=403 (replayed_nonce)
+  ✓ Fresh timestamp accepted (200)
+  ✓ Old timestamp correctly rejected with 403 (timestamp_expired)
+
+FAIL items:
+
+LIMITATION items:
+  ⚠ mTLS not implemented – documented in p0-09-webhook-mtls-status.md
+
+Evidence saved to: /home/rvan1102/API/docs/evidence/tv1/
+========================================
