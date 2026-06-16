@@ -192,7 +192,7 @@ plugins:
           end
 
           local path = kong.request.get_path()
-          if string.sub(path, 1, 16) == "/api/v1/webhooks" then
+          if string.sub(path, 1, 16) == "/api/v1/webhooks" and kong.request.get_method() ~= "OPTIONS" then
             local required = {
               "X-Webhook-Timestamp",
               "X-Webhook-Nonce",
