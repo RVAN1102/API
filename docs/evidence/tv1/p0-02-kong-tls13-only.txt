@@ -11,7 +11,7 @@ Verify return code: 18 (self-signed certificate)
 [0;32m[PASS][0m TLS 1.3 handshake succeeded
 
 --- TLS 1.2 should fail ---
-98270000:error:0A00042E:SSL routines:ssl3_read_bytes:tlsv1 alert protocol version:../openssl-3.2.3/ssl/record/rec_layer_s3.c:909:SSL alert number 70
+40D7A4A28B750000:error:0A00042E:SSL routines:ssl3_read_bytes:tlsv1 alert protocol version:../ssl/record/rec_layer_s3.c:1599:SSL alert number 70
 New, (NONE), Cipher is (NONE)
     Protocol  : TLSv1.2
     Cipher    : 0000

@@ -1,11 +1,11 @@
 ===== TV1 P0.1 Kong route smoke =====
-Tue, Jun 16, 2026  2:56:25 PM
+Tue Jun 16 05:32:07 PM +07 2026
 feat/tv1-edge-webhook-closeout
-a8bda97 docs: capture tv1 edge and webhook final evidence - P0.1 Kong route smoke test - P0.2-P0.3 TLS 1.3 / HSTS - P0.4 CORS strict - P0.5 Rate limiting - P0.6 Request size limit - P0.7 Webhook HMAC valid/invalid/replay - P0.8 Timestamp freshness - P0.9 mTLS limitation documented - P1.1 Technical summary - P1.2 Evidence README - P2.1 Automated test script
-bb5176d test: add tv3 regression, security tests and documentation
-e226d9a merge tv1 gateway edge security dashboard into main
-a33ce9f fix: align frontend rate limit test with protected route
-8f1f897 Merge remote-tracking branch 'origin/main' into feat/tv1-gateway-edge-security
+355d7f7 Merge remote-tracking branch 'origin/main' into feat/tv1-edge-webhook-closeout
+834852b merge tv2 authz core closeout into main
+b196d9e fix: stabilize post-mfa regression automation
+af31643 merge tv2 authz core closeout into main
+6b3aa24 docs: capture tv2 pre-merge regression evidence
 
 ===== Health via Kong =====
 users/health -> 200
