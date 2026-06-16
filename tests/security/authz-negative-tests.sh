@@ -8,6 +8,7 @@
 #   - Fake/malformed tokens rejected (401)
 #   - RBAC: user cannot access admin endpoints (403)
 #   - BOLA fixed: ci-alice cannot read Bob's order (403)
+#   - Billing: checkout ownership enforced (202/403)
 #   - Billing: malformed tokens rejected (401)
 #
 # Usage:
@@ -142,6 +143,20 @@ assert_status "billing ci-alice automation checkout accepted" 202 \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
+assert_status "billing ci-alice automation bob checkout forbidden" 403 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
+
+assert_status "billing ci-bob automation checkout accepted" 202 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer ${CI_BOB_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
+
 assert_status "billing fake token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
@@ -153,6 +168,20 @@ assert_status "billing malformed token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
     -H "Authorization: Bearer abc" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
+
+assert_status "billing malformed compact token rejected" 401 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer eyJ.invalid" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
+
+assert_status "billing extremely malformed token rejected" 401 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "Authorization: Bearer not-a-jwt-@@@" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
