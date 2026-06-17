@@ -12,6 +12,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1/webhook-final"
 WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+WEBHOOK_CA_CRT="${REPO_ROOT}/infra/certs/webhook-ca.crt"
+WEBHOOK_CA_KEY="${REPO_ROOT}/infra/certs/webhook-ca.key"
+WEBHOOK_CERT_DIR=""
 
 # Git Bash / MSYS2: save original MSYS_NO_PATHCONV
 _ORIG_MSYS_NO_PATHCONV="${MSYS_NO_PATHCONV:-}"
@@ -24,7 +27,21 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 RESULT_FILE="$(mktemp)"
-trap 'rm -f "${RESULT_FILE}"' EXIT
+
+cleanup() {
+  rm -f "${RESULT_FILE}"
+  if [ -n "${WEBHOOK_CERT_DIR}" ] && [ -d "${WEBHOOK_CERT_DIR}" ]; then
+    rm -f \
+      "${WEBHOOK_CERT_DIR}/webhook-ca.crt" \
+      "${WEBHOOK_CERT_DIR}/webhook-client.crt" \
+      "${WEBHOOK_CERT_DIR}/webhook-client.csr" \
+      "${WEBHOOK_CERT_DIR}/webhook-client.ext" \
+      "${WEBHOOK_CERT_DIR}/webhook-client.key"
+    rmdir "${WEBHOOK_CERT_DIR}" 2>/dev/null
+  fi
+  return 0
+}
+trap cleanup EXIT
 
 TOTAL=0
 PASSED=0
@@ -33,6 +50,7 @@ FAILED=0
 log()  { echo -e "${CYAN}[WEBHOOK]${NC} $*"; }
 pass() { TOTAL=$((TOTAL+1)); PASSED=$((PASSED+1)); echo -e "${GREEN}[PASS]${NC} $*"; echo "PASS:$*" >> "${RESULT_FILE}"; }
 fail() { TOTAL=$((TOTAL+1)); FAILED=$((FAILED+1)); echo -e "${RED}[FAIL]${NC} $*"; echo "FAIL:$*" >> "${RESULT_FILE}"; }
+die()  { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
 sign_hmac() {
   local secret="$1" ts="$2" nonce="$3" body="$4"
@@ -46,14 +64,93 @@ random_nonce() {
   openssl rand -hex 16 2>/dev/null || echo "nonce-$(date +%s)-$$"
 }
 
+cert_key_match() {
+  local cert_file="$1"
+  local key_file="$2"
+  local cert_hash key_hash
+
+  cert_hash="$(
+    openssl x509 -in "${cert_file}" -pubkey -noout 2>/dev/null \
+      | openssl pkey -pubin -outform DER 2>/dev/null \
+      | openssl dgst -sha256 -binary 2>/dev/null \
+      | openssl base64 -A 2>/dev/null
+  )"
+  key_hash="$(
+    openssl pkey -in "${key_file}" -pubout 2>/dev/null \
+      | openssl pkey -pubin -outform DER 2>/dev/null \
+      | openssl dgst -sha256 -binary 2>/dev/null \
+      | openssl base64 -A 2>/dev/null
+  )"
+
+  [ -n "${cert_hash}" ] && [ "${cert_hash}" = "${key_hash}" ]
+}
+
+cert_has_client_auth() {
+  local cert_file="$1"
+  openssl x509 -in "${cert_file}" -noout -ext extendedKeyUsage 2>/dev/null \
+    | grep -Eq "TLS Web Client Authentication|clientAuth"
+}
+
+prepare_ephemeral_client_cert() {
+  [ -r "${WEBHOOK_CA_CRT}" ] || die "Webhook CA certificate is missing or unreadable: ${WEBHOOK_CA_CRT}"
+  [ -r "${WEBHOOK_CA_KEY}" ] || die "Webhook CA private key is missing or unreadable: ${WEBHOOK_CA_KEY}"
+  cert_key_match "${WEBHOOK_CA_CRT}" "${WEBHOOK_CA_KEY}" \
+    || die "Webhook CA certificate and private key do not match"
+
+  WEBHOOK_CERT_DIR="$(mktemp -d /tmp/webhook-client-cert.XXXXXX)"
+  local client_key="${WEBHOOK_CERT_DIR}/webhook-client.key"
+  local client_csr="${WEBHOOK_CERT_DIR}/webhook-client.csr"
+  local client_crt="${WEBHOOK_CERT_DIR}/webhook-client.crt"
+  local client_ext="${WEBHOOK_CERT_DIR}/webhook-client.ext"
+
+  cp "${WEBHOOK_CA_CRT}" "${WEBHOOK_CERT_DIR}/webhook-ca.crt"
+  chmod 700 "${WEBHOOK_CERT_DIR}"
+
+  openssl genrsa -out "${client_key}" 2048 >/dev/null 2>&1 \
+    || die "Failed to generate temporary webhook client private key"
+  chmod 600 "${client_key}"
+
+  openssl req -new \
+    -key "${client_key}" \
+    -out "${client_csr}" \
+    -subj "/C=VN/O=Topic10-SME-API/OU=TV1-WebhookSender/CN=webhook-sender-ephemeral" >/dev/null 2>&1 \
+    || die "Failed to generate temporary webhook client CSR"
+
+  cat > "${client_ext}" <<'EOF'
+basicConstraints=CA:FALSE
+keyUsage=digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+EOF
+
+  openssl x509 -req \
+    -in "${client_csr}" \
+    -CA "${WEBHOOK_CA_CRT}" \
+    -CAkey "${WEBHOOK_CA_KEY}" \
+    -set_serial "0x$(openssl rand -hex 16)" \
+    -out "${client_crt}" \
+    -days 1 \
+    -sha256 \
+    -extfile "${client_ext}" >/dev/null 2>&1 \
+    || die "Failed to sign temporary webhook client certificate"
+
+  cert_key_match "${client_crt}" "${client_key}" \
+    || die "Temporary webhook client certificate and private key do not match"
+  cert_has_client_auth "${client_crt}" \
+    || die "Temporary webhook client certificate is missing extendedKeyUsage=clientAuth"
+}
+
+prepare_ephemeral_client_cert
+
 # =============================================================================
 # Docker-based webhook client (matches tv1-edge-webhook-tests.sh approach)
 # Runs inside Docker network so it can reach kong:8443 with mTLS
 # =============================================================================
 run_webhook_client() {
   MSYS_NO_PATHCONV=1 docker run --rm --network infra_default \
-    -v "$(pwd)/infra/certs:/certs" \
-    -v "$(pwd)/tests/security:/scripts" \
+    -v "${WEBHOOK_CERT_DIR}:/certs:ro" \
+    -v "${REPO_ROOT}/tests/security:/scripts:ro" \
     python:3.13-slim python /scripts/webhook_client.py "$@"
 }
 
