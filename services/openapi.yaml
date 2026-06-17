@@ -323,7 +323,7 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
 
     Unauthorized:
-      description: Missing, expired, revoked, or invalid JWT
+      description: Missing, expired, or invalid JWT. Token revocation is demonstrated through Keycloak introspection/revocation scripts, not backend online revocation enforcement.
       content:
         application/json:
           schema:

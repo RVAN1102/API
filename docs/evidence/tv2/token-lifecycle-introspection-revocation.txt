@@ -1,0 +1,29 @@
+==============================================
+  TOKEN LIFECYCLE SECURITY TESTS
+  Wed Jun 17 03:23:56 PM +07 2026
+==============================================
+
+===== Obtain service token =====
+[PASS] billing service token obtained
+[PASS] billing token script output is metadata-only
+[PASS] billing token TTL metadata -> 300
+
+===== Introspect valid token =====
+[PASS] valid token introspection completed
+[PASS] valid introspection output is metadata-only
+[PASS] valid token active -> true
+[PASS] valid token client_id -> billing-service-client
+
+===== Introspect invalid token =====
+[PASS] invalid introspection output is metadata-only
+[PASS] invalid token active -> false
+
+===== Revoke token at IdP =====
+[PASS] revocation endpoint completed
+[PASS] revocation output is metadata-only
+[PASS] revocation request sent -> true
+[PASS] revocation HTTP status -> 200
+
+==============================================
+  TOKEN LIFECYCLE RESULT: 13/13 passed, 0 failed
+==============================================
