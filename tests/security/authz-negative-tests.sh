@@ -7,7 +7,7 @@
 # Tests:
 #   - Fake/malformed tokens rejected (401)
 #   - RBAC: user cannot access service-only admin automation (403)
-#   - Service client can access service-only admin automation (200)
+#   - Admin service client can access service-only admin automation (200)
 #   - BOLA fixed: ci-alice cannot read Bob's order (403)
 #   - Billing: checkout ownership enforced (202/403)
 #   - Billing: malformed tokens rejected (401)
@@ -20,6 +20,8 @@ set -euo pipefail
 BASE_URL="${BASE_URL:-http://localhost:8000}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+AUTH_HEADER_NAME="Authorization"
+BEARER_SCHEME="Bearer"
 
 TOTAL=0
 PASSED=0
@@ -35,6 +37,10 @@ fail() {
   TOTAL=$((TOTAL + 1))
   FAILED=$((FAILED + 1))
   echo "[FAIL] $1"
+}
+
+bearer_header() {
+  printf "%s: %s %s" "${AUTH_HEADER_NAME}" "${BEARER_SCHEME}" "$1"
 }
 
 assert_status() {
@@ -66,19 +72,25 @@ bash "${PROJECT_ROOT}/demo/auth/get-user-token.sh" ci-bob > /tmp/tv3-ci-bob-toke
 cp /tmp/user-token.txt /tmp/tv3-ci-bob-token.txt
 echo "[INFO] ci-bob automation token obtained"
 
-if [ -z "${SERVICE_CLIENT_SECRET:-}" ]; then
-  echo "[ERROR] SERVICE_CLIENT_SECRET is required for service-client admin automation checks."
+if [ -z "${BILLING_SERVICE_CLIENT_SECRET:-}" ]; then
+  echo "[ERROR] BILLING_SERVICE_CLIENT_SECRET is required for Billing-to-Order ownership checks."
   echo "[ERROR] Set it from Keycloak/Vault; this test will not print the secret."
   exit 1
 fi
 
-bash "${PROJECT_ROOT}/demo/auth/get-service-token.sh" > /tmp/tv3-service-token.log 2>&1
-cp /tmp/service-token.txt /tmp/tv3-service-token.txt
-echo "[INFO] service client token obtained"
+if [ -z "${ADMIN_SERVICE_CLIENT_SECRET:-}" ]; then
+  echo "[ERROR] ADMIN_SERVICE_CLIENT_SECRET is required for admin automation checks."
+  echo "[ERROR] Set it from Keycloak/Vault; this test will not print the secret."
+  exit 1
+fi
+
+bash "${PROJECT_ROOT}/demo/auth/get-admin-service-token.sh" > /tmp/tv3-admin-service-token.log 2>&1
+cp /tmp/admin-service-token.txt /tmp/tv3-admin-service-token.txt
+echo "[INFO] admin service client token obtained"
 
 CI_ALICE_TOKEN="$(cat /tmp/tv3-ci-alice-token.txt)"
 CI_BOB_TOKEN="$(cat /tmp/tv3-ci-bob-token.txt)"
-SERVICE_TOKEN="$(cat /tmp/tv3-service-token.txt)"
+ADMIN_SERVICE_TOKEN="$(cat /tmp/tv3-admin-service-token.txt)"
 
 echo ""
 
@@ -88,7 +100,7 @@ echo "===== User endpoint negative ====="
 assert_status "users me fake token" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/users/me" \
-    -H "Authorization: Bearer fake.jwt.token")"
+    -H "$(bearer_header "fake.jwt.token")")"
 
 echo ""
 
@@ -98,28 +110,28 @@ echo "===== Admin RBAC ====="
 assert_status "ci-alice automation admin maintenance forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
-assert_status "service client maintenance allowed" 200 \
+assert_status "admin service client maintenance allowed" 200 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer ${SERVICE_TOKEN}" \
+    -H "$(bearer_header "${ADMIN_SERVICE_TOKEN}")" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
 assert_status "admin fake token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer fake.jwt.token" \
+    -H "$(bearer_header "fake.jwt.token")" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
 assert_status "admin malformed token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer abc" \
+    -H "$(bearer_header "abc")" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"tv3-authz-test"}')"
 
@@ -131,12 +143,12 @@ echo "===== BOLA fixed endpoint ====="
 assert_status "ci-alice automation bob order fixed forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/orders/ord-bob-2001/fixed" \
-    -H "Authorization: Bearer ${CI_ALICE_TOKEN}")"
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")")"
 
 assert_status "ci-bob automation bob order fixed allowed" 200 \
   "$(curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/orders/ord-bob-2001/fixed" \
-    -H "Authorization: Bearer ${CI_BOB_TOKEN}")"
+    -H "$(bearer_header "${CI_BOB_TOKEN}")")"
 
 echo ""
 
@@ -146,49 +158,49 @@ echo "===== Billing auth ====="
 assert_status "billing ci-alice automation checkout accepted" 202 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
 assert_status "billing ci-alice automation bob checkout forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer ${CI_ALICE_TOKEN}" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
 
 assert_status "billing ci-bob automation checkout accepted" 202 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer ${CI_BOB_TOKEN}" \
+    -H "$(bearer_header "${CI_BOB_TOKEN}")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
 
 assert_status "billing fake token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer fake.jwt.token" \
+    -H "$(bearer_header "fake.jwt.token")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
 assert_status "billing malformed token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer abc" \
+    -H "$(bearer_header "abc")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
 assert_status "billing malformed compact token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer eyJ.invalid" \
+    -H "$(bearer_header "eyJ.invalid")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
 assert_status "billing extremely malformed token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer not-a-jwt-@@@" \
+    -H "$(bearer_header "not-a-jwt-@@@")" \
     -H "Content-Type: application/json" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 

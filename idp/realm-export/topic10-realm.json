@@ -84,6 +84,20 @@
         "description": "Role for internal service-to-service communication",
         "composite": false,
         "clientRole": false
+      },
+      {
+        "id": "role-order-ownership-read",
+        "name": "order-ownership-read",
+        "description": "Allows Billing service to verify order ownership through the Order internal API",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "id": "role-admin-maintenance",
+        "name": "admin-maintenance",
+        "description": "Allows Admin service maintenance automation through Client Credentials",
+        "composite": false,
+        "clientRole": false
       }
     ]
   },
@@ -163,9 +177,9 @@
       }
     },
     {
-      "clientId": "sme-service-client",
-      "name": "SME Service Client",
-      "description": "Confidential client for service-to-service (Client Credentials flow)",
+      "clientId": "billing-service-client",
+      "name": "Billing Service Client",
+      "description": "Confidential client for Billing-to-Order ownership verification",
       "enabled": true,
       "publicClient": false,
       "standardFlowEnabled": false,
@@ -173,7 +187,23 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": true,
       "protocol": "openid-connect",
-      "secret": "<redacted>",
+      "secret": "${BILLING_SERVICE_CLIENT_SECRET}",
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
+    },
+    {
+      "clientId": "admin-service-client",
+      "name": "Admin Service Client",
+      "description": "Confidential client for Admin maintenance automation",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect",
+      "secret": "${ADMIN_SERVICE_CLIENT_SECRET}",
       "attributes": {
         "access.token.lifespan": "300"
       }
@@ -299,12 +329,22 @@
       "requiredActions": []
     },
     {
-      "username": "service-account-sme-service-client",
+      "username": "service-account-billing-service-client",
       "enabled": true,
       "emailVerified": false,
-      "serviceAccountClientId": "sme-service-client",
+      "serviceAccountClientId": "billing-service-client",
       "realmRoles": [
-        "internal-service"
+        "order-ownership-read"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "service-account-admin-service-client",
+      "enabled": true,
+      "emailVerified": false,
+      "serviceAccountClientId": "admin-service-client",
+      "realmRoles": [
+        "admin-maintenance"
       ],
       "requiredActions": []
     }

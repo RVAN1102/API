@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 # tests/security/client-credentials-tests.sh
 #
-# Regression coverage for backend service-to-service Client Credentials flow.
+# Regression coverage for per-service Client Credentials clients.
 
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-TOKEN_OUTPUT="/tmp/client-credentials-token-output.txt"
-TOKEN_FILE="${SERVICE_TOKEN_FILE:-/tmp/service-token.txt}"
+BILLING_TOKEN_OUTPUT="/tmp/billing-service-token-output.txt"
+ADMIN_TOKEN_OUTPUT="/tmp/admin-service-token-output.txt"
+BILLING_TOKEN_FILE="${BILLING_SERVICE_TOKEN_FILE:-/tmp/billing-service-token.txt}"
+ADMIN_TOKEN_FILE="${ADMIN_SERVICE_TOKEN_FILE:-/tmp/admin-service-token.txt}"
+AUTH_HEADER_NAME="Authorization"
+BEARER_SCHEME="Bearer"
 
 TOTAL=0
 PASSED=0
@@ -25,6 +29,10 @@ fail() {
   TOTAL=$((TOTAL + 1))
   FAILED=$((FAILED + 1))
   echo "[FAIL] $1"
+}
+
+bearer_header() {
+  printf "%s: %s %s" "${AUTH_HEADER_NAME}" "${BEARER_SCHEME}" "$1"
 }
 
 assert_equals() {
@@ -51,6 +59,35 @@ assert_status() {
   fi
 }
 
+metadata_value() {
+  local file="$1"
+  local key="$2"
+  awk -F= -v k="${key}" '$1==k{print $2}' "${file}" | tail -n 1
+}
+
+jwt_claims_value() {
+  local token_file="$1"
+  local field="$2"
+  python3 - "${token_file}" "${field}" <<'PY'
+import base64
+import json
+import sys
+
+token = open(sys.argv[1], encoding="utf-8").read().strip()
+field = sys.argv[2]
+payload = token.split(".")[1]
+payload += "=" * (-len(payload) % 4)
+claims = json.loads(base64.urlsafe_b64decode(payload.encode("ascii")))
+
+if field == "ttl":
+    print(int(claims["exp"]) - int(claims["iat"]))
+elif field == "roles":
+    print(",".join(claims.get("realm_access", {}).get("roles", [])))
+else:
+    print(claims.get(field, ""))
+PY
+}
+
 echo "=============================================="
 echo "  CLIENT CREDENTIALS SECURITY TESTS"
 echo "  $(date)"
@@ -64,145 +101,157 @@ import sys
 
 realm = json.load(open(sys.argv[1], encoding="utf-8"))
 clients = {client.get("clientId"): client for client in realm.get("clients", [])}
-service_client = clients.get("sme-service-client")
 service_users = {
     user.get("serviceAccountClientId"): user
     for user in realm.get("users", [])
     if user.get("serviceAccountClientId")
 }
-service_account = service_users.get("sme-service-client")
 
 print(f"realm_access_token_lifespan={realm.get('accessTokenLifespan')}")
-print(f"service_client_present={str(service_client is not None).lower()}")
-print(f"service_accounts_enabled={str(bool(service_client and service_client.get('serviceAccountsEnabled'))).lower()}")
-print(f"service_direct_grant_enabled={str(bool(service_client and service_client.get('directAccessGrantsEnabled'))).lower()}")
-print(f"service_client_token_lifespan={service_client.get('attributes', {}).get('access.token.lifespan', '') if service_client else ''}")
-print("service_account_roles=" + ",".join(service_account.get("realmRoles", []) if service_account else []))
+for client_id in ("billing-service-client", "admin-service-client"):
+    client = clients.get(client_id) or {}
+    account = service_users.get(client_id) or {}
+    prefix = client_id.replace("-", "_")
+    print(f"{prefix}_present={str(bool(client)).lower()}")
+    print(f"{prefix}_service_accounts_enabled={str(bool(client.get('serviceAccountsEnabled'))).lower()}")
+    print(f"{prefix}_direct_grant_enabled={str(bool(client.get('directAccessGrantsEnabled'))).lower()}")
+    print(f"{prefix}_token_lifespan={client.get('attributes', {}).get('access.token.lifespan', '')}")
+    print(f"{prefix}_roles=" + ",".join(account.get("realmRoles", [])))
 PY
 )"
 
 echo "${STATIC_CHECKS}"
 assert_equals "realm access token lifespan" "300" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="realm_access_token_lifespan"{print $2}')"
-assert_equals "service client exists" "true" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="service_client_present"{print $2}')"
-assert_equals "service account enabled" "true" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="service_accounts_enabled"{print $2}')"
-assert_equals "service password grant disabled" "false" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="service_direct_grant_enabled"{print $2}')"
-assert_equals "service client access token lifespan" "300" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="service_client_token_lifespan"{print $2}')"
 
-SERVICE_ACCOUNT_ROLES="$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="service_account_roles"{print $2}')"
-case ",${SERVICE_ACCOUNT_ROLES}," in
-  *,internal-service,*) pass "service account has internal-service role" ;;
-  *) fail "service account missing internal-service role" ;;
+for prefix in billing_service_client admin_service_client; do
+  assert_equals "${prefix} exists" "true" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= -v k="${prefix}_present" '$1==k{print $2}')"
+  assert_equals "${prefix} service account enabled" "true" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= -v k="${prefix}_service_accounts_enabled" '$1==k{print $2}')"
+  assert_equals "${prefix} password grant disabled" "false" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= -v k="${prefix}_direct_grant_enabled" '$1==k{print $2}')"
+  assert_equals "${prefix} access token lifespan" "300" "$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= -v k="${prefix}_token_lifespan" '$1==k{print $2}')"
+done
+
+BILLING_ROLES="$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="billing_service_client_roles"{print $2}')"
+ADMIN_ROLES="$(printf '%s\n' "${STATIC_CHECKS}" | awk -F= '$1=="admin_service_client_roles"{print $2}')"
+case ",${BILLING_ROLES}," in
+  *,order-ownership-read,*) pass "billing-service-client has order-ownership-read role" ;;
+  *) fail "billing-service-client missing order-ownership-read role" ;;
+esac
+case ",${ADMIN_ROLES}," in
+  *,admin-maintenance,*) pass "admin-service-client has admin-maintenance role" ;;
+  *) fail "admin-service-client missing admin-maintenance role" ;;
 esac
 
 echo ""
-echo "===== Obtain service token ====="
+echo "===== Obtain service tokens ====="
 
-if [ -z "${SERVICE_CLIENT_SECRET:-}" ]; then
-  echo "[ERROR] SERVICE_CLIENT_SECRET is required for dynamic Client Credentials tests."
+if [ -z "${BILLING_SERVICE_CLIENT_SECRET:-}" ]; then
+  echo "[ERROR] BILLING_SERVICE_CLIENT_SECRET is required."
   echo "[ERROR] Set it from Keycloak/Vault; this test will not print the secret."
   exit 1
 fi
 
-if bash "${PROJECT_ROOT}/demo/auth/get-service-token.sh" > "${TOKEN_OUTPUT}" 2>&1; then
-  pass "service token script completed"
-else
-  fail "service token script failed"
-  echo "Sanitized script output:"
-  cat "${TOKEN_OUTPUT}"
-  echo ""
-  echo "=============================================="
-  echo "  CLIENT CREDENTIALS RESULT: ${PASSED}/${TOTAL} passed, ${FAILED} failed"
-  echo "=============================================="
+if [ -z "${ADMIN_SERVICE_CLIENT_SECRET:-}" ]; then
+  echo "[ERROR] ADMIN_SERVICE_CLIENT_SECRET is required."
+  echo "[ERROR] Set it from Keycloak/Vault; this test will not print the secret."
   exit 1
 fi
 
-if [ -s "${TOKEN_FILE}" ]; then
-  pass "service token file written"
+if bash "${PROJECT_ROOT}/demo/auth/get-billing-service-token.sh" > "${BILLING_TOKEN_OUTPUT}" 2>&1; then
+  pass "billing service token script completed"
 else
-  fail "service token file missing or empty"
-  echo ""
-  echo "=============================================="
-  echo "  CLIENT CREDENTIALS RESULT: ${PASSED}/${TOTAL} passed, ${FAILED} failed"
-  echo "=============================================="
+  fail "billing service token script failed"
+  cat "${BILLING_TOKEN_OUTPUT}"
   exit 1
 fi
 
-if grep -q '^service_token_obtained=true$' "${TOKEN_OUTPUT}"; then
-  pass "service token metadata confirms success"
+if bash "${PROJECT_ROOT}/demo/auth/get-admin-service-token.sh" > "${ADMIN_TOKEN_OUTPUT}" 2>&1; then
+  pass "admin service token script completed"
 else
-  fail "service token metadata missing success flag"
+  fail "admin service token script failed"
+  cat "${ADMIN_TOKEN_OUTPUT}"
+  exit 1
 fi
 
-if grep -Eq 'eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.' "${TOKEN_OUTPUT}"; then
-  fail "service token stdout leaked JWT material"
-else
-  pass "service token stdout does not leak JWT material"
-fi
+for output_file in "${BILLING_TOKEN_OUTPUT}" "${ADMIN_TOKEN_OUTPUT}"; do
+  if grep -q '^token_obtained=true$' "${output_file}"; then
+    pass "$(basename "${output_file}") metadata confirms success"
+  else
+    fail "$(basename "${output_file}") metadata missing success flag"
+  fi
 
-SCRIPT_TTL="$(awk -F= '$1=="token_ttl_seconds"{print $2}' "${TOKEN_OUTPUT}" | tail -n 1)"
-assert_equals "service token TTL from script metadata" "300" "${SCRIPT_TTL}"
+  if grep -Eq 'eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.' "${output_file}"; then
+    fail "$(basename "${output_file}") stdout leaked JWT material"
+  else
+    pass "$(basename "${output_file}") stdout does not leak JWT material"
+  fi
+done
 
-DECODED_TTL="$(python3 - "${TOKEN_FILE}" <<'PY'
-import base64
-import json
-import sys
+assert_equals "billing token TTL metadata" "300" "$(metadata_value "${BILLING_TOKEN_OUTPUT}" ttl_seconds)"
+assert_equals "admin token TTL metadata" "300" "$(metadata_value "${ADMIN_TOKEN_OUTPUT}" ttl_seconds)"
+assert_equals "billing token TTL claims" "300" "$(jwt_claims_value "${BILLING_TOKEN_FILE}" ttl)"
+assert_equals "admin token TTL claims" "300" "$(jwt_claims_value "${ADMIN_TOKEN_FILE}" ttl)"
 
-token = open(sys.argv[1], encoding="utf-8").read().strip()
-payload = token.split(".")[1]
-payload += "=" * (-len(payload) % 4)
-claims = json.loads(base64.urlsafe_b64decode(payload.encode("ascii")))
-print(int(claims["exp"]) - int(claims["iat"]))
-PY
-)"
-assert_equals "service token TTL from JWT claims" "300" "${DECODED_TTL}"
-
-TOKEN_ROLES="$(python3 - "${TOKEN_FILE}" <<'PY'
-import base64
-import json
-import sys
-
-token = open(sys.argv[1], encoding="utf-8").read().strip()
-payload = token.split(".")[1]
-payload += "=" * (-len(payload) % 4)
-claims = json.loads(base64.urlsafe_b64decode(payload.encode("ascii")))
-print(",".join(claims.get("realm_access", {}).get("roles", [])))
-PY
-)"
-case ",${TOKEN_ROLES}," in
-  *,internal-service,*) pass "service token contains internal-service role" ;;
-  *) fail "service token missing internal-service role" ;;
+BILLING_TOKEN_ROLES="$(jwt_claims_value "${BILLING_TOKEN_FILE}" roles)"
+ADMIN_TOKEN_ROLES="$(jwt_claims_value "${ADMIN_TOKEN_FILE}" roles)"
+case ",${BILLING_TOKEN_ROLES}," in
+  *,order-ownership-read,*) pass "billing token contains order-ownership-read role" ;;
+  *) fail "billing token missing order-ownership-read role" ;;
+esac
+case ",${ADMIN_TOKEN_ROLES}," in
+  *,admin-maintenance,*) pass "admin token contains admin-maintenance role" ;;
+  *) fail "admin token missing admin-maintenance role" ;;
 esac
 
 echo ""
 echo "===== Service token authorization ====="
 
-SERVICE_TOKEN="$(cat "${TOKEN_FILE}")"
+BILLING_TOKEN="$(cat "${BILLING_TOKEN_FILE}")"
+ADMIN_TOKEN="$(cat "${ADMIN_TOKEN_FILE}")"
 
-assert_status "service token admin maintenance allowed" 200 \
+assert_status "billing-service-client Order ownership allowed" 200 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/orders/internal/verify-ownership" \
+    -H "$(bearer_header "${BILLING_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","subject":"alice"}')"
+
+assert_status "admin-service-client Order ownership forbidden" 403 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/orders/internal/verify-ownership" \
+    -H "$(bearer_header "${ADMIN_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","subject":"alice"}')"
+
+assert_status "billing-service-client Admin maintenance forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/admin/maintenance" \
-    -H "Authorization: Bearer ${SERVICE_TOKEN}" \
+    -H "$(bearer_header "${BILLING_TOKEN}")" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check"}')"
 
-assert_status "service token admin metadata fixed forbidden" 403 \
+assert_status "admin-service-client Admin maintenance allowed" 200 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-    "${BASE_URL}/api/v1/admin/metadata-fetch/fixed" \
-    -H "Authorization: Bearer ${SERVICE_TOKEN}" \
+    "${BASE_URL}/api/v1/admin/maintenance" \
+    -H "$(bearer_header "${ADMIN_TOKEN}")" \
     -H "Content-Type: application/json" \
-    -d '{"fetch_url":"https://example.com"}')"
+    -d '{"action":"health-check"}')"
 
-assert_status "service token billing checkout forbidden" 403 \
-  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-    "${BASE_URL}/api/v1/billing/checkout" \
-    -H "Authorization: Bearer ${SERVICE_TOKEN}" \
-    -H "Content-Type: application/json" \
-    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
-
-assert_status "service token users me forbidden" 403 \
+assert_status "billing service token users me forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/users/me" \
-    -H "Authorization: Bearer ${SERVICE_TOKEN}")"
+    -H "$(bearer_header "${BILLING_TOKEN}")")"
+
+assert_status "admin service token users me forbidden" 403 \
+  "$(curl -s -o /dev/null -w "%{http_code}" \
+    "${BASE_URL}/api/v1/users/me" \
+    -H "$(bearer_header "${ADMIN_TOKEN}")")"
+
+assert_status "billing service token billing checkout forbidden" 403 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "$(bearer_header "${BILLING_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
 echo ""
 echo "=============================================="
