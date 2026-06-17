@@ -1,9 +1,9 @@
 ===== TV1 P0.8 Timestamp freshness =====
 --- Code verification: WEBHOOK_MAX_AGE_SECONDS ---
-38:WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
-341:    if age > WEBHOOK_MAX_AGE_SECONDS:
-345:                  {"security_event": True, "decision": "rejected", "reason": "timestamp_expired", "age_seconds": age})
-348:            detail={"error": "timestamp_expired", "message": f"Webhook timestamp is {age}s old (max {WEBHOOK_MAX_AGE_SECONDS}s)"},
+39:WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
+596:    if age > WEBHOOK_MAX_AGE_SECONDS:
+600:                  {"security_event": True, "decision": "rejected", "reason": "timestamp_expired", "age_seconds": age})
+603:            detail={"error": "timestamp_expired", "message": f"Webhook timestamp is {age}s old (max {WEBHOOK_MAX_AGE_SECONDS}s)"},
 
 --- Test: fresh timestamp -> should pass ---
 Fresh timestamp status: 200

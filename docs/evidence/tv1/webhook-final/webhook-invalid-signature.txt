@@ -1,0 +1,1 @@
+[0;32m[PASS][0m Invalid signature correctly rejected (401)

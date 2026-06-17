@@ -1,7 +1,6 @@
-===== TV1 P0.7 Valid webhook =====
-Timestamp : 1781605927
-Nonce     : valid-e79af796de33ffbbf1707e130cf7c90f
-Signature : sha256=4a2280af018e070ba937fbf9a26e8eb7f0650815095cfe6031676bd78348e685
+Timestamp : 1781703806
+Nonce     : valid-12ea5efa7f83096fc0d21a1790694eac
+Signature : sha256=f41977f777b77c766c8554a81a8f99e7ff6b4718c561ab8c19ee23739e8d75ef
 Valid webhook status: 200
 [0;32m[PASS][0m Valid webhook accepted (HTTP 200)
 

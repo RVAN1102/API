@@ -6,6 +6,9 @@
 *.pem
 infra/certs/*
 !infra/certs/.gitkeep
+!infra/certs/generate-webhook-mtls-certs.sh
+!infra/certs/webhook-ca.crt
+!infra/certs/webhook-client.crt
 
 # Generated demo state and reports
 demo/webhook/.nonce-cache.json

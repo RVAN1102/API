@@ -23,8 +23,11 @@ services:
       KONG_SSL_CIPHER_SUITE: "custom"
       KONG_SSL_PROTOCOLS: "TLSv1.3"
       KONG_NGINX_PROXY_SSL_PROTOCOLS: "TLSv1.3"
+      KONG_NGINX_PROXY_SSL_CLIENT_CERTIFICATE: "/kong/certs/webhook-ca.crt"
+      KONG_NGINX_PROXY_SSL_VERIFY_CLIENT: "optional"
     volumes:
       - ../gateway/kong.yml:/kong/declarative/kong.yml:ro
+      - ../infra/certs:/kong/certs:ro
     ports:
       - "8000:8000"
       - "8443:8443"
@@ -66,9 +69,6 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: topic10-sme-api
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
-      TOKEN_INTROSPECTION_ENABLED: "${TOKEN_INTROSPECTION_ENABLED:-false}"
-      TOKEN_INTROSPECTION_CLIENT_ID: "billing-service-client"
-      TOKEN_INTROSPECTION_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
     expose:
       - "8000"
     healthcheck:
@@ -94,9 +94,6 @@ services:
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
       BILLING_SERVICE_CLIENT_ID: "billing-service-client"
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
-      TOKEN_INTROSPECTION_ENABLED: "${TOKEN_INTROSPECTION_ENABLED:-false}"
-      TOKEN_INTROSPECTION_CLIENT_ID: "billing-service-client"
-      TOKEN_INTROSPECTION_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
       ORDER_SERVICE_URL: "http://order-service:8000"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
     healthcheck:
@@ -119,11 +116,6 @@ services:
       KEYCLOAK_URL: "http://keycloak:8080"
       KEYCLOAK_REALM: "topic10-sme-api"
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
-      ADMIN_SERVICE_CLIENT_ID: "admin-service-client"
-      ADMIN_SERVICE_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:-}"
-      TOKEN_INTROSPECTION_ENABLED: "${TOKEN_INTROSPECTION_ENABLED:-false}"
-      TOKEN_INTROSPECTION_CLIENT_ID: "admin-service-client"
-      TOKEN_INTROSPECTION_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:?ADMIN_SERVICE_CLIENT_SECRET is required}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
       interval: 10s

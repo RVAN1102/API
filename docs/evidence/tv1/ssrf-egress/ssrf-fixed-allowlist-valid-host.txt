@@ -1,0 +1,2 @@
+--- Fetching https://httpbin.org/get from fixed endpoint ---
+[FAIL] Fixed endpoint did not return 200 (got 403)

@@ -1,3 +1,6 @@
 ===== TV1 P0.9 mTLS check =====
-No mTLS configuration found.
-[1;33m[LIMITATION][0m mTLS not implemented – documented in p0-09-webhook-mtls-status.md
+--- Testing mTLS with valid client cert ---
+[0;32m[PASS][0m mTLS: Request with valid client cert accepted (200)
+
+--- Testing mTLS without client cert ---
+[0;32m[PASS][0m mTLS: Request without client cert correctly rejected (401)

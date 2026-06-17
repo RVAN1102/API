@@ -1,0 +1,1 @@
+[0;32m[PASS][0m mTLS: Request with valid client cert accepted (200)
