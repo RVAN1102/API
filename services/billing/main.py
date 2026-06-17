@@ -28,6 +28,7 @@ from urllib.parse import urlparse
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwk, jwt
 from pydantic import BaseModel
@@ -40,12 +41,27 @@ WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "30
 
 KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
-EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+KEYCLOAK_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+EXPECTED_ISSUER: str = KEYCLOAK_ISSUER
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 TOKEN_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
+INTROSPECTION_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
 ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "http://order-service:8000")
 BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
 BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
+TOKEN_INTROSPECTION_ENABLED: bool = (
+    os.environ.get("TOKEN_INTROSPECTION_ENABLED", "false").lower() == "true"
+)
+TOKEN_INTROSPECTION_CLIENT_ID: str = (
+    os.environ.get("BILLING_TOKEN_INTROSPECTION_CLIENT_ID")
+    or os.environ.get("TOKEN_INTROSPECTION_CLIENT_ID")
+    or BILLING_SERVICE_CLIENT_ID
+)
+TOKEN_INTROSPECTION_CLIENT_SECRET: str = (
+    os.environ.get("BILLING_TOKEN_INTROSPECTION_CLIENT_SECRET")
+    or os.environ.get("TOKEN_INTROSPECTION_CLIENT_SECRET")
+    or BILLING_SERVICE_CLIENT_SECRET
+)
 
 # ---------------------------------------------------------------------------
 # Logging – structured JSON
@@ -196,10 +212,74 @@ async def validate_token(token: str) -> Dict[str, Any]:
     return payload
 
 
+def _introspection_failed_exception() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "error": "invalid_token",
+            "message": "Token introspection failed or token is inactive",
+        },
+    )
+
+
+def _introspection_headers() -> Dict[str, str]:
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    issuer_netloc = urlparse(KEYCLOAK_ISSUER).netloc
+    if issuer_netloc:
+        headers["Host"] = issuer_netloc
+    return headers
+
+
+async def require_introspection_active(token: str) -> None:
+    if not TOKEN_INTROSPECTION_ENABLED:
+        return
+
+    if not TOKEN_INTROSPECTION_CLIENT_ID or not TOKEN_INTROSPECTION_CLIENT_SECRET:
+        raise _introspection_failed_exception()
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                INTROSPECTION_URL,
+                data={
+                    "token": token,
+                    "client_id": TOKEN_INTROSPECTION_CLIENT_ID,
+                    "client_secret": TOKEN_INTROSPECTION_CLIENT_SECRET,
+                },
+                headers=_introspection_headers(),
+            )
+    except httpx.HTTPError:
+        raise _introspection_failed_exception()
+
+    if response.status_code != 200:
+        raise _introspection_failed_exception()
+
+    try:
+        body = response.json()
+        active = isinstance(body, dict) and body.get("active") is True
+    except ValueError:
+        active = False
+
+    if not active:
+        raise _introspection_failed_exception()
+
+
+async def validate_token_with_introspection(token: str) -> Dict[str, Any]:
+    payload = await validate_token(token)
+    await require_introspection_active(token)
+    return payload
+
+
 async def get_current_token_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     return await validate_token(credentials.credentials)
+
+
+async def get_current_introspected_token_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> Dict[str, Any]:
+    return await validate_token_with_introspection(credentials.credentials)
 
 
 def require_role(payload: Dict[str, Any], *required_roles: str) -> None:
@@ -261,7 +341,7 @@ def get_effective_subject(payload: Dict[str, Any]) -> str:
 
 
 async def require_checkout_access(
-    payload: Dict[str, Any] = Depends(get_current_token_payload),
+    payload: Dict[str, Any] = Depends(get_current_introspected_token_payload),
 ) -> Dict[str, Any]:
     require_role(payload, ROLE_USER, ROLE_ADMIN)
     return payload
@@ -394,6 +474,57 @@ async def require_order_owner_via_order_service(
     )
 
 
+def _auth_failure_reason(status_code: int, detail: Any, path: str) -> Optional[str]:
+    if status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return None
+    if path.startswith("/api/v1/webhooks/"):
+        return None
+    if not path.startswith("/api/v1/billing/"):
+        return None
+
+    detail_text = json.dumps(detail, default=str).lower()
+    if "not authenticated" in detail_text:
+        return "missing_token"
+    if "expired" in detail_text:
+        return "expired_token"
+    if status_code == status.HTTP_401_UNAUTHORIZED or "invalid_token" in detail_text:
+        return "invalid_token"
+    if "permission to checkout" in detail_text:
+        return "ownership_denied"
+    if "ownership_verification_failed" in detail_text:
+        return "service_token_invalid"
+    if "required role" in detail_text:
+        return "user_required"
+    return "missing_role"
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    reason = _auth_failure_reason(exc.status_code, exc.detail, request.url.path)
+    if reason:
+        correlation_id = request.headers.get("X-Correlation-ID", "")
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=request.method,
+            path=request.url.path,
+            status_code=exc.status_code,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=correlation_id,
+            message="JWT authn/authz failure",
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Middleware
 # ---------------------------------------------------------------------------
@@ -427,6 +558,20 @@ class CheckoutRequest(BaseModel):
     currency: str = "VND"
 
 
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+class CheckoutResponse(BaseModel):
+    payment_id: str
+    order_id: str
+    status: str
+    amount: float
+    currency: str
+    correlation_id: str
+
+
 class PaymentWebhookPayload(BaseModel):
     event_id: str
     event_type: str
@@ -438,13 +583,18 @@ class PaymentWebhookPayload(BaseModel):
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/billing/health", tags=["Billing"])
+@app.get("/api/v1/billing/health", tags=["Billing"], response_model=HealthResponse)
 async def health_check():
     """Public health check. No authentication required."""
     return {"status": "ok", "service": "billing-service"}
 
 
-@app.post("/api/v1/billing/checkout", tags=["Billing"], status_code=202)
+@app.post(
+    "/api/v1/billing/checkout",
+    tags=["Billing"],
+    status_code=202,
+    response_model=CheckoutResponse,
+)
 async def create_checkout(
     body: CheckoutRequest,
     request: Request,

@@ -21,10 +21,11 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from auth import extract_identity, get_current_token_payload
 from authz import require_user_or_admin
@@ -47,6 +48,7 @@ def log_event(
     status_code: int,
     client_ip: str,
     correlation_id: str,
+    extra: Optional[Dict[str, Any]] = None,
 ) -> None:
     record: Dict[str, Any] = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -59,6 +61,8 @@ def log_event(
         "correlation_id": correlation_id,
         "event_type": event_type,
     }
+    if extra:
+        record.update(extra)
     getattr(logger, level.lower(), logger.info)(json.dumps(record))
 
 # ---------------------------------------------------------------------------
@@ -70,6 +74,72 @@ app = FastAPI(
     version="1.0.0",
     openapi_url="/openapi.json",
 )
+
+
+# ---------------------------------------------------------------------------
+# Response models
+# ---------------------------------------------------------------------------
+
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+class UserMeResponse(BaseModel):
+    user_id: str
+    username: str
+    email: str
+    roles: List[str]
+    correlation_id: str
+
+
+class UserProfileResponse(UserMeResponse):
+    azp: str
+    scope: str
+
+
+def _auth_failure_reason(status_code: int, detail: Any, path: str) -> Optional[str]:
+    if status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return None
+    if not path.startswith("/api/v1/users/"):
+        return None
+
+    detail_text = json.dumps(detail, default=str).lower()
+    if "not authenticated" in detail_text:
+        return "missing_token"
+    if "expired" in detail_text:
+        return "expired_token"
+    if status_code == status.HTTP_401_UNAUTHORIZED or "invalid_token" in detail_text:
+        return "invalid_token"
+    if "required role" in detail_text:
+        return "user_required"
+    return "missing_role"
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    reason = _auth_failure_reason(exc.status_code, exc.detail, request.url.path)
+    if reason:
+        correlation_id = request.headers.get("X-Correlation-ID", "")
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=request.method,
+            path=request.url.path,
+            status_code=exc.status_code,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=correlation_id,
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +169,7 @@ async def log_requests(request: Request, call_next):
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/users/health", tags=["Users"])
+@app.get("/api/v1/users/health", tags=["Users"], response_model=HealthResponse)
 async def health_check():
     """
     Public health check endpoint.
@@ -108,7 +178,7 @@ async def health_check():
     return {"status": "ok", "service": "user-service"}
 
 
-@app.get("/api/v1/users/me", tags=["Users"])
+@app.get("/api/v1/users/me", tags=["Users"], response_model=UserMeResponse)
 async def get_me(
     request: Request,
     payload: Dict[str, Any] = Depends(get_current_token_payload),
@@ -131,7 +201,7 @@ async def get_me(
     }
 
 
-@app.get("/api/v1/users/profile", tags=["Users"])
+@app.get("/api/v1/users/profile", tags=["Users"], response_model=UserProfileResponse)
 async def get_profile(
     request: Request,
     payload: Dict[str, Any] = Depends(get_current_token_payload),
