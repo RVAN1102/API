@@ -57,6 +57,7 @@ echo "=============================================="
 
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
 run_suite "Client Credentials" "tests/security/client-credentials-tests.sh"
+run_suite "Token Lifecycle" "tests/security/token-lifecycle-tests.sh"
 run_suite "Real S2S Ownership" "tests/security/s2s-ownership-tests.sh"
 run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
 run_suite "Edge Hardening" "tests/security/edge-hardening-tests.sh"

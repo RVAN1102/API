@@ -1,0 +1,327 @@
+==============================================
+  FINAL REGRESSION TEST
+  Wed Jun 17 03:25:23 PM +07 2026
+==============================================
+
+┌──────────────────────────────────────────────┐
+│  Regression: Smoke Test
+└──────────────────────────────────────────────┘
+
+==============================================
+  MAIN SMOKE TEST
+  Wed Jun 17 03:25:23 PM +07 2026
+==============================================
+
+===== Smoke: health endpoints =====
+[PASS] users health -> 200
+[PASS] orders health -> 200
+[PASS] billing health -> 200
+[PASS] admin health -> 200
+
+===== Smoke: Keycloak OIDC discovery =====
+Waiting for Keycloak discovery endpoint...
+[PASS] keycloak discovery -> 200
+
+===== Smoke: ci-alice automation token and /users/me =====
+[PASS] ci-alice automation token obtained
+[PASS] users me ci-alice automation -> 200
+
+==============================================
+  SMOKE RESULT: 7/7 passed, 0 failed
+==============================================
+
+  ✓ Smoke Test PASSED
+
+┌──────────────────────────────────────────────┐
+│  Regression: Client Credentials
+└──────────────────────────────────────────────┘
+
+==============================================
+  CLIENT CREDENTIALS SECURITY TESTS
+  Wed Jun 17 03:25:23 PM +07 2026
+==============================================
+
+===== Static Keycloak config checks =====
+realm_access_token_lifespan=300
+billing_service_client_present=true
+billing_service_client_service_accounts_enabled=true
+billing_service_client_direct_grant_enabled=false
+billing_service_client_token_lifespan=300
+billing_service_client_roles=order-ownership-read
+admin_service_client_present=true
+admin_service_client_service_accounts_enabled=true
+admin_service_client_direct_grant_enabled=false
+admin_service_client_token_lifespan=300
+admin_service_client_roles=admin-maintenance
+[PASS] realm access token lifespan -> 300
+[PASS] billing_service_client exists -> true
+[PASS] billing_service_client service account enabled -> true
+[PASS] billing_service_client password grant disabled -> false
+[PASS] billing_service_client access token lifespan -> 300
+[PASS] admin_service_client exists -> true
+[PASS] admin_service_client service account enabled -> true
+[PASS] admin_service_client password grant disabled -> false
+[PASS] admin_service_client access token lifespan -> 300
+[PASS] billing-service-client has order-ownership-read role
+[PASS] admin-service-client has admin-maintenance role
+
+===== Obtain service tokens =====
+[PASS] billing service token script completed
+[PASS] admin service token script completed
+[PASS] billing-service-token-output.txt metadata confirms success
+[PASS] billing-service-token-output.txt stdout does not leak JWT material
+[PASS] admin-service-token-output.txt metadata confirms success
+[PASS] admin-service-token-output.txt stdout does not leak JWT material
+[PASS] billing token TTL metadata -> 300
+[PASS] admin token TTL metadata -> 300
+[PASS] billing token TTL claims -> 300
+[PASS] admin token TTL claims -> 300
+[PASS] billing token contains order-ownership-read role
+[PASS] admin token contains admin-maintenance role
+
+===== Service token authorization =====
+[PASS] billing-service-client Order ownership allowed -> 200
+[PASS] admin-service-client Order ownership forbidden -> 403
+[PASS] billing-service-client Admin maintenance forbidden -> 403
+[PASS] admin-service-client Admin maintenance allowed -> 200
+[PASS] billing service token users me forbidden -> 403
+[PASS] admin service token users me forbidden -> 403
+[PASS] billing service token billing checkout forbidden -> 403
+
+==============================================
+  CLIENT CREDENTIALS RESULT: 30/30 passed, 0 failed
+==============================================
+
+  ✓ Client Credentials PASSED
+
+┌──────────────────────────────────────────────┐
+│  Regression: Token Lifecycle
+└──────────────────────────────────────────────┘
+
+==============================================
+  TOKEN LIFECYCLE SECURITY TESTS
+  Wed Jun 17 03:25:24 PM +07 2026
+==============================================
+
+===== Obtain service token =====
+[PASS] billing service token obtained
+[PASS] billing token script output is metadata-only
+[PASS] billing token TTL metadata -> 300
+
+===== Introspect valid token =====
+[PASS] valid token introspection completed
+[PASS] valid introspection output is metadata-only
+[PASS] valid token active -> true
+[PASS] valid token client_id -> billing-service-client
+
+===== Introspect invalid token =====
+[PASS] invalid introspection output is metadata-only
+[PASS] invalid token active -> false
+
+===== Revoke token at IdP =====
+[PASS] revocation endpoint completed
+[PASS] revocation output is metadata-only
+[PASS] revocation request sent -> true
+[PASS] revocation HTTP status -> 200
+
+==============================================
+  TOKEN LIFECYCLE RESULT: 13/13 passed, 0 failed
+==============================================
+
+  ✓ Token Lifecycle PASSED
+
+┌──────────────────────────────────────────────┐
+│  Regression: Real S2S Ownership
+└──────────────────────────────────────────────┘
+
+==============================================
+  REAL S2S ORDER OWNERSHIP TESTS
+  Wed Jun 17 03:25:24 PM +07 2026
+==============================================
+
+===== Prepare tokens =====
+[INFO] ci-alice automation token obtained
+[INFO] ci-bob automation token obtained
+[INFO] billing service token obtained
+[INFO] admin service token obtained
+
+===== Billing checkout ownership =====
+[PASS] Alice checkout Alice order accepted -> 202
+[PASS] Alice checkout Bob order forbidden -> 403
+[PASS] Bob checkout Bob order accepted -> 202
+[PASS] Billing fake user token rejected -> 401
+[PASS] Billing malformed user token rejected -> 401
+[PASS] Unknown order checkout fail closed -> 403
+[PASS] Service token cannot call Billing checkout -> 403
+
+===== Order internal ownership endpoint =====
+[PASS] billing-service-client Order internal verify status -> 200
+[PASS] billing-service-client Order internal verify allowed=true
+[PASS] admin-service-client Order internal verify forbidden -> 403
+[PASS] human user Order internal verify forbidden -> 403
+[PASS] missing token Order internal verify rejected -> 403
+[PASS] fake token Order internal verify rejected -> 401
+[PASS] malformed token Order internal verify rejected -> 401
+
+===== Service-client least privilege =====
+[PASS] billing-service-client Admin maintenance forbidden -> 403
+[PASS] admin-service-client Admin maintenance allowed -> 200
+[PASS] billing-service-client users/me forbidden -> 403
+
+==============================================
+  REAL S2S RESULT: 17/17 passed, 0 failed
+==============================================
+
+  ✓ Real S2S Ownership PASSED
+
+┌──────────────────────────────────────────────┐
+│  Regression: Authz Negative
+└──────────────────────────────────────────────┘
+
+==============================================
+  AUTHZ NEGATIVE REGRESSION TESTS
+  Wed Jun 17 03:25:25 PM +07 2026
+==============================================
+
+===== Prepare tokens =====
+[INFO] ci-alice automation token obtained
+[INFO] ci-bob automation token obtained
+[INFO] admin service client token obtained
+
+===== User endpoint negative =====
+[PASS] users me fake token -> 401
+
+===== Admin RBAC =====
+[PASS] ci-alice automation admin maintenance forbidden -> 403
+[PASS] admin service client maintenance allowed -> 200
+[PASS] admin fake token rejected -> 401
+[PASS] admin malformed token rejected -> 401
+
+===== BOLA fixed endpoint =====
+[PASS] ci-alice automation bob order fixed forbidden -> 403
+[PASS] ci-bob automation bob order fixed allowed -> 200
+
+===== Billing auth =====
+[PASS] billing ci-alice automation checkout accepted -> 202
+[PASS] billing ci-alice automation bob checkout forbidden -> 403
+[PASS] billing ci-bob automation checkout accepted -> 202
+[PASS] billing fake token rejected -> 401
+[PASS] billing malformed token rejected -> 401
+[PASS] billing malformed compact token rejected -> 401
+[PASS] billing extremely malformed token rejected -> 401
+
+==============================================
+  AUTHZ NEGATIVE RESULT: 14/14 passed, 0 failed
+==============================================
+
+  ✓ Authz Negative PASSED
+
+┌──────────────────────────────────────────────┐
+│  Regression: Edge Hardening
+└──────────────────────────────────────────────┘
+
+==============================================
+  EDGE HARDENING TESTS
+  Wed Jun 17 03:25:25 PM +07 2026
+==============================================
+
+===== TLS 1.3 should succeed =====
+[PASS] TLS 1.3 handshake completed
+
+===== TLS 1.2 should fail =====
+[PASS] TLS 1.2 rejected (connection failed)
+
+===== HSTS header =====
+[PASS] HSTS header present
+
+===== CORS allowed origin =====
+[PASS] allowed origin (localhost:3002) has CORS allow header
+
+===== CORS evil origin =====
+[PASS] evil origin not allowed
+
+===== Request size limit =====
+[PASS] large payload blocked -> 417
+
+===== Rate limit (sensitive endpoint) =====
+[PASS] rate limit triggered (429 received)
+
+==============================================
+  EDGE HARDENING RESULT: 7/7 passed, 0 failed, 0 skipped
+==============================================
+
+  ✓ Edge Hardening PASSED
+
+[INFO] Resetting Kong after edge rate-limit test
+
+┌──────────────────────────────────────────────┐
+│  Regression: Webhook Security
+└──────────────────────────────────────────────┘
+
+==============================================
+  WEBHOOK SECURITY TESTS
+  Wed Jun 17 03:25:47 PM +07 2026
+==============================================
+
+===== Valid webhook =====
+[PASS] valid webhook accepted
+
+===== Invalid webhook (bad signature) =====
+[PASS] invalid webhook rejected (401)
+
+===== Replay webhook =====
+[PASS] replay webhook test completed with expected behavior
+
+==============================================
+  WEBHOOK RESULT: 3/3 passed, 0 failed
+==============================================
+
+  ✓ Webhook Security PASSED
+
+┌──────────────────────────────────────────────┐
+│  Regression: Fuzz/Negative
+└──────────────────────────────────────────────┘
+
+==============================================
+  FUZZ / NEGATIVE INPUT TESTS
+  Wed Jun 17 03:25:47 PM +07 2026
+==============================================
+
+===== Prepare automation token =====
+[PASS] ci-alice automation token obtained
+
+===== Billing: empty body =====
+[PASS] billing empty body rejected -> 422
+
+===== Billing: wrong data type =====
+[PASS] billing wrong data type rejected -> 422
+
+===== Billing: missing required fields =====
+[PASS] billing missing fields rejected -> 422
+
+===== SQLi in query parameter =====
+[PASS] SQLi in query blocked by WAF -> 403
+
+===== XSS in query parameter =====
+[PASS] XSS in query blocked by WAF -> 403
+
+===== Invalid JSON body =====
+[PASS] invalid JSON body rejected -> 422
+
+===== Webhook: missing required headers =====
+[PASS] webhook missing headers rejected -> 401
+
+
+==============================================
+  FUZZ/NEGATIVE RESULT: 8/8 passed, 0 failed
+==============================================
+
+  ✓ Fuzz/Negative PASSED
+
+==============================================
+  REGRESSION SUMMARY
+  Suites passed: 8
+  Suites failed: 0
+==============================================
+
+[OK] All regression suites passed. Safe to merge.
