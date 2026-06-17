@@ -12,3 +12,6 @@
 *.yaml text
 *.json text
 *.txt text
+
+# Preserve captured evidence/log artifacts exactly; do not normalize line endings.
+docs/evidence/** -text
