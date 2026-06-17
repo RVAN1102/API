@@ -7,6 +7,11 @@
 # =============================================================================
 set -uo pipefail
 
+# --- Git Bash / MSYS2 compatibility ---
+# Save original MSYS_NO_PATHCONV and ensure /dev/null works for curl
+_ORIG_MSYS_NO_PATHCONV="${MSYS_NO_PATHCONV:-}"
+unset MSYS_NO_PATHCONV 2>/dev/null || true
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1"
@@ -15,6 +20,24 @@ ADMIN_URL="${ADMIN_URL:-http://localhost:8001}"
 HTTPS_HOST="${HTTPS_HOST:-localhost:8443}"
 
 mkdir -p "${EVIDENCE_DIR}"
+
+# --- Portable HTTP status code helper ---
+# Works on Linux, Mac and Git Bash Windows regardless of MSYS_NO_PATHCONV.
+# Writes curl body to a temp file instead of /dev/null to avoid path issues.
+http_code() {
+  local _tmp_body
+  _tmp_body="$(mktemp)"
+  local _code
+  _code=$(curl -s -o "${_tmp_body}" -w "%{http_code}" "$@" 2>/dev/null) || _code="000"
+  rm -f "${_tmp_body}"
+  # Guard: if _code is empty or shorter than 3 chars, return 000
+  if [ -z "${_code}" ] || [ "${#_code}" -lt 3 ]; then
+    echo "000"
+    return
+  fi
+  # Return only the last 3 chars (the HTTP status code)
+  echo "${_code: -3}"
+}
 
 # --- Auto-detect Python binary (python3 on Linux/Mac, python on Windows) ---
 PYTHON_BIN=""
@@ -66,16 +89,15 @@ log "===== P0.1 Kong route smoke test ====="
 {
   echo "===== TV1 P0.1 Kong route smoke ====="
   date
-  git -C "${REPO_ROOT}" branch --show-current
-  git -C "${REPO_ROOT}" log --oneline -5
+  git branch --show-current
+  git log --oneline -5
   echo
 } | tee "${EVIDENCE_DIR}/p0-01-kong-route-smoke.txt"
 
 {
   echo "===== Health via Kong ====="
   for svc in users orders billing admin; do
-    code=$(curl -s -o /dev/null -w "%{http_code}" \
-      "${GATEWAY_URL}/api/v1/${svc}/health" 2>/dev/null || echo "000")
+    code=$(http_code "${GATEWAY_URL}/api/v1/${svc}/health")
     echo "${svc}/health -> ${code}"
     if [ "${code}" = "200" ]; then
       pass "${svc}/health 200"
@@ -181,12 +203,11 @@ log "===== P0.5 Rate limiting ====="
   echo "===== TV1 P0.5 Rate limit on protected route ====="
   got_429=false
   for i in $(seq 1 15); do
-    code=$(curl -s -o /dev/null -w "%{http_code}" \
+    code=$(http_code \
       -X POST "${GATEWAY_URL}/api/v1/admin/maintenance" \
       -H "Authorization: Bearer fake.jwt.token" \
       -H "Content-Type: application/json" \
-      -d '{"action":"health-check","reason":"rate-limit-test"}' 2>/dev/null \
-      || echo "000")
+      -d '{"action":"health-check","reason":"rate-limit-test"}')
     echo "request=${i} status=${code}"
     if [ "${code}" = "429" ]; then
       got_429=true
@@ -206,12 +227,11 @@ echo
 log "===== P0.6 Request size limit ====="
 {
   echo "===== TV1 P0.6 Small payload reaches upstream ====="
-  small_code=$(curl -s -o /dev/null -w "%{http_code}" \
+  small_code=$(http_code \
     -X POST "${GATEWAY_URL}/api/v1/billing/checkout" \
     -H "Authorization: Bearer abc" \
     -H "Content-Type: application/json" \
-    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}' 2>/dev/null \
-    || echo "000")
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')
   echo "Small payload status: ${small_code}"
   if [ "${small_code}" = "401" ] || [ "${small_code}" = "403" ]; then
     pass "Small payload reached upstream (auth error ${small_code} – not blocked by size)"
@@ -235,12 +255,11 @@ log "===== P0.6 Request size limit ====="
     { printf '{"data":"'; cat "${LARGE_FILE}"; printf '"}'; } > "${WRAPPED}" || true
     rm -f "${LARGE_FILE}"
 
-    large_code=$(curl -s -o /dev/null -w "%{http_code}" \
+    large_code=$(http_code \
       -X POST "${GATEWAY_URL}/api/v1/billing/checkout" \
       -H "Authorization: Bearer abc" \
       -H "Content-Type: application/json" \
-      --data-binary @"${WRAPPED}" 2>/dev/null \
-      || echo "000")
+      --data-binary @"${WRAPPED}")
     rm -f "${WRAPPED}"
 
     echo "Large payload (2MB+) status: ${large_code}"
@@ -258,25 +277,37 @@ echo
 # =============================================================================
 # P0.7 – Webhook HMAC valid/invalid/replay
 # =============================================================================
-log "===== P0.7 Webhook HMAC ====="
-WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+# Helper function to run the python client in a container (avoids host python/curl issues)
+# =============================================================================
+run_python_client() {
+  MSYS_NO_PATHCONV=1 docker run --rm --network infra_default \
+    -v "$(pwd)/infra/certs:/certs" \
+    -v "$(pwd)/tests/security:/scripts" \
+    python:3.13-slim python /scripts/webhook_client.py "$@"
+}
+
+# =============================================================================
+# P0.7 – Webhook HMAC (Valid)
+# =============================================================================
+log "===== TV1 P0.7 Valid webhook ====="
 {
-  echo "===== TV1 P0.7 Valid webhook ====="
   TS="$(date +%s)"
   NONCE="valid-$(random_nonce)"
-  BODY='{"event_id":"evt-tv1-valid","event_type":"payment.succeeded","checkout_id":"checkout-001","amount":150000}'
+  BODY='{"event_id":"evt-12345","event_type":"payment.succeeded","checkout_id":"co-67890"}'
   SIG="$(sign_hmac "${WEBHOOK_SECRET}" "${TS}" "${NONCE}" "${BODY}")"
+
   echo "Timestamp : ${TS}"
   echo "Nonce     : ${NONCE}"
   echo "Signature : ${SIG}"
 
-  valid_code=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X POST "${GATEWAY_URL}/api/v1/webhooks/payment" \
-    -H "Content-Type: application/json" \
-    -H "X-Webhook-Timestamp: ${TS}" \
-    -H "X-Webhook-Nonce: ${NONCE}" \
-    -H "X-Webhook-Signature: ${SIG}" \
-    --data-binary "${BODY}" 2>/dev/null || echo "000")
+  valid_code=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${TS}" \
+    --header "X-Webhook-Nonce: ${NONCE}" \
+    --header "X-Webhook-Signature: ${SIG}" \
+    --data "${BODY}" || echo "000")
   echo "Valid webhook status: ${valid_code}"
   if [ "${valid_code}" = "200" ]; then
     pass "Valid webhook accepted (HTTP 200)"
@@ -286,14 +317,14 @@ WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
 
   echo ""
   echo "===== TV1 P0.7 Invalid webhook (bad signature) ====="
-  invalid_code=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X POST "${GATEWAY_URL}/api/v1/webhooks/payment" \
-    -H "Content-Type: application/json" \
-    -H "X-Webhook-Timestamp: $(date +%s)" \
-    -H "X-Webhook-Nonce: invalid-nonce-$(random_nonce)" \
-    -H "X-Webhook-Signature: sha256=badhashbadhashbadhashbadhashbadhashbadhashbadhash0000000000000000" \
-    -d '{"event_id":"evt-bad","event_type":"payment.succeeded","checkout_id":"co-bad"}' 2>/dev/null \
-    || echo "000")
+  invalid_code=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: $(date +%s)" \
+    --header "X-Webhook-Nonce: invalid-nonce-$(random_nonce)" \
+    --header "X-Webhook-Signature: sha256=badhash0000000000000000" \
+    --data '{"event_id":"evt-bad","event_type":"payment.succeeded"}' || echo "000")
   echo "Invalid signature status: ${invalid_code}"
   if [ "${invalid_code}" = "401" ]; then
     pass "Invalid signature correctly rejected (401)"
@@ -308,25 +339,25 @@ WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
   BODY2='{"event_id":"evt-replay","event_type":"payment.succeeded","checkout_id":"checkout-replay"}'
   SIG2="$(sign_hmac "${WEBHOOK_SECRET}" "${TS2}" "${NONCE2}" "${BODY2}")"
 
-  replay1=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-    -X POST "${GATEWAY_URL}/api/v1/webhooks/payment" \
-    -H "Content-Type: application/json" \
-    -H "X-Webhook-Timestamp: ${TS2}" \
-    -H "X-Webhook-Nonce: ${NONCE2}" \
-    -H "X-Webhook-Signature: ${SIG2}" \
-    --data-binary "${BODY2}" 2>/dev/null || echo "HTTP_STATUS:000")
-  code1=$(echo "${replay1}" | grep HTTP_STATUS | cut -d: -f2)
+  code1=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${TS2}" \
+    --header "X-Webhook-Nonce: ${NONCE2}" \
+    --header "X-Webhook-Signature: ${SIG2}" \
+    --data "${BODY2}" || echo "000")
   echo "Replay send #1 status: ${code1}"
 
   # Send exact same request again (replay)
-  replay2=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-    -X POST "${GATEWAY_URL}/api/v1/webhooks/payment" \
-    -H "Content-Type: application/json" \
-    -H "X-Webhook-Timestamp: ${TS2}" \
-    -H "X-Webhook-Nonce: ${NONCE2}" \
-    -H "X-Webhook-Signature: ${SIG2}" \
-    --data-binary "${BODY2}" 2>/dev/null || echo "HTTP_STATUS:000")
-  code2=$(echo "${replay2}" | grep HTTP_STATUS | cut -d: -f2)
+  code2=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${TS2}" \
+    --header "X-Webhook-Nonce: ${NONCE2}" \
+    --header "X-Webhook-Signature: ${SIG2}" \
+    --data "${BODY2}" || echo "000")
   echo "Replay send #2 status: ${code2}"
 
   if [ "${code1}" = "200" ] && [ "${code2}" = "403" ]; then
@@ -356,13 +387,14 @@ log "===== P0.8 Webhook timestamp freshness ====="
   FSBODY='{"event_id":"evt-fresh","event_type":"payment.succeeded","checkout_id":"co-fresh"}'
   FSSIG="$(sign_hmac "${WEBHOOK_SECRET}" "${FSTS}" "${FSNONCE}" "${FSBODY}")"
 
-  fresh_code=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X POST "${GATEWAY_URL}/api/v1/webhooks/payment" \
-    -H "Content-Type: application/json" \
-    -H "X-Webhook-Timestamp: ${FSTS}" \
-    -H "X-Webhook-Nonce: ${FSNONCE}" \
-    -H "X-Webhook-Signature: ${FSSIG}" \
-    --data-binary "${FSBODY}" 2>/dev/null || echo "000")
+  fresh_code=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${FSTS}" \
+    --header "X-Webhook-Nonce: ${FSNONCE}" \
+    --header "X-Webhook-Signature: ${FSSIG}" \
+    --data "${FSBODY}" || echo "000")
   echo "Fresh timestamp status: ${fresh_code}"
   if [ "${fresh_code}" = "200" ]; then
     pass "Fresh timestamp accepted (200)"
@@ -377,13 +409,14 @@ log "===== P0.8 Webhook timestamp freshness ====="
   OLD_BODY='{"event_id":"evt-old-ts","event_type":"payment.succeeded","checkout_id":"co-ts-test"}'
   OLD_SIG="$(sign_hmac "${WEBHOOK_SECRET}" "${OLD_TS}" "${OLD_NONCE}" "${OLD_BODY}")"
 
-  old_code=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X POST "${GATEWAY_URL}/api/v1/webhooks/payment" \
-    -H "Content-Type: application/json" \
-    -H "X-Webhook-Timestamp: ${OLD_TS}" \
-    -H "X-Webhook-Nonce: ${OLD_NONCE}" \
-    -H "X-Webhook-Signature: ${OLD_SIG}" \
-    --data-binary "${OLD_BODY}" 2>/dev/null || echo "000")
+  old_code=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${OLD_TS}" \
+    --header "X-Webhook-Nonce: ${OLD_NONCE}" \
+    --header "X-Webhook-Signature: ${OLD_SIG}" \
+    --data "${OLD_BODY}" || echo "000")
   echo "Old timestamp (400s ago) status: ${old_code}"
   if [ "${old_code}" = "403" ]; then
     pass "Old timestamp correctly rejected with 403 (timestamp_expired)"
@@ -399,18 +432,46 @@ echo
 log "===== P0.9 Webhook mTLS status ====="
 {
   echo "===== TV1 P0.9 mTLS check ====="
-  mtls_found=$(grep -RIn \
-    "mtls\|client certificate\|ssl_verify_client\|client_cert\|ca\.crt\|client\.crt" \
-    "${REPO_ROOT}" \
-    --include="*.yml" --include="*.yaml" --include="*.conf" --include="*.py" \
-    2>/dev/null | grep -v "\.git" | head -10 || echo "")
+  
+  TS="$(date +%s)"
+  NONCE="mtls-valid-$(random_nonce)"
+  BODY='{"event_id":"evt-mtls-valid","event_type":"payment.succeeded"}'
+  SIG="$(sign_hmac "${WEBHOOK_SECRET}" "${TS}" "${NONCE}" "${BODY}")"
 
-  if [ -n "${mtls_found}" ]; then
-    echo "${mtls_found}"
-    pass "mTLS references found in codebase"
+  echo "--- Testing mTLS with valid client cert ---"
+  mtls_code=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${TS}" \
+    --header "X-Webhook-Nonce: ${NONCE}" \
+    --header "X-Webhook-Signature: ${SIG}" \
+    --data "${BODY}" || echo "000")
+  
+  if [ "${mtls_code}" = "200" ]; then
+    pass "mTLS: Request with valid client cert accepted (200)"
   else
-    echo "No mTLS configuration found."
-    limitation "mTLS not implemented – documented in p0-09-webhook-mtls-status.md"
+    fail "mTLS: Request with valid client cert rejected – got ${mtls_code}"
+  fi
+
+  echo ""
+  echo "--- Testing mTLS without client cert ---"
+  TS2="$(date +%s)"
+  NONCE2="mtls-nocert-$(random_nonce)"
+  SIG2="$(sign_hmac "${WEBHOOK_SECRET}" "${TS2}" "${NONCE2}" "${BODY}")"
+
+  nocert_code=$(run_python_client \
+    --url "https://kong:8443/api/v1/webhooks/payment" \
+    --header "Content-Type: application/json" \
+    --header "X-Webhook-Timestamp: ${TS2}" \
+    --header "X-Webhook-Nonce: ${NONCE2}" \
+    --header "X-Webhook-Signature: ${SIG2}" \
+    --data "${BODY}" || echo "000")
+
+  if [ "${nocert_code}" = "401" ] || [ "${nocert_code}" = "403" ]; then
+    pass "mTLS: Request without client cert correctly rejected (${nocert_code})"
+  else
+    fail "mTLS: Request without client cert NOT rejected – got ${nocert_code}"
   fi
 } | tee "${EVIDENCE_DIR}/p0-09-webhook-mtls-check.txt"
 echo
