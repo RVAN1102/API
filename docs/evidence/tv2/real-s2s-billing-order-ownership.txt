@@ -1,0 +1,37 @@
+==============================================
+  REAL S2S ORDER OWNERSHIP TESTS
+  Wed Jun 17 02:25:20 PM +07 2026
+==============================================
+
+===== Prepare tokens =====
+[INFO] ci-alice automation token obtained
+[INFO] ci-bob automation token obtained
+[INFO] billing service token obtained
+[INFO] admin service token obtained
+
+===== Billing checkout ownership =====
+[PASS] Alice checkout Alice order accepted -> 202
+[PASS] Alice checkout Bob order forbidden -> 403
+[PASS] Bob checkout Bob order accepted -> 202
+[PASS] Billing fake user token rejected -> 401
+[PASS] Billing malformed user token rejected -> 401
+[PASS] Unknown order checkout fail closed -> 403
+[PASS] Service token cannot call Billing checkout -> 403
+
+===== Order internal ownership endpoint =====
+[PASS] billing-service-client Order internal verify status -> 200
+[PASS] billing-service-client Order internal verify allowed=true
+[PASS] admin-service-client Order internal verify forbidden -> 403
+[PASS] human user Order internal verify forbidden -> 403
+[PASS] missing token Order internal verify rejected -> 403
+[PASS] fake token Order internal verify rejected -> 401
+[PASS] malformed token Order internal verify rejected -> 401
+
+===== Service-client least privilege =====
+[PASS] billing-service-client Admin maintenance forbidden -> 403
+[PASS] admin-service-client Admin maintenance allowed -> 200
+[PASS] billing-service-client users/me forbidden -> 403
+
+==============================================
+  REAL S2S RESULT: 17/17 passed, 0 failed
+==============================================

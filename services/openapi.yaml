@@ -130,6 +130,45 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /api/v1/orders/internal/verify-ownership:
+    post:
+      tags:
+        - Orders
+      operationId: verifyOrderOwnershipInternal
+      summary: Verify order ownership for internal Billing service calls
+      description: Internal service-to-service endpoint. Requires a valid Client Credentials access token for `billing-service-client` with role `order-ownership-read`. Human user tokens and other service clients are rejected.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: X-Correlation-ID
+          in: header
+          required: false
+          description: Correlation identifier propagated from Billing to Order.
+          schema:
+            type: string
+          example: "req-123456"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnershipVerificationRequest'
+      responses:
+        '200':
+          description: Ownership verification completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnershipVerificationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /api/v1/billing/health:
     get:
       tags:
@@ -304,6 +343,13 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
 
+    ValidationError:
+      description: Request body failed schema validation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
   schemas:
     HealthResponse:
       type: object
@@ -380,6 +426,35 @@ components:
         currency:
           type: string
           example: "VND"
+
+    OwnershipVerificationRequest:
+      type: object
+      required:
+        - order_id
+        - subject
+      properties:
+        order_id:
+          type: string
+          example: "ord-alice-1001"
+        subject:
+          type: string
+          example: "alice"
+
+    OwnershipVerificationResponse:
+      type: object
+      required:
+        - order_id
+        - allowed
+      properties:
+        order_id:
+          type: string
+          example: "ord-alice-1001"
+        allowed:
+          type: boolean
+          example: true
+        correlation_id:
+          type: string
+          example: "req-123456"
 
     CheckoutAcceptedResponse:
       type: object

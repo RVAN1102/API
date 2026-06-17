@@ -8,7 +8,7 @@ set -euo pipefail
 
 KEYCLOAK_BASE_URL="${KEYCLOAK_BASE_URL:-${KEYCLOAK_URL:-http://localhost:8080}}"
 KEYCLOAK_REALM="${KEYCLOAK_REALM:-topic10-sme-api}"
-CLIENT_ID="${SERVICE_CLIENT_ID:-sme-service-client}"
+CLIENT_ID="${SERVICE_CLIENT_ID:-billing-service-client}"
 CLIENT_SECRET="${SERVICE_CLIENT_SECRET:-}"
 TOKEN_FILE="${SERVICE_TOKEN_FILE:-/tmp/service-token.txt}"
 
@@ -92,10 +92,10 @@ roles = payload.get("realm_access", {}).get("roles", [])
 roles = sorted(str(role) for role in roles)
 scope = str(payload.get("scope", "")).strip()
 
-print("service_token_obtained=true")
+print("token_obtained=true")
 print(f"client_id={token_client_id}")
 print(f"token_length={len(token)}")
-print(f"token_ttl_seconds={ttl}")
+print(f"ttl_seconds={ttl}")
 if roles:
     print("roles=" + ",".join(roles))
 if scope:

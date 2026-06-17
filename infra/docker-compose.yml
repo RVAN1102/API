@@ -89,6 +89,9 @@ services:
       KEYCLOAK_URL: "http://keycloak:8080"
       KEYCLOAK_REALM: "topic10-sme-api"
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      BILLING_SERVICE_CLIENT_ID: "billing-service-client"
+      BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
+      ORDER_SERVICE_URL: "http://order-service:8000"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
@@ -141,6 +144,8 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
+      BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
+      ADMIN_SERVICE_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:?ADMIN_SERVICE_CLIENT_SECRET is required}"
     volumes:
       - ../idp/realm-export/topic10-realm.json:/opt/keycloak/data/import/topic10-sme-api-realm.json:ro
     ports:

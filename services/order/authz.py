@@ -16,6 +16,7 @@ ROLE_USER = "user"
 ROLE_ADMIN = "admin"
 ROLE_BILLING_SERVICE = "billing-service"
 ROLE_INTERNAL_SERVICE = "internal-service"
+ROLE_ORDER_OWNERSHIP_READ = "order-ownership-read"
 
 
 def _is_automation_fixture(payload: Dict[str, Any]) -> bool:
@@ -79,12 +80,39 @@ def has_role(payload: Dict[str, Any], *roles: str) -> bool:
     return any(r in user_roles for r in roles)
 
 
+def get_token_client_id(payload: Dict[str, Any]) -> str:
+    return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
+
+
 def require_user_or_admin(payload: Dict[str, Any]) -> None:
     require_role(payload, ROLE_USER, ROLE_ADMIN)
 
 
 def require_admin(payload: Dict[str, Any]) -> None:
     require_role(payload, ROLE_ADMIN)
+
+
+def require_service_client_role(
+    payload: Dict[str, Any],
+    required_client_id: str,
+    required_role: str,
+) -> None:
+    token_client_id = get_token_client_id(payload)
+    if token_client_id == required_client_id and has_role(payload, required_role):
+        return
+
+    user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden",
+            "message": (
+                f"Required service client '{required_client_id}' with role "
+                f"'{required_role}'. Token client: '{token_client_id}'. "
+                f"Token roles: {user_roles}"
+            ),
+        },
+    )
 
 
 def check_order_ownership(

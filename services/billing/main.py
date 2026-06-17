@@ -24,6 +24,7 @@ import logging
 import os
 import time
 from typing import Any, Dict, List, Optional, Set
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -41,6 +42,10 @@ KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+TOKEN_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
+ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "http://order-service:8000")
+BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
+BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
 
 # ---------------------------------------------------------------------------
 # Logging – structured JSON
@@ -99,11 +104,9 @@ _jwks_cache: Optional[Dict[str, Any]] = None
 ROLE_USER = "user"
 ROLE_ADMIN = "admin"
 
-ORDER_OWNERS: Dict[str, str] = {
-    "ord-alice-1001": "alice",
-    "ord-alice-1002": "alice",
-    "ord-bob-2001": "bob",
-    "ord-bob-2002": "bob",
+LAB_AUTOMATION_SUBJECTS: Dict[str, str] = {
+    "ci-alice": "alice",
+    "ci-bob": "bob",
 }
 
 
@@ -238,31 +241,148 @@ def _claim_as_string(value: Any) -> str:
     return ""
 
 
+def normalize_checkout_subject(subject: str) -> str:
+    # Production users should use their real preferred_username. The ci-* users
+    # are lab automation identities mapped to alice/bob for repeatable tests
+    # without using password-only human flows.
+    return LAB_AUTOMATION_SUBJECTS.get(subject, subject)
+
+
 def get_effective_subject(payload: Dict[str, Any]) -> str:
     if _is_automation_fixture(payload):
         automation_owner = _claim_as_string(payload.get("automation_owner"))
         if automation_owner:
-            return automation_owner
+            return normalize_checkout_subject(automation_owner)
 
     caller = _claim_as_string(payload.get("preferred_username"))
     if caller:
-        return caller
-    return _claim_as_string(payload.get("sub"))
+        return normalize_checkout_subject(caller)
+    return normalize_checkout_subject(_claim_as_string(payload.get("sub")))
 
 
-def can_checkout_order(payload: Dict[str, Any], order_id: str) -> bool:
-    if has_role(payload, ROLE_ADMIN):
-        return True
+async def require_checkout_access(
+    payload: Dict[str, Any] = Depends(get_current_token_payload),
+) -> Dict[str, Any]:
+    require_role(payload, ROLE_USER, ROLE_ADMIN)
+    return payload
 
-    order_owner = ORDER_OWNERS.get(order_id)
-    if not order_owner:
+
+def keycloak_token_request_headers() -> Dict[str, str]:
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    issuer_host = urlparse(EXPECTED_ISSUER).netloc
+    if issuer_host:
+        headers["Host"] = issuer_host
+    return headers
+
+
+async def obtain_billing_service_token() -> str:
+    if not BILLING_SERVICE_CLIENT_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "service_token_unavailable",
+                "message": "Billing service client secret is not configured",
+            },
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                TOKEN_URL,
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": BILLING_SERVICE_CLIENT_ID,
+                    "client_secret": BILLING_SERVICE_CLIENT_SECRET,
+                },
+                headers=keycloak_token_request_headers(),
+            )
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "service_token_unavailable",
+                "message": "Billing service could not reach identity provider",
+            },
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "service_token_unavailable",
+                "message": "Billing service token request failed",
+            },
+        )
+
+    try:
+        token = response.json().get("access_token", "")
+    except ValueError:
+        token = ""
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "service_token_unavailable",
+                "message": "Billing service token response was invalid",
+            },
+        )
+    return token
+
+
+async def verify_order_ownership_with_order_service(
+    order_id: str,
+    subject: str,
+    correlation_id: str,
+) -> bool:
+    service_token = await obtain_billing_service_token()
+    verify_url = f"{ORDER_SERVICE_URL}/api/v1/orders/internal/verify-ownership"
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                verify_url,
+                json={"order_id": order_id, "subject": subject},
+                headers={
+                    "Authorization": f"Bearer {service_token}",
+                    "Content-Type": "application/json",
+                    "X-Correlation-ID": correlation_id,
+                },
+            )
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "error": "ownership_verification_failed",
+                "message": "Order ownership could not be verified",
+            },
+        )
+
+    if response.status_code == 200:
+        try:
+            return bool(response.json().get("allowed"))
+        except ValueError:
+            return False
+
+    if response.status_code in (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND):
         return False
 
-    return get_effective_subject(payload) == order_owner
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "ownership_verification_failed",
+            "message": "Order ownership could not be verified",
+        },
+    )
 
 
-def require_order_owner_or_admin(payload: Dict[str, Any], order_id: str) -> None:
-    if can_checkout_order(payload, order_id):
+async def require_order_owner_via_order_service(
+    payload: Dict[str, Any],
+    order_id: str,
+    correlation_id: str,
+) -> None:
+    subject = get_effective_subject(payload)
+    if subject and await verify_order_ownership_with_order_service(order_id, subject, correlation_id):
         return
 
     raise HTTPException(
@@ -272,13 +392,6 @@ def require_order_owner_or_admin(payload: Dict[str, Any], order_id: str) -> None
             "message": "You do not have permission to checkout this order",
         },
     )
-
-
-async def require_checkout_access(
-    payload: Dict[str, Any] = Depends(get_current_token_payload),
-) -> Dict[str, Any]:
-    require_role(payload, ROLE_USER, ROLE_ADMIN)
-    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -346,9 +459,9 @@ async def create_checkout(
     Requires a valid Keycloak JWT with role 'user' or 'admin'.
     Requires order ownership unless the caller has role 'admin'.
     """
-    require_order_owner_or_admin(payload, body.order_id)
-
     correlation_id = request.headers.get("X-Correlation-ID", "")
+    await require_order_owner_via_order_service(payload, body.order_id, correlation_id)
+
     import uuid
     payment_id = f"pay-{uuid.uuid4().hex[:8]}"
 

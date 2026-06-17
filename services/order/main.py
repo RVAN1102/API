@@ -19,13 +19,21 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from pydantic import BaseModel
 
 from auth import extract_identity, get_current_token_payload
-from authz import check_order_ownership, get_effective_subject, require_user_or_admin
+from authz import (
+    ROLE_ORDER_OWNERSHIP_READ,
+    check_order_ownership,
+    get_effective_subject,
+    require_service_client_role,
+    require_user_or_admin,
+)
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -80,6 +88,24 @@ ORDERS: Dict[str, Dict[str, Any]] = {
     "ord-bob-2001":   {"order_id": "ord-bob-2001",   "owner_id": "bob",   "amount": 80000,  "status": "created", "currency": "VND"},
     "ord-bob-2002":   {"order_id": "ord-bob-2002",   "owner_id": "bob",   "amount": 310000, "status": "shipped", "currency": "VND"},
 }
+
+BILLING_SERVICE_CLIENT_ID = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
+
+
+class OwnershipVerificationRequest(BaseModel):
+    order_id: str
+    subject: str
+
+
+async def require_order_ownership_read(
+    payload: Dict[str, Any] = Depends(get_current_token_payload),
+) -> Dict[str, Any]:
+    require_service_client_role(
+        payload,
+        BILLING_SERVICE_CLIENT_ID,
+        ROLE_ORDER_OWNERSHIP_READ,
+    )
+    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -137,6 +163,58 @@ async def list_orders(
         "caller": caller,
         "orders": orders,
         "count": len(orders),
+        "correlation_id": correlation_id,
+    }
+
+
+@app.post("/api/v1/orders/internal/verify-ownership", tags=["Orders", "Internal"])
+async def verify_order_ownership(
+    body: OwnershipVerificationRequest,
+    request: Request,
+    _payload: Dict[str, Any] = Depends(require_order_ownership_read),
+):
+    """
+    Verify order ownership for internal service-to-service callers.
+
+    Only the billing-service-client with role order-ownership-read may call this
+    endpoint. Ownership is checked from the Order service ORDERS data.
+    """
+    correlation_id = request.headers.get("X-Correlation-ID", "")
+    order = ORDERS.get(body.order_id)
+    if not order:
+        log_event(
+            level="WARNING",
+            event_type="ownership_verification_failed",
+            method="POST",
+            path="/api/v1/orders/internal/verify-ownership",
+            status_code=404,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=correlation_id,
+            extra={"order_id": body.order_id, "decision": "not_found"},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "not_found", "message": "Order not found"},
+        )
+
+    allowed = order["owner_id"] == body.subject
+    log_event(
+        level="INFO" if allowed else "WARNING",
+        event_type="ownership_verification",
+        method="POST",
+        path="/api/v1/orders/internal/verify-ownership",
+        status_code=200,
+        client_ip=request.client.host if request.client else "unknown",
+        correlation_id=correlation_id,
+        extra={
+            "order_id": body.order_id,
+            "decision": "allowed" if allowed else "denied",
+        },
+    )
+
+    return {
+        "order_id": body.order_id,
+        "allowed": allowed,
         "correlation_id": correlation_id,
     }
 
