@@ -24,9 +24,10 @@ import time
 from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from auth import extract_identity, get_current_token_payload
+from auth import extract_identity, get_current_introspected_token_payload, get_current_token_payload
 from authz import (
     ROLE_ORDER_OWNERSHIP_READ,
     check_order_ownership,
@@ -97,8 +98,36 @@ class OwnershipVerificationRequest(BaseModel):
     subject: str
 
 
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+class OrderResponse(BaseModel):
+    order_id: str
+    owner_id: str
+    amount: float
+    status: str
+    currency: str
+    correlation_id: Optional[str] = None
+    note: Optional[str] = None
+
+
+class OrderListResponse(BaseModel):
+    caller: str
+    orders: List[OrderResponse]
+    count: int
+    correlation_id: str
+
+
+class OwnershipVerificationResponse(BaseModel):
+    order_id: str
+    allowed: bool
+    correlation_id: str
+
+
 async def require_order_ownership_read(
-    payload: Dict[str, Any] = Depends(get_current_token_payload),
+    payload: Dict[str, Any] = Depends(get_current_introspected_token_payload),
 ) -> Dict[str, Any]:
     require_service_client_role(
         payload,
@@ -106,6 +135,54 @@ async def require_order_ownership_read(
         ROLE_ORDER_OWNERSHIP_READ,
     )
     return payload
+
+
+def _auth_failure_reason(status_code: int, detail: Any, path: str) -> Optional[str]:
+    if status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return None
+    if not path.startswith("/api/v1/orders"):
+        return None
+
+    detail_text = json.dumps(detail, default=str).lower()
+    if "not authenticated" in detail_text:
+        return "missing_token"
+    if "expired" in detail_text:
+        return "expired_token"
+    if status_code == status.HTTP_401_UNAUTHORIZED or "invalid_token" in detail_text:
+        return "invalid_token"
+    if "required service client" in detail_text:
+        return "service_client_forbidden"
+    if "permission to access this order" in detail_text or "bola_attempt" in detail_text:
+        return "ownership_denied"
+    if "required role" in detail_text:
+        return "user_required"
+    return "missing_role"
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    reason = _auth_failure_reason(exc.status_code, exc.detail, request.url.path)
+    if reason:
+        correlation_id = request.headers.get("X-Correlation-ID", "")
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=request.method,
+            path=request.url.path,
+            status_code=exc.status_code,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=correlation_id,
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -134,13 +211,18 @@ async def log_requests(request: Request, call_next):
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/orders/health", tags=["Orders"])
+@app.get("/api/v1/orders/health", tags=["Orders"], response_model=HealthResponse)
 async def health_check():
     """Public health check. No authentication required."""
     return {"status": "ok", "service": "order-service"}
 
 
-@app.get("/api/v1/orders", tags=["Orders"])
+@app.get(
+    "/api/v1/orders",
+    tags=["Orders"],
+    response_model=OrderListResponse,
+    response_model_exclude_none=True,
+)
 async def list_orders(
     request: Request,
     payload: Dict[str, Any] = Depends(get_current_token_payload),
@@ -167,7 +249,11 @@ async def list_orders(
     }
 
 
-@app.post("/api/v1/orders/internal/verify-ownership", tags=["Orders", "Internal"])
+@app.post(
+    "/api/v1/orders/internal/verify-ownership",
+    tags=["Orders", "Internal"],
+    response_model=OwnershipVerificationResponse,
+)
 async def verify_order_ownership(
     body: OwnershipVerificationRequest,
     request: Request,
@@ -219,7 +305,12 @@ async def verify_order_ownership(
     }
 
 
-@app.get("/api/v1/orders/{order_id}", tags=["Orders"])
+@app.get(
+    "/api/v1/orders/{order_id}",
+    tags=["Orders"],
+    response_model=OrderResponse,
+    response_model_exclude_none=True,
+)
 async def get_order(
     order_id: str,
     request: Request,
@@ -242,7 +333,12 @@ async def get_order(
     return {**order, "correlation_id": correlation_id}
 
 
-@app.get("/api/v1/orders/{order_id}/vulnerable", tags=["Orders", "BOLA"])
+@app.get(
+    "/api/v1/orders/{order_id}/vulnerable",
+    tags=["Orders", "BOLA"],
+    response_model=OrderResponse,
+    response_model_exclude_none=True,
+)
 async def get_order_vulnerable(
     order_id: str,
     request: Request,
@@ -296,7 +392,12 @@ async def get_order_vulnerable(
     }
 
 
-@app.get("/api/v1/orders/{order_id}/fixed", tags=["Orders", "BOLA"])
+@app.get(
+    "/api/v1/orders/{order_id}/fixed",
+    tags=["Orders", "BOLA"],
+    response_model=OrderResponse,
+    response_model_exclude_none=True,
+)
 async def get_order_fixed(
     order_id: str,
     request: Request,

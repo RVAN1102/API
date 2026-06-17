@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import logging
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import Depends, HTTPException, status
@@ -18,8 +19,21 @@ from jose import JWTError, jwk, jwt
 
 KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
-EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+KEYCLOAK_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+EXPECTED_ISSUER: str = KEYCLOAK_ISSUER
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+INTROSPECTION_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
+TOKEN_INTROSPECTION_ENABLED: bool = (
+    os.environ.get("TOKEN_INTROSPECTION_ENABLED", "false").lower() == "true"
+)
+TOKEN_INTROSPECTION_CLIENT_ID: str = os.environ.get(
+    "ORDER_TOKEN_INTROSPECTION_CLIENT_ID",
+    os.environ.get("TOKEN_INTROSPECTION_CLIENT_ID", ""),
+)
+TOKEN_INTROSPECTION_CLIENT_SECRET: str = os.environ.get(
+    "ORDER_TOKEN_INTROSPECTION_CLIENT_SECRET",
+    os.environ.get("TOKEN_INTROSPECTION_CLIENT_SECRET", ""),
+)
 
 _jwks_cache: Optional[Dict[str, Any]] = None
 
@@ -96,10 +110,74 @@ async def validate_token(token: str) -> Dict[str, Any]:
     return payload
 
 
+def _introspection_failed_exception() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "error": "invalid_token",
+            "message": "Token introspection failed or token is inactive",
+        },
+    )
+
+
+def _introspection_headers() -> Dict[str, str]:
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    issuer_netloc = urlparse(KEYCLOAK_ISSUER).netloc
+    if issuer_netloc:
+        headers["Host"] = issuer_netloc
+    return headers
+
+
+async def require_introspection_active(token: str) -> None:
+    if not TOKEN_INTROSPECTION_ENABLED:
+        return
+
+    if not TOKEN_INTROSPECTION_CLIENT_ID or not TOKEN_INTROSPECTION_CLIENT_SECRET:
+        raise _introspection_failed_exception()
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                INTROSPECTION_URL,
+                data={
+                    "token": token,
+                    "client_id": TOKEN_INTROSPECTION_CLIENT_ID,
+                    "client_secret": TOKEN_INTROSPECTION_CLIENT_SECRET,
+                },
+                headers=_introspection_headers(),
+            )
+    except httpx.HTTPError:
+        raise _introspection_failed_exception()
+
+    if response.status_code != 200:
+        raise _introspection_failed_exception()
+
+    try:
+        body = response.json()
+        active = isinstance(body, dict) and body.get("active") is True
+    except ValueError:
+        active = False
+
+    if not active:
+        raise _introspection_failed_exception()
+
+
+async def validate_token_with_introspection(token: str) -> Dict[str, Any]:
+    payload = await validate_token(token)
+    await require_introspection_active(token)
+    return payload
+
+
 async def get_current_token_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     return await validate_token(credentials.credentials)
+
+
+async def get_current_introspected_token_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> Dict[str, Any]:
+    return await validate_token_with_introspection(credentials.credentials)
 
 
 def extract_identity(payload: Dict[str, Any]) -> Dict[str, Any]:
