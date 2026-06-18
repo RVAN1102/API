@@ -1,4 +1,4 @@
-# Security Metrics (TV3)
+# Security Metrics
 
 This directory contains scripts to measure security operational metrics:
 - **MTTD**: Mean Time To Detect

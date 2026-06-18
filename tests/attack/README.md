@@ -1,4 +1,4 @@
-# Attack Simulation Scripts (TV3)
+# Attack Simulation Scripts
 
 This directory contains scripts used to simulate attacks against the API Gateway and backend services.
 

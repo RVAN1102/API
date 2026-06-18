@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/zap/run-zap-baseline.sh
 #
-# OWASP ZAP Baseline Scan (TV3)
+# OWASP ZAP Baseline Scan
 #
 # Runs ZAP API scan against the Kong Gateway.
 # Uses Docker to run ZAP without local installation.

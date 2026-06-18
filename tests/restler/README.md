@@ -1,4 +1,4 @@
-# RESTler API Fuzzing (TV3)
+# RESTler API Fuzzing
 
 This directory contains configuration for Microsoft RESTler, a stateful REST API fuzzing tool.
 

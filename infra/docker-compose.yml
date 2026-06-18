@@ -168,7 +168,27 @@ services:
   # ---------------------------------------------------------------------------
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
-    command: start-dev --import-realm
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - |
+        set -eu
+
+        template="/opt/keycloak/data/import-template/topic10-sme-api-realm.json"
+        target="/opt/keycloak/data/import/topic10-sme-api-realm.json"
+
+        mkdir -p "$$(dirname "$$target")"
+
+        esc_billing=$$(printf '%s' "$$BILLING_SERVICE_CLIENT_SECRET" | sed 's/[\/&\\]/\\&/g')
+        esc_admin=$$(printf '%s' "$$ADMIN_SERVICE_CLIENT_SECRET" | sed 's/[\/&\\]/\\&/g')
+
+        sed \
+          -e "s/[$$]{BILLING_SERVICE_CLIENT_SECRET}/$$esc_billing/g" \
+          -e "s/[$$]{ADMIN_SERVICE_CLIENT_SECRET}/$$esc_admin/g" \
+          "$$template" > "$$target"
+
+        exec /opt/keycloak/bin/kc.sh start-dev --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -176,7 +196,7 @@ services:
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
       ADMIN_SERVICE_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:?ADMIN_SERVICE_CLIENT_SECRET is required}"
     volumes:
-      - ../idp/realm-export/topic10-realm.json:/opt/keycloak/data/import/topic10-sme-api-realm.json:ro
+      - ../idp/realm-export/topic10-realm.json:/opt/keycloak/data/import-template/topic10-sme-api-realm.json:ro
     ports:
       - "8080:8080"
     healthcheck:
@@ -256,6 +276,38 @@ services:
       - "3001:3000"
     depends_on:
       - loki
+
+  # ---------------------------------------------------------------------------
+  # TV3 – Jaeger (distributed tracing backend + UI)
+  # ---------------------------------------------------------------------------
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:14269/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV3 – OpenTelemetry Collector
+  # ---------------------------------------------------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.104.0
+    command: ["--config=/etc/otel/otel-collector.yml"]
+    volumes:
+      - ../infra/otel/otel-collector.yml:/etc/otel/otel-collector.yml:ro
+    depends_on:
+      - jaeger
+    expose:
+      - "4317"
+      - "4318"
 
 volumes:
   loki-data:

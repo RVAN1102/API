@@ -1,0 +1,142 @@
+=== OWASP ZAP Active Scan ===
+Date: 2026-06-18T05:49:06Z
+Target: http://localhost:8000
+Scan mode: active
+
+--- Step 1: Obtaining user token from Keycloak ---
+[OK] Auth token obtained; token not logged. Length: 1311 chars.
+
+--- Step 2: Preparing ZAP config ---
+[OK] Auth hook written (token not logged).
+
+--- Step 3: Validating OpenAPI spec ---
+[OK] OpenAPI spec path: services/openapi.yaml
+[OK] ZAP container OpenAPI spec path: /zap/wrk/services/openapi.yaml
+[OK] Endpoints in spec: 14
+
+--- Step 4: Running ZAP Active Scan ---
+[INFO] Using Docker image: ghcr.io/zaproxy/zaproxy:stable
+[INFO] Scan mode: active (not baseline)
+[INFO] OpenAPI target: /zap/wrk/services/openapi.yaml
+[INFO] Runtime base URL override: http://localhost:8000
+[INFO] zap-api-scan.py -t /zap/wrk/services/openapi.yaml -f openapi -a -O http://localhost:8000
+
+2026-06-18 05:49:06,924 Trigger hook: cli_opts, args: 1
+2026-06-18 05:49:06,925 Using port: 43791
+2026-06-18 05:49:06,925 Trigger hook: start_zap, args: 2
+2026-06-18 05:49:06,925 Starting ZAP
+2026-06-18 05:49:06,925 Params: ['/zap/zap-x.sh', '-daemon', '-port', '43791', '-host', '0.0.0.0', '-config', 'database.recoverylog=false', '-config', 'api.disablekey=true', '-config', 'api.addrs.addr.name=.*', '-config', 'api.addrs.addr.regex=true', '-config', 'stats.pkg.apiscan-api=1', '-addonupdate', '-addoninstall', 'pscanrulesBeta', '-addoninstall', 'pscanrulesAlpha']
+2026-06-18 05:49:06,928 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:07,931 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:08,933 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:09,935 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:10,937 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:11,939 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:12,941 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:13,943 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:14,945 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:15,947 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:16,949 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:17,950 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:18,952 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:19,955 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,038 http://localhost:43791 "GET http://zap/JSON/core/view/version/ HTTP/1.1" 200 20
+2026-06-18 05:49:20,039 ZAP Version 2.17.0
+2026-06-18 05:49:20,039 Took 13 seconds
+2026-06-18 05:49:20,039 Trigger hook: zap_started, args: 2
+2026-06-18 05:49:20,039 Tune
+2026-06-18 05:49:20,039 Disable all tags
+2026-06-18 05:49:20,040 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,048 http://localhost:43791 "GET http://zap/JSON/pscan/action/disableAllTags/ HTTP/1.1" 200 15
+2026-06-18 05:49:20,049 Set max pscan alerts
+2026-06-18 05:49:20,050 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,059 http://localhost:43791 "GET http://zap/JSON/pscan/action/setMaxAlertsPerRule/?maxAlerts=10 HTTP/1.1" 200 15
+2026-06-18 05:49:20,059 Trigger hook: zap_tuned, args: 1
+2026-06-18 05:49:20,061 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,070 http://localhost:43791 "GET http://zap/JSON/script/view/listEngines/ HTTP/1.1" 200 63
+2026-06-18 05:49:20,071 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,082 http://localhost:43791 "GET http://zap/JSON/script/action/load/?scriptName=Alert_on_HTTP_Response_Code_Errors.js&scriptType=httpsender&scriptEngine=Graal.js&fileName=%2Fhome%2Fzap%2F.ZAP_D%2Fscripts%2Fscripts%2Fhttpsender%2FAlert_on_HTTP_Response_Code_Errors.js HTTP/1.1" 200 15
+2026-06-18 05:49:20,084 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,094 http://localhost:43791 "GET http://zap/JSON/script/action/enable/?scriptName=Alert_on_HTTP_Response_Code_Errors.js HTTP/1.1" 200 15
+2026-06-18 05:49:20,096 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,104 http://localhost:43791 "GET http://zap/JSON/script/action/load/?scriptName=Alert_on_Unexpected_Content_Types.js&scriptType=httpsender&scriptEngine=Graal.js&fileName=%2Fhome%2Fzap%2F.ZAP_D%2Fscripts%2Fscripts%2Fhttpsender%2FAlert_on_Unexpected_Content_Types.js HTTP/1.1" 200 15
+2026-06-18 05:49:20,106 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,114 http://localhost:43791 "GET http://zap/JSON/script/action/enable/?scriptName=Alert_on_Unexpected_Content_Types.js HTTP/1.1" 200 15
+2026-06-18 05:49:20,115 Trigger hook: importing_openapi, args: 2
+2026-06-18 05:49:20,115 Import OpenAPI File /zap/wrk/services/openapi.yaml
+2026-06-18 05:49:20,116 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,899 http://localhost:43791 "GET http://zap/JSON/openapi/action/importFile/?file=%2Fzap%2Fwrk%2Fservices%2Fopenapi.yaml&target=http%3A%2F%2Flocalhost%3A8000 HTTP/1.1" 200 17
+2026-06-18 05:49:20,901 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,908 http://localhost:43791 "GET http://zap/JSON/core/view/urls/ HTTP/1.1" 200 1029
+2026-06-18 05:49:20,909 Using target from imported file: http://localhost:8000
+2026-06-18 05:49:20,909 Using override, new target: http://localhost:8000
+2026-06-18 05:49:20,909 Number of Imported URLs: 23
+2026-06-18 05:49:20,909 Import warnings: []
+2026-06-18 05:49:20,909 Trigger hook: zap_active_scan, args: 3
+2026-06-18 05:49:20,909 Active Scan http://localhost:8000 with policy API-Minimal
+2026-06-18 05:49:20,910 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:20,936 http://localhost:43791 "GET http://zap/JSON/ascan/action/scan/?url=http%3A%2F%2Flocalhost%3A8000&recurse=True&scanPolicyName=API-Minimal HTTP/1.1" 200 12
+2026-06-18 05:49:25,937 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:25,944 http://localhost:43791 "GET http://zap/JSON/ascan/view/status/?scanId=0 HTTP/1.1" 200 16
+2026-06-18 05:49:25,945 Active Scan complete
+2026-06-18 05:49:25,946 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:25,954 http://localhost:43791 "GET http://zap/JSON/ascan/view/scanProgress/?scanId=0 HTTP/1.1" 200 1783
+2026-06-18 05:49:25,955 ['http://localhost:8000', {'HostProcess': [{'Plugin': ['Remote File Inclusion', '7', 'release', 'Complete', '508', '100', '0']}, {'Plugin': ['External Redirect', '20019', 'release', 'Complete', '338', '90', '0']}, {'Plugin': ['Server Side Include', '40009', 'release', 'Complete', '154', '40', '0']}, {'Plugin': ['SQL Injection', '40018', 'release', 'Complete', '773', '226', '0']}, {'Plugin': ['Server Side Code Injection', '90019', 'release', 'Complete', '199', '80', '0']}, {'Plugin': ['Remote OS Command Injection', '90020', 'release', 'Complete', '439', '190', '0']}, {'Plugin': ['XPath Injection', '90021', 'release', 'Complete', '66', '30', '0']}, {'Plugin': ['XML External Entity Attack', '90023', 'release', 'Complete', '47', '0', '0']}, {'Plugin': ['Cloud Metadata Potentially Exposed', '90034', 'release', 'Complete', '104', '13', '0']}, {'Plugin': ['Server Side Template Injection', '90035', 'release', 'Complete', '321', '140', '0']}, {'Plugin': ['Server Side Template Injection (Blind)', '90036', 'release', 'Complete', '271', '120', '0']}, {'Plugin': ['Directory Browsing', '0', 'release', 'Complete', '103', '16', '0']}, {'Plugin': ['Buffer Overflow', '30001', 'release', 'Complete', '45', '10', '0']}, {'Plugin': ['Format String Error', '30002', 'release', 'Complete', '70', '30', '0']}, {'Plugin': ['CRLF Injection', '40003', 'release', 'Complete', '142', '70', '0']}, {'Plugin': ['Parameter Tampering', '40008', 'release', 'Complete', '43', '10', '0']}, {'Plugin': ['Spring Actuator Information Leak', '40042', 'release', 'Complete', '11', '2', '0']}, {'Plugin': ['Exponential Entity Expansion (Billion Laughs Attack)', '40044', 'release', 'Complete', '37', '0', '0']}, {'Plugin': ['XSLT Injection', '90017', 'release', 'Complete', '86', '44', '0']}, {'Plugin': ['SOAP Action Spoofing', '90026', 'beta', 'Complete', '35', '0', '0']}, {'Plugin': ['SOAP XML Injection', '90029', 'beta', 'Complete', '40', '0', '0']}]}]
+2026-06-18 05:49:25,955 Trigger hook: zap_active_scan_wrap, args: 1
+2026-06-18 05:49:25,956 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:25,959 http://localhost:43791 "GET http://zap/JSON/pscan/view/recordsToScan/ HTTP/1.1" 200 21
+2026-06-18 05:49:25,959 Records to scan...
+2026-06-18 05:49:25,960 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:25,963 http://localhost:43791 "GET http://zap/JSON/pscan/view/recordsToScan/ HTTP/1.1" 200 21
+2026-06-18 05:49:25,964 Passive scanning complete
+2026-06-18 05:49:25,964 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:25,968 http://localhost:43791 "GET http://zap/JSON/core/view/urls/ HTTP/1.1" 200 3230
+2026-06-18 05:49:25,969 Trigger hook: zap_get_alerts, args: 4
+2026-06-18 05:49:25,970 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,153 http://localhost:43791 "GET http://zap/JSON/core/view/alerts/?baseurl=http%3A%2F%2Flocalhost%3A8000&start=0&count=5000 HTTP/1.1" 200 152790
+2026-06-18 05:49:26,155 Reading 5000 alerts from 0
+2026-06-18 05:49:26,156 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,286 http://localhost:43791 "GET http://zap/JSON/core/view/alerts/?start=5000&count=5000 HTTP/1.1" 200 13
+2026-06-18 05:49:26,287 Total number of alerts: 120
+2026-06-18 05:49:26,287 Trigger hook: zap_get_alerts_wrap, args: 1
+2026-06-18 05:49:26,288 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,316 http://localhost:43791 "GET http://zap/JSON/ascan/view/scanners/?scanPolicyName=Default+Policy HTTP/1.1" 200 13564
+2026-06-18 05:49:26,317 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,323 http://localhost:43791 "GET http://zap/JSON/pscan/view/scanners/ HTTP/1.1" 200 9665
+2026-06-18 05:49:26,324 Trigger hook: print_rules_wrap, args: 2
+2026-06-18 05:49:26,324 Trigger hook: print_rules_wrap, args: 2
+2026-06-18 05:49:26,324 Trigger hook: print_rules_wrap, args: 2
+2026-06-18 05:49:26,324 Trigger hook: print_rules_wrap, args: 2
+2026-06-18 05:49:26,325 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,744 http://localhost:43791 "GET http://zap/OTHER/core/other/htmlreport/ HTTP/1.1" 200 129587
+2026-06-18 05:49:26,746 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,822 http://localhost:43791 "GET http://zap/OTHER/core/other/jsonreport/ HTTP/1.1" 200 42165
+2026-06-18 05:49:26,824 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,888 http://localhost:43791 "GET http://zap/OTHER/core/other/mdreport/ HTTP/1.1" 200 33355
+2026-06-18 05:49:26,889 Trigger hook: zap_pre_shutdown, args: 1
+2026-06-18 05:49:26,890 Starting new HTTP connection (1): localhost:43791
+2026-06-18 05:49:26,893 http://localhost:43791 "GET http://zap/JSON/core/action/shutdown/ HTTP/1.1" 200 15
+2026-06-18 05:49:26,894 Trigger hook: pre_exit, args: 3
+WARN-NEW: X-Content-Type-Options Header Missing [10021] x 4 
+WARN-NEW: Cross-Origin-Resource-Policy Header Missing or Invalid [90004] x 4 
+FAIL-NEW: 0	FAIL-INPROG: 0	WARN-NEW: 2	WARN-INPROG: 0	INFO: 0	IGNORE: 0	PASS: 120
+
+[INFO] ZAP exited with code 2
+[INFO] Non-zero exit may indicate findings, not script failure.
+
+--- Step 5: Generating triage summary ---
+
+ZAP Active Scan – Triage Summary:
+  High:          0
+  Medium:        0
+  Low:           2
+  Informational: 7
+  Total alerts:  9
+
+=== ZAP Active Scan Complete ===
+
+Reports saved:
+  docs/evidence/tv3/zap/zap-active-report.html
+  docs/evidence/tv3/zap/zap-active-report.json
+  docs/evidence/tv3/zap/zap-active-summary.md
+  docs/evidence/tv3/zap/zap-active-run.log
