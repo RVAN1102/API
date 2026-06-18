@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-bash "$ROOT_DIR/demo/mtls/ensure-mtls-certs.sh"
 # =============================================================================
 # TV1 Webhook Security – Automated Test Suite (Regression)
 # Sends webhook requests through Docker network with mTLS client certs,
@@ -54,6 +51,42 @@ log()  { echo -e "${CYAN}[WEBHOOK]${NC} $*"; }
 pass() { TOTAL=$((TOTAL+1)); PASSED=$((PASSED+1)); echo -e "${GREEN}[PASS]${NC} $*"; echo "PASS:$*" >> "${RESULT_FILE}"; }
 fail() { TOTAL=$((TOTAL+1)); FAILED=$((FAILED+1)); echo -e "${RED}[FAIL]${NC} $*"; echo "FAIL:$*" >> "${RESULT_FILE}"; }
 die()  { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
+
+wait_for_kong() {
+  local code
+  local health_url="http://localhost:8000/api/v1/users/health"
+
+  for attempt in $(seq 1 30); do
+    if code="$(curl -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
+      :
+    else
+      code="000"
+    fi
+
+    echo "[INFO] Kong readiness attempt ${attempt}/30: users health HTTP ${code}"
+    if [ "${code}" = "200" ]; then
+      echo "[INFO] Kong users health is ready (HTTP 200)"
+      return 0
+    fi
+    sleep 2
+  done
+
+  die "Kong did not return HTTP 200 from ${health_url} within 60s."
+}
+
+ensure_webhook_certs_and_reload_kong() {
+  bash "${REPO_ROOT}/demo/mtls/ensure-mtls-certs.sh"
+
+  echo "[INFO] Restarting Kong so nginx reloads the current webhook CA"
+  (
+    cd "${REPO_ROOT}/infra"
+    BILLING_SERVICE_CLIENT_SECRET="${BILLING_SERVICE_CLIENT_SECRET:-compose-restart-placeholder}" \
+    ADMIN_SERVICE_CLIENT_SECRET="${ADMIN_SERVICE_CLIENT_SECRET:-compose-restart-placeholder}" \
+    WEBHOOK_SECRET="${WEBHOOK_SECRET}" \
+      docker compose restart kong
+  )
+  wait_for_kong
+}
 
 sign_hmac() {
   local secret="$1" ts="$2" nonce="$3" body="$4"
@@ -144,18 +177,67 @@ EOF
     || die "Temporary webhook client certificate is missing extendedKeyUsage=clientAuth"
 }
 
-prepare_ephemeral_client_cert
-
 # =============================================================================
 # Docker-based webhook client (matches tv1-edge-webhook-tests.sh approach)
 # Runs inside Docker network so it can reach kong:8443 with mTLS
 # =============================================================================
 run_webhook_client() {
-  MSYS_NO_PATHCONV=1 docker run --rm --network infra_default \
+  MSYS_NO_PATHCONV=1 docker run --rm -i --network infra_default \
     -v "${WEBHOOK_CERT_DIR}:/certs:ro" \
-    -v "${REPO_ROOT}/tests/security:/scripts:ro" \
-    python:3.13-slim python /scripts/webhook_client.py "$@"
+    python:3.13-slim python - "$@" <<'PY'
+import argparse
+import ssl
+import sys
+import urllib.error
+import urllib.request
+
+
+parser = argparse.ArgumentParser(description="mTLS Webhook Test Client")
+parser.add_argument("--url", required=True)
+parser.add_argument("--cert", required=False)
+parser.add_argument("--key", required=False)
+parser.add_argument("--data", required=False)
+parser.add_argument("--header", action="append", default=[])
+args = parser.parse_args()
+
+context = ssl.create_default_context()
+context.check_hostname = False
+context.verify_mode = ssl.CERT_NONE
+
+if args.cert and args.key:
+    try:
+        context.load_cert_chain(certfile=args.cert, keyfile=args.key)
+    except Exception as exc:
+        print(f"Error loading cert: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+req = urllib.request.Request(args.url, method="POST")
+for header in args.header:
+    if ":" in header:
+        key, value = header.split(":", 1)
+        req.add_header(key.strip(), value.strip())
+
+data = args.data.encode("utf-8") if args.data else b""
+
+try:
+    response = urllib.request.urlopen(req, data=data, context=context)
+    print(response.getcode())
+except urllib.error.HTTPError as exc:
+    print(exc.code)
+    body = exc.read().decode("utf-8", errors="replace")
+    if body:
+        print(f"response_body={body}", file=sys.stderr)
+except urllib.error.URLError as exc:
+    print("000")
+    print(f"URLError: {exc}", file=sys.stderr)
+except Exception as exc:
+    print("000")
+    print(f"Exception: {exc}", file=sys.stderr)
+PY
 }
+
+ensure_webhook_certs_and_reload_kong
+prepare_ephemeral_client_cert
 
 # =============================================================================
 # 1. Valid HMAC (with mTLS client cert, via Docker network)
@@ -203,7 +285,7 @@ log "===== 2. Invalid Signature ====="
     --header "X-Webhook-Timestamp: $(date +%s)" \
     --header "X-Webhook-Nonce: invalid-$(random_nonce)" \
     --header "X-Webhook-Signature: sha256=badhash0000000000000000" \
-    --data '{"event_id":"evt-bad","event_type":"payment.succeeded"}' || echo "000")
+    --data '{"event_id":"evt-bad","event_type":"payment.succeeded","checkout_id":"checkout-bad"}' || echo "000")
   if [ "${invalid_code}" = "401" ]; then
     pass "Invalid signature correctly rejected (401)"
   else
@@ -218,7 +300,7 @@ log "===== 3. Replay Nonce ====="
 {
   TS2="$(date +%s)"
   NONCE2="replay-$(random_nonce)"
-  BODY2='{"event_id":"evt-replay","event_type":"payment.succeeded"}'
+  BODY2='{"event_id":"evt-replay","event_type":"payment.succeeded","checkout_id":"checkout-replay"}'
   SIG2="$(sign_hmac "${WEBHOOK_SECRET}" "${TS2}" "${NONCE2}" "${BODY2}")"
 
   code1=$(run_webhook_client \
@@ -253,7 +335,7 @@ log "===== 4. Old Timestamp ====="
 {
   OLD_TS=$(( $(date +%s) - 400 ))
   OLD_NONCE="old-ts-$(random_nonce)"
-  OLD_BODY='{"event_id":"evt-old-ts","event_type":"payment.succeeded"}'
+  OLD_BODY='{"event_id":"evt-old-ts","event_type":"payment.succeeded","checkout_id":"checkout-old-ts"}'
   OLD_SIG="$(sign_hmac "${WEBHOOK_SECRET}" "${OLD_TS}" "${OLD_NONCE}" "${OLD_BODY}")"
 
   old_code=$(run_webhook_client \
@@ -280,7 +362,7 @@ log "===== 5. Missing Headers ====="
     --url "https://kong:8443/api/v1/webhooks/payment" \
     --cert "/certs/webhook-client.crt" --key "/certs/webhook-client.key" \
     --header "Content-Type: application/json" \
-    --data '{"event_id":"evt-missing","event_type":"payment.succeeded"}' || echo "000")
+    --data '{"event_id":"evt-missing","event_type":"payment.succeeded","checkout_id":"checkout-missing"}' || echo "000")
   if [ "${missing_code}" = "401" ]; then
     pass "Missing headers correctly rejected by Gateway WAF (401)"
   else
@@ -295,7 +377,7 @@ log "===== 6. mTLS with valid client cert ====="
 {
   TS="$(date +%s)"
   NONCE="mtls-valid-$(random_nonce)"
-  BODY='{"event_id":"evt-mtls-valid","event_type":"payment.succeeded"}'
+  BODY='{"event_id":"evt-mtls-valid","event_type":"payment.succeeded","checkout_id":"checkout-mtls-valid"}'
   SIG="$(sign_hmac "${WEBHOOK_SECRET}" "${TS}" "${NONCE}" "${BODY}")"
 
   mtls_code=$(run_webhook_client \
@@ -321,7 +403,7 @@ log "===== 7. mTLS without client cert ====="
 {
   TS="$(date +%s)"
   NONCE="mtls-nocert-$(random_nonce)"
-  BODY='{"event_id":"evt-mtls-nocert","event_type":"payment.succeeded"}'
+  BODY='{"event_id":"evt-mtls-nocert","event_type":"payment.succeeded","checkout_id":"checkout-mtls-nocert"}'
   SIG="$(sign_hmac "${WEBHOOK_SECRET}" "${TS}" "${NONCE}" "${BODY}")"
 
   nocert_code=$(run_webhook_client \
