@@ -109,17 +109,19 @@ curl -v "http://localhost:8000/api/v1/admin/metadata-fixed?url=http://localhost:
 
 ---
 
-### Scenario 5: SSRF – Legitimate External URL Allowed
+### Scenario 5: SSRF - Public URL Validation vs Docker Egress
 
 ```bash
-curl -v "http://localhost:8000/api/v1/admin/metadata-fixed?url=https://api.github.com/meta" \
+curl -v "http://localhost:8000/api/v1/admin/metadata-fetch/fixed" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
-  -H "X-Correlation-ID: ssrf-legit-001"
+  -H "Content-Type: application/json" \
+  -H "X-Correlation-ID: ssrf-legit-001" \
+  -d '{"fetch_url":"https://example.com"}'
 ```
 
-**Expected:** HTTP 200 (public URL allowed)  
-**Actual:** HTTP 200  
-**Result:** ✅ Legitimate URL works (allowlist not too restrictive)  
+**Expected:** URL validation accepts the syntactically safe public URL, while Docker network egress prevents direct public Internet access from admin-service.  
+**Runtime proof:** `tests/security/network-egress-control-tests.sh` writes `docs/evidence/tv1/ssrf-egress/network-egress-control-runtime-after-fix.txt`.  
+**Result:** Application-layer URL validation and Docker-layer egress control are separate controls.  
 
 ---
 
@@ -146,17 +148,11 @@ BLOCKED_PREFIXES = [
 
 In addition to URL validation, Docker network policy limits egress:
 
-```yaml
-# infra/docker-compose.yml (network isolation)
-networks:
-  internal:
-    driver: bridge
-    internal: true   # No external access for internal services
-  gateway:
-    driver: bridge   # Kong exposed externally
-```
+`infra/docker-compose.yml` defines explicit Docker networks. The backend services (`user-service`, `order-service`, `billing-service`, and `admin-service`) attach only to `internal: true` networks and are not attached to `infra_default` or any other general non-internal network.
 
-The admin service runs on the `internal` network. Even if URL validation was bypassed, the metadata IP `169.254.169.254` is not routable within the Docker internal network.
+Kong remains reachable from the host on `infra_default` and joins per-service internal upstream networks. Billing and Order share `billing-order-s2s-internal` for the approved internal service-to-service path.
+
+Runtime verification is handled by `tests/security/network-egress-control-tests.sh`, which proves admin-service cannot directly reach `169.254.169.254` or `https://example.com`, while billing-service can still reach order-service.
 
 ---
 
@@ -168,7 +164,7 @@ The admin service runs on the `internal` network. Even if URL validation was byp
 | Metadata IP (fixed) | 403 | 403 | ✅ Blocked |
 | GCP metadata DNS | 403 | 403 | ✅ Blocked |
 | Internal localhost | 403 | 403 | ✅ Blocked |
-| Public URL | 200 | 200 | ✅ Allowed |
+| Public URL validation | URL accepted by app validation; direct egress blocked by Docker | Runtime evidence file | Defense-in-depth |
 
 ---
 
@@ -182,7 +178,7 @@ See `observability/alerts/loki-alert-rules.yml`
 ## Verdict
 
 ✅ URL validation blocks all internal/metadata SSRF patterns.  
-✅ Docker network isolation provides defense-in-depth.  
-✅ Vulnerable endpoint shows attack risk; fixed endpoint shows mitigation.  
-✅ All SSRF attempts logged with event_type=ssrf_blocked.  
-✅ No credential leak possible (lab metadata IP not routable).
+✅ Docker network isolation provides defense-in-depth with `internal: true` backend networks.  
+✅ Vulnerable endpoint shows attack risk; fixed endpoint shows application-layer mitigation.  
+✅ Runtime egress test proves direct metadata and public Internet egress are blocked from admin-service.  
+✅ All SSRF attempts logged with event_type=ssrf_blocked.

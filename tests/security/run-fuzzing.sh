@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # tests/security/run-fuzzing.sh
 #
-# API Fuzzing – RESTler + fuzz-negative-tests
+# Structured Negative API Tests
 #
-# Runs RESTler fuzzing against the Kong Gateway using OpenAPI spec.
-# Falls back to structured fuzz-negative-tests if RESTler unavailable.
+# Runs deterministic malformed-input and fail-closed checks against Kong.
+# This is not RESTler fuzzing. RESTler execution lives in
+# tests/restler/run-restler-check.sh and fails if RESTler is unavailable.
 #
 # Usage:
 #   bash tests/security/run-fuzzing.sh
@@ -28,7 +29,7 @@ FINDINGS_FILE="${REPORT_DIR}/fuzzing-findings.json"
 
 mkdir -p "${REPORT_DIR}"
 
-echo "=== API Fuzzing ===" | tee "${LOG_FILE}"
+echo "=== Structured Negative API Tests ===" | tee "${LOG_FILE}"
 echo "Date: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" | tee -a "${LOG_FILE}"
 echo "Target: ${BASE_URL}" | tee -a "${LOG_FILE}"
 echo "OpenAPI: services/openapi.yaml" | tee -a "${LOG_FILE}"
@@ -205,27 +206,6 @@ fuzz_request POST "/api/v1/orders" \
 echo "" | tee -a "${LOG_FILE}"
 
 # --------------------------------------------------
-# RESTler check (if available via Docker)
-# --------------------------------------------------
-echo "--- RESTler Docker Check ---" | tee -a "${LOG_FILE}"
-if docker image inspect "mcr.microsoft.com/restler:9.2.4" > /dev/null 2>&1; then
-  echo "[INFO] RESTler image found. Running compile check..." | tee -a "${LOG_FILE}"
-  docker run --rm \
-    --network host \
-    -v "$(pwd):/api:ro" \
-    mcr.microsoft.com/restler:9.2.4 \
-    dotnet /RESTler/restler/Restler.dll \
-    compile --api_spec /api/services/openapi.yaml \
-    2>&1 | tee -a "${LOG_FILE}" || true
-else
-  echo "[INFO] RESTler Docker image not available locally." | tee -a "${LOG_FILE}"
-  echo "[INFO] Structured fuzz-negative-tests cover the equivalent scenarios." | tee -a "${LOG_FILE}"
-  echo "[INFO] See: tests/security/fuzz-negative-tests.sh" | tee -a "${LOG_FILE}"
-fi
-
-echo "" | tee -a "${LOG_FILE}"
-
-# --------------------------------------------------
 # Write findings JSON
 # --------------------------------------------------
 {
@@ -252,7 +232,7 @@ echo "" | tee -a "${LOG_FILE}"
 # --------------------------------------------------
 # Final summary
 # --------------------------------------------------
-echo "=== Fuzzing Complete ===" | tee -a "${LOG_FILE}"
+echo "=== Structured Negative Tests Complete ===" | tee -a "${LOG_FILE}"
 echo "" | tee -a "${LOG_FILE}"
 echo "Total requests:  ${TOTAL_REQUESTS}" | tee -a "${LOG_FILE}"
 echo "4xx responses:   ${ERRORS_4XX} (expected for invalid inputs)" | tee -a "${LOG_FILE}"

@@ -50,7 +50,7 @@ Khi có nghi ngờ cấu hình Edge bị thay đổi:
 ## 7. Xoay (Rotate) Webhook Client Certificate (mTLS)
 **Triệu chứng**: Nghi ngờ private key của client certificate bị lộ, hoặc client cert đã hết hạn.
 **Cách xử lý**:
-1. Chạy lại script sinh cert để cấp phát một certificate mới: `bash infra/certs/generate-webhook-mtls-certs.sh`.
+1. Chạy lại script sinh cert để cấp phát một certificate mới: `bash demo/mtls/generate-mtls-certs.sh`.
 2. Gửi file `infra/certs/webhook-client.crt` và `webhook-client.key` (qua kênh an toàn) cho đối tác webhook sender.
 3. Nếu CA certificate (`webhook-ca.crt`) cũng được sinh lại, cần mount file mới vào Kong Gateway và restart Kong (`docker compose restart kong`).
 4. Theo dõi log của Billing Service: nếu thấy `webhook_mtls_rejected` (mã lỗi 401 `mtls_client_cert_required`), có thể đối tác vẫn đang dùng cert cũ không hợp lệ hoặc cert chưa được CA trust.

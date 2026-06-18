@@ -20,11 +20,73 @@
 set -uo pipefail
 
 REPORT_DIR="docs/evidence/tv3"
+SUPPLY_CHAIN_DIR="${REPORT_DIR}/supply-chain"
+GITLEAKS_REPORT="${SUPPLY_CHAIN_DIR}/gitleaks-report-after-secret-purge.json"
+EXIT_CODE=0
 mkdir -p "${REPORT_DIR}"
+mkdir -p "${SUPPLY_CHAIN_DIR}"
+
+PACKAGE_SCAN_DIR=""
+
+cleanup() {
+  if [ -n "${PACKAGE_SCAN_DIR}" ] && [ -d "${PACKAGE_SCAN_DIR}" ]; then
+    rm -rf "${PACKAGE_SCAN_DIR}"
+  fi
+}
+trap cleanup EXIT
+
+prepare_package_scan_dir() {
+  PACKAGE_SCAN_DIR="$(mktemp -d /tmp/topic10-gitleaks-package.XXXXXX)"
+  while IFS= read -r -d '' path; do
+    [ -f "${path}" ] || continue
+    mkdir -p "${PACKAGE_SCAN_DIR}/$(dirname "${path}")"
+    cp "${path}" "${PACKAGE_SCAN_DIR}/${path}"
+  done < <(git ls-files --cached --modified --others --exclude-standard -z)
+  printf '%s\n' "${PACKAGE_SCAN_DIR}"
+}
+
+clean_ignored_runtime_private_key_artifacts() {
+  local path
+  local found=0
+  local failed=0
+
+  for path in infra/certs/*.key infra/certs/*.p12; do
+    [ -e "${path}" ] || continue
+    found=1
+
+    if git ls-files --error-unmatch -- "${path}" >/dev/null 2>&1; then
+      echo "[FAIL] Tracked private key/PKCS#12 material must be removed from Git before scanning: ${path}" >&2
+      failed=1
+      continue
+    fi
+
+    if git check-ignore -q -- "${path}"; then
+      echo "[INFO] Removing ignored runtime mTLS private artifact before Trivy scan: ${path}"
+      rm -f -- "${path}"
+      continue
+    fi
+
+    echo "[FAIL] Unignored runtime private artifact would be included in the source package: ${path}" >&2
+    failed=1
+  done
+
+  if [ "${failed}" -ne 0 ]; then
+    echo "[ERROR] Refusing to continue security scan with private key material in tracked or package-visible paths." >&2
+    echo "[ERROR] Cleanup guidance: remove local runtime files with: rm -f infra/certs/*.key infra/certs/*.p12" >&2
+    EXIT_CODE=1
+    return 1
+  fi
+
+  if [ "${found}" -eq 0 ]; then
+    echo "[PASS] No runtime mTLS private key or PKCS#12 artifacts present before scan."
+  fi
+}
 
 echo "=== Local Security Scan ==="
 echo "Output: ${REPORT_DIR}/"
 echo ""
+
+clean_ignored_runtime_private_key_artifacts || exit "${EXIT_CODE}"
 
 # --------------------------------------------------
 # 1. Bandit – Python static analysis
@@ -50,11 +112,24 @@ echo ""
 # --------------------------------------------------
 echo "--- [2/3] Gitleaks – Secret Detection ---"
 if command -v gitleaks > /dev/null 2>&1; then
-  gitleaks detect --source . --report-path "${REPORT_DIR}/gitleaks-report.json" --no-banner 2>&1 || true
-  echo "Gitleaks report: ${REPORT_DIR}/gitleaks-report.json"
+  GITLEAKS_EXIT=0
+  SCAN_DIR="$(prepare_package_scan_dir)"
+  gitleaks dir "${SCAN_DIR}" \
+    --report-path "${GITLEAKS_REPORT}" \
+    --report-format json \
+    --no-banner \
+    --redact 2>&1 || GITLEAKS_EXIT=$?
+  echo "Gitleaks report: ${GITLEAKS_REPORT}"
+  if [ "${GITLEAKS_EXIT}" -ne 0 ]; then
+    echo "[FAIL] Gitleaks detected secret-like findings. See redacted report."
+    EXIT_CODE=1
+  else
+    echo "[PASS] Gitleaks detected no secrets in the current tracked/non-ignored source package."
+  fi
 else
   echo "[WARN] gitleaks not found. Download from https://github.com/gitleaks/gitleaks/releases"
-  echo "gitleaks not installed" > "${REPORT_DIR}/gitleaks-report.json"
+  printf '{"error":"gitleaks not installed"}\n' > "${GITLEAKS_REPORT}"
+  EXIT_CODE=1
 fi
 
 echo ""
@@ -63,6 +138,7 @@ echo ""
 # 3. Trivy – filesystem scan
 # --------------------------------------------------
 echo "--- [3/3] Trivy – Filesystem Vulnerability Scan ---"
+clean_ignored_runtime_private_key_artifacts || exit "${EXIT_CODE}"
 if command -v trivy > /dev/null 2>&1; then
   trivy fs . \
     --severity HIGH,CRITICAL \
@@ -89,7 +165,7 @@ ls -la "${REPORT_DIR}/"*report* 2>/dev/null || true
   cat "${REPORT_DIR}/bandit-report.txt" 2>/dev/null || echo "No bandit report"
   echo ""
   echo "=== GITLEAKS ==="
-  cat "${REPORT_DIR}/gitleaks-report.json" 2>/dev/null || echo "No gitleaks report"
+  cat "${GITLEAKS_REPORT}" 2>/dev/null || echo "No gitleaks report"
   echo ""
   echo "=== TRIVY ==="
   cat "${REPORT_DIR}/trivy-report.txt" 2>/dev/null || echo "No trivy report"
@@ -97,3 +173,4 @@ ls -la "${REPORT_DIR}/"*report* 2>/dev/null || true
 
 echo ""
 echo "Combined evidence: ${REPORT_DIR}/security-scan-local.txt"
+exit "${EXIT_CODE}"

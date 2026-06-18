@@ -1,9 +1,21 @@
---- SSRF Network Egress Control Strategy ---
-In this lab, egress control is primarily handled by the Admin Service's application-layer validation (URL blocklist & DNS rebinding checks).
-For production environments (e.g., AWS/Kubernetes), network-layer egress control should be applied using:
-1. AWS Security Groups: Deny outbound traffic to 169.254.169.254 for application pods.
-2. Kubernetes NetworkPolicies: Egress rules explicitly denying traffic to cloud metadata IP.
-3. Docker/iptables equivalent:
-   iptables -I DOCKER-USER -d 169.254.169.254 -j DROP
+--- SSRF Network Egress Control Evidence ---
+Docker-level network egress control is implemented in infra/docker-compose.yml.
 
-Application-layer block evidence has been captured in ssrf-fixed-block-metadata-ip.txt.
+Network-layer control:
+- user-service, order-service, billing-service, and admin-service attach only to Docker networks with internal: true.
+- Kong remains reachable from the host on infra_default and joins per-service internal upstream networks for backend routing.
+- billing-service and order-service share billing-order-s2s-internal for the approved internal service-to-service path.
+- backend services do not attach to infra_default or other non-internal management networks, so they do not inherit unrestricted Internet egress.
+
+Runtime proof:
+- Script: tests/security/network-egress-control-tests.sh
+- Evidence output: docs/evidence/tv1/ssrf-egress/network-egress-control-runtime-after-fix.txt
+- Assertions:
+  1. admin-service cannot directly reach http://169.254.169.254/latest/meta-data/
+  2. admin-service cannot directly reach https://example.com
+  3. billing-service can reach order-service over the approved internal S2S network
+  4. backend service Docker networks are internal:true at runtime
+
+Application-layer SSRF URL validation is separate:
+- Evidence: docs/evidence/tv1/ssrf-egress/ssrf-fixed-block-metadata-ip.txt
+- Control: Admin fixed endpoint rejects metadata/private/internal URLs before fetch.

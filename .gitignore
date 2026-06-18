@@ -2,13 +2,15 @@
 .env
 .env.*
 !.env.example
+infra/.env
+infra/.env.*
+!infra/.env.example
 *.key
 *.pem
+*.p12
 infra/certs/*
 !infra/certs/.gitkeep
-!infra/certs/generate-webhook-mtls-certs.sh
-!infra/certs/webhook-ca.crt
-!infra/certs/webhook-client.crt
+!infra/certs/README.md
 
 # Generated demo state and reports
 demo/webhook/.nonce-cache.json

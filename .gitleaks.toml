@@ -1,0 +1,11 @@
+title = "Topic 10 API Security Gitleaks config"
+
+[allowlist]
+description = "Allow documented placeholders and local realm identifiers only"
+regexes = [
+  '''Authorization:\s+Bearer\s+(\$\{?[A-Z0-9_]+\}?|abc|fake\.jwt\.token|\[REDACTED_JWT\]|<[^>]+>)''',
+  '''eyJhbGciOiJSUzI1NiJ9\.fake\.fake''',
+  '''KEYCLOAK_REALM["']?,?\s*[:=]\s*["']?topic10-sme-api["']?''',
+  '''keycloak_realm\s*=\s*["']topic10-sme-api["']''',
+]
+

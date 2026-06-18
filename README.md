@@ -175,6 +175,15 @@ bash tests/attack/rate-limit-trigger.sh
 bash ci/run-local-security-scan.sh
 ```
 
+## Final Evidence Before Packaging
+
+Run this while the project is still inside the real Git repository, before
+removing `.git` or creating a zip/package archive:
+
+```bash
+bash scripts/generate-final-evidence.sh
+```
+
 ## MTTD/MTTR Measurement
 
 ```bash

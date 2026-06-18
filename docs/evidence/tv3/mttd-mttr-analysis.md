@@ -1,25 +1,16 @@
 # MTTD/MTTR Analysis
 
-Generated: Wed Jun 17 10:53:07 AM UTC 2026
+This legacy response-time based evidence is superseded.
 
-## Methodology
+Authoritative methodology and outputs now live at:
 
-In this prototype, security events are detected **synchronously** – the backend service
-validates the request and logs the event in the same HTTP call. Therefore:
+- `docs/evidence/tv3/metrics/mttd-mttr-alert-based-results.csv`
+- `docs/evidence/tv3/metrics/mttd-mttr-alert-based-analysis.md`
+- `tests/metrics/measure-mttd-mttr.sh`
 
-- **MTTD** ≈ response time of the blocked request (detection happens during request processing)
-- **MTTR** ≈ same as MTTD (the HTTP 4xx response IS the mitigation action)
+## Correct Methodology
 
-## Results Summary
-
-| Scenario | MTTD (ms) | MTTR (ms) | HTTP Status |
-|---|---|---|---|
-| ssrf_blocked | 1500 | 1500 | 403 |
-| rate_limit_429 | 100 | 100 | 429 |
-| webhook_invalid_signature | 12 | 12 | 401 |
-
-## Limitations
-
-- Async log-based detection (e.g., Grafana alert) would add latency not measured here.
-- Rate limiting detection is measured from the 429 response timing.
-- BOLA detection requires an authenticated user token.
+- **MTTD** is `alert_fired - attack_start`.
+- **MTTR** is `remediation_done - alert_fired`.
+- `alert_fired` must come from Grafana/Loki alert state or LogQL threshold detection.
+- HTTP response milliseconds are not a valid MTTD measurement.

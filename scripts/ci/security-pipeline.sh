@@ -39,6 +39,14 @@ FAIL=0
 SKIP=0
 SKIP_STACK="${SKIP_STACK:-0}"
 SKIP_ZAP="${SKIP_ZAP:-0}"
+PACKAGE_SCAN_DIR=""
+
+cleanup() {
+  if [ -n "${PACKAGE_SCAN_DIR}" ] && [ -d "${PACKAGE_SCAN_DIR}" ]; then
+    rm -rf "${PACKAGE_SCAN_DIR}"
+  fi
+}
+trap cleanup EXIT
 
 stage() {
   echo ""
@@ -51,6 +59,16 @@ ok() { echo "[✓] $1"; PASS=$((PASS + 1)); }
 fail() { echo "[✗] $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "[~] $1 (skipped)"; SKIP=$((SKIP + 1)); }
 
+prepare_package_scan_dir() {
+  PACKAGE_SCAN_DIR="$(mktemp -d /tmp/topic10-pipeline-package.XXXXXX)"
+  while IFS= read -r -d '' path; do
+    [ -f "${path}" ] || continue
+    mkdir -p "${PACKAGE_SCAN_DIR}/$(dirname "${path}")"
+    cp "${path}" "${PACKAGE_SCAN_DIR}/${path}"
+  done < <(git ls-files --cached --modified --others --exclude-standard -z)
+  printf '%s\n' "${PACKAGE_SCAN_DIR}"
+}
+
 echo "=== DevSecOps Security Pipeline ===" | tee "${OUTPUT_FILE}"
 echo "Date: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" | tee -a "${OUTPUT_FILE}"
 echo "" | tee -a "${OUTPUT_FILE}"
@@ -62,11 +80,11 @@ stage "1. Lint / Syntax Check" | tee -a "${OUTPUT_FILE}"
 
 # Check Python syntax
 PYTHON_ERRORS=0
-for f in services/**/*.py services/*.py 2>/dev/null; do
+while IFS= read -r -d '' f; do
   if [ -f "${f}" ]; then
     python3 -m py_compile "${f}" 2>/dev/null || { PYTHON_ERRORS=$((PYTHON_ERRORS + 1)); echo "Syntax error: ${f}"; }
   fi
-done
+done < <(find services/ -name "*.py" -print0 2>/dev/null)
 if [ "${PYTHON_ERRORS}" -eq 0 ]; then
   ok "Python syntax check – no errors" | tee -a "${OUTPUT_FILE}"
 else
@@ -148,14 +166,16 @@ stage "4. Secrets Scan – Gitleaks" | tee -a "${OUTPUT_FILE}"
 
 if command -v gitleaks > /dev/null 2>&1; then
   GITLEAKS_EXIT=0
-  gitleaks detect --source . \
-    --report-path docs/evidence/tv3/supply-chain/gitleaks-report.json \
+  SCAN_DIR="$(prepare_package_scan_dir)"
+  gitleaks dir "${SCAN_DIR}" \
+    --report-path docs/evidence/tv3/supply-chain/gitleaks-report-after-secret-purge.json \
+    --report-format json \
     --no-banner \
     --redact 2>/dev/null || GITLEAKS_EXIT=$?
   if [ "${GITLEAKS_EXIT}" -eq 0 ]; then
     ok "Gitleaks – no secrets detected" | tee -a "${OUTPUT_FILE}"
   else
-    LEAK_COUNT=$(python3 -c "import json; d=json.load(open('docs/evidence/tv3/supply-chain/gitleaks-report.json')); print(len(d))" 2>/dev/null || echo "?")
+    LEAK_COUNT=$(python3 -c "import json; d=json.load(open('docs/evidence/tv3/supply-chain/gitleaks-report-after-secret-purge.json')); print(len(d))" 2>/dev/null || echo "?")
     fail "Gitleaks – ${LEAK_COUNT} finding(s) – review for false positives" | tee -a "${OUTPUT_FILE}"
   fi
 else

@@ -1,2 +1,4 @@
---- Fetching https://httpbin.org/get from fixed endpoint ---
-[FAIL] Fixed endpoint did not return 200 (got 403)
+--- Requesting https://example.com through fixed endpoint ---
+Application-layer SSRF validation permits public http/https URLs that do not resolve to private, loopback, or metadata IP ranges.
+Docker network egress control is evaluated separately by tests/security/network-egress-control-tests.sh.
+After the Docker network fix, admin-service must not directly complete outbound public Internet fetches.
