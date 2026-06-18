@@ -2,7 +2,7 @@
 
 This directory contains all QA/regression/security evidence produced by TV3 (Huy).
 
-**Last updated:** 2026-06-17
+**Last updated:** 2026-06-18
 
 ---
 
@@ -33,8 +33,9 @@ This directory contains all QA/regression/security evidence produced by TV3 (Huy
 | `supply-chain/bandit-report.json` | `ci/run-local-security-scan.sh` | SAST JSON report |
 | `supply-chain/sca-summary.md` | `ci/run-local-security-scan.sh` | SCA: 0 CRITICAL vulnerabilities |
 | `supply-chain/sca-report.txt` | `ci/run-local-security-scan.sh` | Trivy table output |
-| `supply-chain/gitleaks-summary.md` | `ci/run-local-security-scan.sh` | Secrets scan: 0 active secrets |
-| `supply-chain/gitleaks-report.json` | `ci/run-local-security-scan.sh` | Gitleaks JSON |
+| `supply-chain/gitleaks-summary.md` | `ci/run-local-security-scan.sh` | Superseded Gitleaks claim; points to post-purge evidence |
+| `supply-chain/gitleaks-report-after-secret-purge.json` | `ci/run-local-security-scan.sh` | Current tracked/non-ignored package Gitleaks JSON (`[]`) |
+| `supply-chain/gitleaks-secret-purge-summary.md` | `tests/security/verify-no-tracked-secrets.sh` | Secret purge verification and scope |
 | `supply-chain/sbom-cyclonedx.json` | `scripts/security/generate-sbom.sh` | SBOM CycloneDX 1.4 |
 | `supply-chain/sbom-spdx.json` | `scripts/security/generate-sbom.sh` | SBOM SPDX 2.3 |
 | `supply-chain/sbom-summary.md` | `scripts/security/generate-sbom.sh` | SBOM summary |
@@ -138,7 +139,7 @@ This file.
 | `p1-03-fuzz-negative-tests.txt` | `tests/security/fuzz-negative-tests.sh` | Malformed input handled |
 | `security-scan-local.txt` | `ci/run-local-security-scan.sh` | Combined security scan |
 | `bandit-report.txt` | `ci/run-local-security-scan.sh` | SAST text report |
-| `gitleaks-report.json` | `ci/run-local-security-scan.sh` | Gitleaks scan |
+| `supply-chain/gitleaks-report-after-secret-purge.json` | `ci/run-local-security-scan.sh` | Post-purge Gitleaks package scan |
 | `trivy-report.txt` | `ci/run-local-security-scan.sh` | Trivy table |
 
 ---

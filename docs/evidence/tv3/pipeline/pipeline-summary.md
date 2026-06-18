@@ -13,7 +13,7 @@
 | 1. Lint/Syntax Check | Python/Bash | ✅ PASS | – |
 | 2. SAST | Bandit v1.8.0 | ✅ PASS (0 HIGH) | `supply-chain/bandit-report.json` |
 | 3. SCA | Trivy v0.50.x | ✅ PASS (0 CRITICAL) | `supply-chain/sca-report.txt` |
-| 4. Secrets Scan | Gitleaks v8.x | ✅ PASS (0 active) | `supply-chain/gitleaks-report.json` |
+| 4. Secrets Scan | Gitleaks v8.x | Superseded by 2026-06-18 post-purge package scan | `supply-chain/gitleaks-report-after-secret-purge.json` |
 | 5. SBOM | Trivy CycloneDX | ✅ PASS | `supply-chain/sbom-cyclonedx.json` |
 | 6. Build Check | Docker Compose | ✅ PASS | – |
 | 7. Artifact Signing | Cosign | ✅ PASS | `supply-chain/cosign-verify-output.txt` |
