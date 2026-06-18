@@ -1,8 +1,8 @@
 {
 	"@programName": "ZAP",
 	"@version": "2.17.0",
-	"@generated": "Thu, 18 Jun 2026 05:49:26",
-	"created": "2026-06-18T05:49:26.749250273Z",
+	"@generated": "Thu, 18 Jun 2026 12:31:41",
+	"created": "2026-06-18T12:31:41.606246079Z",
 	"site":[ 
 		{
 			"@name": "http://localhost:8000",
@@ -21,7 +21,7 @@
 					"desc": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
 					"instances":[ 
 						{
-							"id": "509",
+							"id": "725",
 							"uri": "http://localhost:8000/api/v1/admin/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/health",
 							"method": "GET",
@@ -31,7 +31,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "495",
+							"id": "702",
 							"uri": "http://localhost:8000/api/v1/billing/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/health",
 							"method": "GET",
@@ -41,7 +41,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "483",
+							"id": "721",
 							"uri": "http://localhost:8000/api/v1/orders/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
 							"method": "GET",
@@ -51,7 +51,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "484",
+							"id": "3",
 							"uri": "http://localhost:8000/api/v1/users/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
 							"method": "GET",
@@ -81,7 +81,7 @@
 					"desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
 					"instances":[ 
 						{
-							"id": "463",
+							"id": "703",
 							"uri": "http://localhost:8000/api/v1/admin/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/health",
 							"method": "GET",
@@ -91,7 +91,7 @@
 							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
 						},
 						{
-							"id": "462",
+							"id": "696",
 							"uri": "http://localhost:8000/api/v1/billing/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/health",
 							"method": "GET",
@@ -101,7 +101,7 @@
 							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
 						},
 						{
-							"id": "461",
+							"id": "705",
 							"uri": "http://localhost:8000/api/v1/orders/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
 							"method": "GET",
@@ -111,7 +111,7 @@
 							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
 						},
 						{
-							"id": "464",
+							"id": "0",
 							"uri": "http://localhost:8000/api/v1/users/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
 							"method": "GET",
@@ -141,7 +141,7 @@
 					"desc": "<p>A response code of 404 was returned by the server.</p><p>This may indicate that the application is failing to handle unexpected input correctly.</p><p>Raised by the 'Alert on HTTP Response Code Error' script</p>",
 					"instances":[ 
 						{
-							"id": "21",
+							"id": "28",
 							"uri": "http://localhost:8000",
 							"nodeName": "http:\/\/localhost:8000",
 							"method": "GET",
@@ -151,7 +151,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1205",
+							"id": "1182",
 							"uri": "http://localhost:8000/",
 							"nodeName": "http:\/\/localhost:8000\/",
 							"method": "GET",
@@ -161,9 +161,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "10",
-							"uri": "http://localhost:8000/5229812978343309281",
-							"nodeName": "http:\/\/localhost:8000\/5229812978343309281",
+							"id": "17",
+							"uri": "http://localhost:8000/2291788917542178958",
+							"nodeName": "http:\/\/localhost:8000\/2291788917542178958",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -171,7 +171,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "22",
+							"id": "29",
 							"uri": "http://localhost:8000/api",
 							"nodeName": "http:\/\/localhost:8000\/api",
 							"method": "GET",
@@ -181,7 +181,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1207",
+							"id": "1185",
 							"uri": "http://localhost:8000/api/",
 							"nodeName": "http:\/\/localhost:8000\/api\/",
 							"method": "GET",
@@ -191,9 +191,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "11",
-							"uri": "http://localhost:8000/api/3266248030183945495",
-							"nodeName": "http:\/\/localhost:8000\/api\/3266248030183945495",
+							"id": "18",
+							"uri": "http://localhost:8000/api/8738691109996394301",
+							"nodeName": "http:\/\/localhost:8000\/api\/8738691109996394301",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -201,7 +201,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "23",
+							"id": "30",
 							"uri": "http://localhost:8000/api/v1",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1",
 							"method": "GET",
@@ -211,7 +211,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1209",
+							"id": "1187",
 							"uri": "http://localhost:8000/api/v1/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/",
 							"method": "GET",
@@ -221,9 +221,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "12",
-							"uri": "http://localhost:8000/api/v1/8781942358330379357",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/8781942358330379357",
+							"id": "19",
+							"uri": "http://localhost:8000/api/v1/5887164291499273727",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/5887164291499273727",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -231,7 +231,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "25",
+							"id": "36",
 							"uri": "http://localhost:8000/api/v1/admin",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin",
 							"method": "GET",
@@ -241,7 +241,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "146",
+							"id": "151",
 							"uri": "http://localhost:8000/api/v1/admin",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin",
 							"method": "GET",
@@ -251,7 +251,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1210",
+							"id": "1189",
 							"uri": "http://localhost:8000/api/v1/admin/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/",
 							"method": "GET",
@@ -261,9 +261,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "13",
-							"uri": "http://localhost:8000/api/v1/admin/4007812227501452039",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/4007812227501452039",
+							"id": "20",
+							"uri": "http://localhost:8000/api/v1/admin/7553276863016447161",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/7553276863016447161",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -271,7 +271,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1381",
+							"id": "1359",
 							"uri": "http://localhost:8000/api/v1/admin/actuator/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/actuator\/health",
 							"method": "GET",
@@ -281,7 +281,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "33",
+							"id": "42",
 							"uri": "http://localhost:8000/api/v1/billing",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing",
 							"method": "GET",
@@ -291,7 +291,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "250",
+							"id": "259",
 							"uri": "http://localhost:8000/api/v1/billing",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing",
 							"method": "GET",
@@ -301,7 +301,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1212",
+							"id": "1192",
 							"uri": "http://localhost:8000/api/v1/billing/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/",
 							"method": "GET",
@@ -311,9 +311,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "14",
-							"uri": "http://localhost:8000/api/v1/billing/3026730012853599911",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/3026730012853599911",
+							"id": "21",
+							"uri": "http://localhost:8000/api/v1/billing/3134622656245721998",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/3134622656245721998",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -321,7 +321,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "2",
+							"id": "9",
 							"uri": "http://localhost:8000/api/v1/orders",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders",
 							"method": "GET",
@@ -331,7 +331,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1213",
+							"id": "1191",
 							"uri": "http://localhost:8000/api/v1/orders/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/",
 							"method": "GET",
@@ -341,9 +341,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "15",
-							"uri": "http://localhost:8000/api/v1/orders/4000001566402305290",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/4000001566402305290",
+							"id": "22",
+							"uri": "http://localhost:8000/api/v1/orders/2945948438672128196",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/2945948438672128196",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -351,7 +351,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "38",
+							"id": "46",
 							"uri": "http://localhost:8000/api/v1/orders/internal",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal",
 							"method": "GET",
@@ -361,7 +361,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1215",
+							"id": "1193",
 							"uri": "http://localhost:8000/api/v1/orders/internal/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal\/",
 							"method": "GET",
@@ -371,9 +371,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "16",
-							"uri": "http://localhost:8000/api/v1/orders/internal/4201134461270040261",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal\/4201134461270040261",
+							"id": "23",
+							"uri": "http://localhost:8000/api/v1/orders/internal/7348343369402804088",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal\/7348343369402804088",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -381,7 +381,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "3",
+							"id": "10",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001",
 							"method": "GET",
@@ -391,7 +391,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1217",
+							"id": "1196",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001\/",
 							"method": "GET",
@@ -401,9 +401,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "17",
-							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001/5765114180886680961",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001\/5765114180886680961",
+							"id": "24",
+							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001/7975401262036768588",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001\/7975401262036768588",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -411,7 +411,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "5",
+							"id": "12",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001/fixed",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001\/fixed",
 							"method": "GET",
@@ -421,7 +421,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1216",
+							"id": "1195",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001/fixed/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001\/fixed\/",
 							"method": "GET",
@@ -431,7 +431,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "43",
+							"id": "50",
 							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001",
 							"method": "GET",
@@ -441,7 +441,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1219",
+							"id": "1197",
 							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/",
 							"method": "GET",
@@ -451,9 +451,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "18",
-							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/691074649565276629",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/691074649565276629",
+							"id": "25",
+							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/7956102833460257525",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/7956102833460257525",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -461,7 +461,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "4",
+							"id": "11",
 							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable",
 							"method": "GET",
@@ -471,7 +471,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1220",
+							"id": "1199",
 							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable\/",
 							"method": "GET",
@@ -481,7 +481,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "48",
+							"id": "60",
 							"uri": "http://localhost:8000/api/v1/users",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users",
 							"method": "GET",
@@ -491,7 +491,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1105",
+							"id": "1075",
 							"uri": "http://localhost:8000/api/v1/users",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users",
 							"method": "GET",
@@ -501,7 +501,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1222",
+							"id": "1201",
 							"uri": "http://localhost:8000/api/v1/users/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/",
 							"method": "GET",
@@ -511,9 +511,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "19",
-							"uri": "http://localhost:8000/api/v1/users/7406146115447455904",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/7406146115447455904",
+							"id": "26",
+							"uri": "http://localhost:8000/api/v1/users/849953127988256592",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/849953127988256592",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -521,7 +521,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "0",
+							"id": "1",
 							"uri": "http://localhost:8000/api/v1/users/me",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/me",
 							"method": "GET",
@@ -531,7 +531,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1",
+							"id": "4",
 							"uri": "http://localhost:8000/api/v1/users/profile",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/profile",
 							"method": "GET",
@@ -541,7 +541,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "54",
+							"id": "65",
 							"uri": "http://localhost:8000/api/v1/webhooks",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/webhooks",
 							"method": "GET",
@@ -551,7 +551,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1224",
+							"id": "1202",
 							"uri": "http://localhost:8000/api/v1/webhooks/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/webhooks\/",
 							"method": "GET",
@@ -561,9 +561,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "20",
-							"uri": "http://localhost:8000/api/v1/webhooks/8129936376887285665",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/webhooks\/8129936376887285665",
+							"id": "27",
+							"uri": "http://localhost:8000/api/v1/webhooks/1068188158635759835",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/webhooks\/1068188158635759835",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -571,7 +571,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "8",
+							"id": "15",
 							"uri": "http://localhost:8000/api/v1/admin/maintenance",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/maintenance ()({action})",
 							"method": "POST",
@@ -581,7 +581,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "61",
+							"id": "72",
 							"uri": "http://localhost:8000/api/v1/admin/maintenance",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/maintenance ()({action})",
 							"method": "POST",
@@ -591,7 +591,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1202",
+							"id": "1178",
 							"uri": "http://localhost:8000/api/v1/admin/maintenance/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/maintenance\/ ()({action})",
 							"method": "POST",
@@ -601,7 +601,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "7",
+							"id": "14",
 							"uri": "http://localhost:8000/api/v1/billing/checkout",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
 							"method": "POST",
@@ -611,7 +611,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "218",
+							"id": "224",
 							"uri": "http://localhost:8000/api/v1/billing/checkout",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
 							"method": "POST",
@@ -621,7 +621,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1200",
+							"id": "1181",
 							"uri": "http://localhost:8000/api/v1/billing/checkout/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout\/ ()({order_id,amount,currency})",
 							"method": "POST",
@@ -631,7 +631,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "6",
+							"id": "13",
 							"uri": "http://localhost:8000/api/v1/orders/internal/verify-ownership",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal\/verify-ownership ()({order_id,subject})",
 							"method": "POST",
@@ -641,7 +641,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "29",
+							"id": "35",
 							"uri": "http://localhost:8000/api/v1/orders/internal/verify-ownership",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal\/verify-ownership ()({order_id,subject})",
 							"method": "POST",
@@ -651,7 +651,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "1201",
+							"id": "1180",
 							"uri": "http://localhost:8000/api/v1/orders/internal/verify-ownership/",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/internal\/verify-ownership\/ ()({order_id,subject})",
 							"method": "POST",
@@ -661,7 +661,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "9",
+							"id": "16",
 							"uri": "http://localhost:8000/api/v1/webhooks/payment",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/webhooks\/payment ()({event_id,event_type,checkout_id,amount})",
 							"method": "POST",
@@ -671,7 +671,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "918",
+							"id": "895",
 							"uri": "http://localhost:8000/computeMetadata/v1/",
 							"nodeName": "http:\/\/localhost:8000\/computeMetadata\/v1\/ ()({action})",
 							"method": "POST",
@@ -681,7 +681,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "909",
+							"id": "887",
 							"uri": "http://localhost:8000/latest/meta-data/",
 							"nodeName": "http:\/\/localhost:8000\/latest\/meta-data\/ ()({action})",
 							"method": "POST",
@@ -691,7 +691,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "965",
+							"id": "938",
 							"uri": "http://localhost:8000/metadata/instance",
 							"nodeName": "http:\/\/localhost:8000\/metadata\/instance ()({action})",
 							"method": "POST",
@@ -701,7 +701,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "969",
+							"id": "945",
 							"uri": "http://localhost:8000/metadata/v1",
 							"nodeName": "http:\/\/localhost:8000\/metadata\/v1 ()({action})",
 							"method": "POST",
@@ -711,7 +711,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "929",
+							"id": "906",
 							"uri": "http://localhost:8000/opc/v1/instance/",
 							"nodeName": "http:\/\/localhost:8000\/opc\/v1\/instance\/ ()({action})",
 							"method": "POST",
@@ -721,7 +721,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "945",
+							"id": "918",
 							"uri": "http://localhost:8000/opc/v2/instance/",
 							"nodeName": "http:\/\/localhost:8000\/opc\/v2\/instance\/ ()({action})",
 							"method": "POST",
@@ -731,7 +731,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "974",
+							"id": "950",
 							"uri": "http://localhost:8000/openstack/latest/meta_data.json",
 							"nodeName": "http:\/\/localhost:8000\/openstack\/latest\/meta_data.json ()({action})",
 							"method": "POST",
@@ -761,7 +761,17 @@
 					"desc": "<p>The response contents are not storable by caching components such as proxy servers. If the response does not contain sensitive, personal or user-specific information, it may benefit from being stored and cached, to improve performance.</p>",
 					"instances":[ 
 						{
-							"id": "471",
+							"id": "691",
+							"uri": "http://localhost:8000/api/v1/orders",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "687",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001",
 							"method": "GET",
@@ -771,7 +781,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "476",
+							"id": "707",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001/fixed",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001\/fixed",
 							"method": "GET",
@@ -781,7 +791,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "480",
+							"id": "679",
 							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable",
 							"method": "GET",
@@ -791,17 +801,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "478",
-							"uri": "http://localhost:8000/api/v1/users/me",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/me",
-							"method": "GET",
-							"param": "",
-							"attack": "",
-							"evidence": "403",
-							"otherinfo": ""
-						},
-						{
-							"id": "473",
+							"id": "704",
 							"uri": "http://localhost:8000/api/v1/billing/checkout",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
 							"method": "POST",
@@ -818,7 +818,7 @@
 					"reference": "<p>https://datatracker.ietf.org/doc/html/rfc7234</p><p>https://datatracker.ietf.org/doc/html/rfc7231</p><p>https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html</p>",
 					"cweid": "524",
 					"wascid": "13",
-					"sourceid": "11"
+					"sourceid": "10"
 				},
 				{
 					"pluginid": "90005",
@@ -831,7 +831,7 @@
 					"desc": "<p>Specifies how and where the data would be used. For instance, if the value is audio, then the requested resource must be audio data and not any other type of resource.</p>",
 					"instances":[ 
 						{
-							"id": "521",
+							"id": "711",
 							"uri": "http://localhost:8000/api/v1/orders",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders",
 							"method": "GET",
@@ -841,17 +841,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "506",
-							"uri": "http://localhost:8000/api/v1/orders/health",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
-							"method": "GET",
-							"param": "Sec-Fetch-Dest",
-							"attack": "",
-							"evidence": "",
-							"otherinfo": ""
-						},
-						{
-							"id": "516",
+							"id": "694",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001",
 							"method": "GET",
@@ -861,9 +851,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "507",
-							"uri": "http://localhost:8000/api/v1/users/me",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/me",
+							"id": "686",
+							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable",
 							"method": "GET",
 							"param": "Sec-Fetch-Dest",
 							"attack": "",
@@ -871,18 +861,18 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "510",
-							"uri": "http://localhost:8000/api/v1/billing/checkout",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
-							"method": "POST",
+							"id": "7",
+							"uri": "http://localhost:8000/api/v1/users/health",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
+							"method": "GET",
 							"param": "Sec-Fetch-Dest",
 							"attack": "",
 							"evidence": "",
 							"otherinfo": ""
 						}
 					],
-					"count": "5",
-					"systemic": true,
+					"count": "4",
+					"systemic": false,
 					"solution": "<p>Ensure that Sec-Fetch-Dest header is included in request headers.</p>",
 					"otherinfo": "",
 					"reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Dest</p>",
@@ -901,7 +891,7 @@
 					"desc": "<p>Allows to differentiate between requests for navigating between HTML pages and requests for loading resources like images, audio etc.</p>",
 					"instances":[ 
 						{
-							"id": "502",
+							"id": "700",
 							"uri": "http://localhost:8000/api/v1/orders",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders",
 							"method": "GET",
@@ -911,17 +901,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "492",
-							"uri": "http://localhost:8000/api/v1/orders/health",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
-							"method": "GET",
-							"param": "Sec-Fetch-Mode",
-							"attack": "",
-							"evidence": "",
-							"otherinfo": ""
-						},
-						{
-							"id": "508",
+							"id": "693",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001",
 							"method": "GET",
@@ -931,9 +911,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "504",
-							"uri": "http://localhost:8000/api/v1/users/me",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/me",
+							"id": "684",
+							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable",
 							"method": "GET",
 							"param": "Sec-Fetch-Mode",
 							"attack": "",
@@ -941,18 +921,18 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "488",
-							"uri": "http://localhost:8000/api/v1/billing/checkout",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
-							"method": "POST",
+							"id": "6",
+							"uri": "http://localhost:8000/api/v1/users/health",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
+							"method": "GET",
 							"param": "Sec-Fetch-Mode",
 							"attack": "",
 							"evidence": "",
 							"otherinfo": ""
 						}
 					],
-					"count": "5",
-					"systemic": true,
+					"count": "4",
+					"systemic": false,
 					"solution": "<p>Ensure that Sec-Fetch-Mode header is included in request headers.</p>",
 					"otherinfo": "",
 					"reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Mode</p>",
@@ -971,7 +951,7 @@
 					"desc": "<p>Specifies the relationship between request initiator's origin and target's origin.</p>",
 					"instances":[ 
 						{
-							"id": "498",
+							"id": "697",
 							"uri": "http://localhost:8000/api/v1/orders",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders",
 							"method": "GET",
@@ -981,17 +961,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "491",
-							"uri": "http://localhost:8000/api/v1/orders/health",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
-							"method": "GET",
-							"param": "Sec-Fetch-Site",
-							"attack": "",
-							"evidence": "",
-							"otherinfo": ""
-						},
-						{
-							"id": "489",
+							"id": "692",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001",
 							"method": "GET",
@@ -1001,9 +971,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "494",
-							"uri": "http://localhost:8000/api/v1/users/me",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/me",
+							"id": "683",
+							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable",
 							"method": "GET",
 							"param": "Sec-Fetch-Site",
 							"attack": "",
@@ -1011,18 +981,18 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "486",
-							"uri": "http://localhost:8000/api/v1/billing/checkout",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
-							"method": "POST",
+							"id": "5",
+							"uri": "http://localhost:8000/api/v1/users/health",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
+							"method": "GET",
 							"param": "Sec-Fetch-Site",
 							"attack": "",
 							"evidence": "",
 							"otherinfo": ""
 						}
 					],
-					"count": "5",
-					"systemic": true,
+					"count": "4",
+					"systemic": false,
 					"solution": "<p>Ensure that Sec-Fetch-Site header is included in request headers.</p>",
 					"otherinfo": "",
 					"reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Site</p>",
@@ -1041,7 +1011,7 @@
 					"desc": "<p>Specifies if a navigation request was initiated by a user.</p>",
 					"instances":[ 
 						{
-							"id": "523",
+							"id": "714",
 							"uri": "http://localhost:8000/api/v1/orders",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders",
 							"method": "GET",
@@ -1051,17 +1021,7 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "519",
-							"uri": "http://localhost:8000/api/v1/orders/health",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
-							"method": "GET",
-							"param": "Sec-Fetch-User",
-							"attack": "",
-							"evidence": "",
-							"otherinfo": ""
-						},
-						{
-							"id": "526",
+							"id": "698",
 							"uri": "http://localhost:8000/api/v1/orders/ord-alice-1001",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-alice-1001",
 							"method": "GET",
@@ -1071,9 +1031,9 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "518",
-							"uri": "http://localhost:8000/api/v1/users/me",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/me",
+							"id": "689",
+							"uri": "http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/ord-bob-2001\/vulnerable",
 							"method": "GET",
 							"param": "Sec-Fetch-User",
 							"attack": "",
@@ -1081,18 +1041,18 @@
 							"otherinfo": ""
 						},
 						{
-							"id": "514",
-							"uri": "http://localhost:8000/api/v1/billing/checkout",
-							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/checkout ()({order_id,amount,currency})",
-							"method": "POST",
+							"id": "8",
+							"uri": "http://localhost:8000/api/v1/users/health",
+							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
+							"method": "GET",
 							"param": "Sec-Fetch-User",
 							"attack": "",
 							"evidence": "",
 							"otherinfo": ""
 						}
 					],
-					"count": "5",
-					"systemic": true,
+					"count": "4",
+					"systemic": false,
 					"solution": "<p>Ensure that Sec-Fetch-User header is included in user initiated requests.</p>",
 					"otherinfo": "",
 					"reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-User</p>",
@@ -1111,7 +1071,7 @@
 					"desc": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
 					"instances":[ 
 						{
-							"id": "474",
+							"id": "718",
 							"uri": "http://localhost:8000/api/v1/admin/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/admin\/health",
 							"method": "GET",
@@ -1121,7 +1081,7 @@
 							"otherinfo": "In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234."
 						},
 						{
-							"id": "481",
+							"id": "699",
 							"uri": "http://localhost:8000/api/v1/billing/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/billing\/health",
 							"method": "GET",
@@ -1131,7 +1091,7 @@
 							"otherinfo": "In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234."
 						},
 						{
-							"id": "469",
+							"id": "710",
 							"uri": "http://localhost:8000/api/v1/orders/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/orders\/health",
 							"method": "GET",
@@ -1141,7 +1101,7 @@
 							"otherinfo": "In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234."
 						},
 						{
-							"id": "472",
+							"id": "2",
 							"uri": "http://localhost:8000/api/v1/users/health",
 							"nodeName": "http:\/\/localhost:8000\/api\/v1\/users\/health",
 							"method": "GET",

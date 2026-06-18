@@ -383,10 +383,6 @@ generated_at=2026-06-18T11:04:46Z
 ./tests/security/zap-active-scan.sh
 ./tests/smoke
 ./tests/smoke/main-smoke.sh
-./tests/zap
-./tests/zap/README.md
-./tests/zap/run-zap-baseline.sh
-./tests/zap/zap-baseline.conf
 ./vault
 ./vault/policies
 ./vault/policies/app-policy.hcl
