@@ -22,13 +22,38 @@ export PATH="${PROJECT_ROOT}/bin:${PATH}"
 # shellcheck source=../compat.sh
 source "${SCRIPT_DIR}/../compat.sh"
 
-# Auto-source secrets so tests work in any shell (Git Bash, WSL, PowerShell)
-if [ -f "${PROJECT_ROOT}/infra/.env" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "${PROJECT_ROOT}/infra/.env"
-  set +a
-fi
+load_service_client_env() {
+  local env_file="${PROJECT_ROOT}/infra/.env"
+
+  # Auto-source secrets so tests work in any shell (Git Bash, WSL, PowerShell).
+  # Do not print secret values.
+  if [ -f "${env_file}" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${env_file}"
+    set +a
+    echo "[INFO] Loaded service-client environment from infra/.env"
+  else
+    echo "[INFO] infra/.env not found; using existing environment variables"
+  fi
+
+  if [ -z "${BILLING_SERVICE_CLIENT_SECRET:-}" ]; then
+    echo "[ERROR] BILLING_SERVICE_CLIENT_SECRET is missing after loading infra/.env." >&2
+    echo "[ERROR] Final regression cannot acquire billing-service tokens without it." >&2
+    exit 1
+  fi
+
+  if [ -z "${ADMIN_SERVICE_CLIENT_SECRET:-}" ]; then
+    echo "[ERROR] ADMIN_SERVICE_CLIENT_SECRET is missing after loading infra/.env." >&2
+    echo "[ERROR] Final regression cannot acquire admin-service tokens without it." >&2
+    exit 1
+  fi
+
+  export BILLING_SERVICE_CLIENT_SECRET
+  export ADMIN_SERVICE_CLIENT_SECRET
+}
+
+load_service_client_env
 
 REGRESSION_PASSED=0
 REGRESSION_FAILED=0
@@ -84,23 +109,33 @@ reset_kong_before_opa() {
   echo "[INFO] Resetting Kong before OPA authz test"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
     (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+    wait_for_kong
   else
     echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
   fi
-  sleep 20
 }
 
 wait_for_kong() {
   local code
-  for _attempt in $(seq 1 30); do
-    code="$(curl -ks -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null || echo "000")"
-    if [ "${code}" != "000" ]; then
-      echo "[INFO] Kong reachable on localhost:8000 (HTTP ${code})"
+  local health_url="http://localhost:8000/api/v1/users/health"
+
+  for attempt in $(seq 1 30); do
+    if code="$(curl -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
+      :
+    else
+      code="000"
+    fi
+
+    echo "[INFO] Kong readiness attempt ${attempt}/30: users health HTTP ${code}"
+    if [ "${code}" = "200" ]; then
+      echo "[INFO] Kong users health is ready (HTTP 200)"
       return 0
     fi
     sleep 2
   done
-  echo "[WARN] Kong did not become reachable on localhost:8000 within 60s; continuing so suite can report exact failure"
+
+  echo "[ERROR] Kong did not return HTTP 200 from ${health_url} within 60s." >&2
+  exit 1
 }
 
 ensure_webhook_mtls_certs() {
@@ -148,7 +183,7 @@ run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
 reset_kong_before_opa
 run_suite "OPA Authz" "tests/security/opa-authz-tests.sh"
 run_suite "Edge Hardening" "tests/security/edge-hardening-tests.sh"
-ensure_webhook_mtls_certs || REGRESSION_FAILED=$((REGRESSION_FAILED + 1))
+ensure_webhook_mtls_certs
 reset_kong_after_edge
 run_suite "Webhook Security" "tests/security/webhook-tests.sh"
 run_suite "Fuzz/Negative" "tests/security/fuzz-negative-tests.sh"
