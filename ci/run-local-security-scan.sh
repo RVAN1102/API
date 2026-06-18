@@ -45,9 +45,48 @@ prepare_package_scan_dir() {
   printf '%s\n' "${PACKAGE_SCAN_DIR}"
 }
 
+clean_ignored_runtime_private_key_artifacts() {
+  local path
+  local found=0
+  local failed=0
+
+  for path in infra/certs/*.key infra/certs/*.p12; do
+    [ -e "${path}" ] || continue
+    found=1
+
+    if git ls-files --error-unmatch -- "${path}" >/dev/null 2>&1; then
+      echo "[FAIL] Tracked private key/PKCS#12 material must be removed from Git before scanning: ${path}" >&2
+      failed=1
+      continue
+    fi
+
+    if git check-ignore -q -- "${path}"; then
+      echo "[INFO] Removing ignored runtime mTLS private artifact before Trivy scan: ${path}"
+      rm -f -- "${path}"
+      continue
+    fi
+
+    echo "[FAIL] Unignored runtime private artifact would be included in the source package: ${path}" >&2
+    failed=1
+  done
+
+  if [ "${failed}" -ne 0 ]; then
+    echo "[ERROR] Refusing to continue security scan with private key material in tracked or package-visible paths." >&2
+    echo "[ERROR] Cleanup guidance: remove local runtime files with: rm -f infra/certs/*.key infra/certs/*.p12" >&2
+    EXIT_CODE=1
+    return 1
+  fi
+
+  if [ "${found}" -eq 0 ]; then
+    echo "[PASS] No runtime mTLS private key or PKCS#12 artifacts present before scan."
+  fi
+}
+
 echo "=== Local Security Scan ==="
 echo "Output: ${REPORT_DIR}/"
 echo ""
+
+clean_ignored_runtime_private_key_artifacts || exit "${EXIT_CODE}"
 
 # --------------------------------------------------
 # 1. Bandit – Python static analysis
@@ -99,6 +138,7 @@ echo ""
 # 3. Trivy – filesystem scan
 # --------------------------------------------------
 echo "--- [3/3] Trivy – Filesystem Vulnerability Scan ---"
+clean_ignored_runtime_private_key_artifacts || exit "${EXIT_CODE}"
 if command -v trivy > /dev/null 2>&1; then
   trivy fs . \
     --severity HIGH,CRITICAL \

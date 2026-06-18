@@ -97,7 +97,8 @@ See `red-team/ssrf-egress-defense.md` above.
 | `metrics/k6-output.json` | k6 JSON output |
 | `metrics/kms-vault-call-overhead.md` | Vault overhead ~10ms at startup only |
 | `metrics/monthly-cost-estimate.md` | Lab $25/month, Production $100-150/month |
-| `metrics/mttd-mttr.md` | MTTD avg 1.7min, MTTR avg 1min |
+| `metrics/mttd-mttr-alert-based-results.csv` | Alert-based MTTD/MTTR raw timing |
+| `metrics/mttd-mttr-alert-based-analysis.md` | MTTD/MTTR methodology and summary |
 
 ### P1-02: Pipeline
 

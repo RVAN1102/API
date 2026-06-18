@@ -1,0 +1,39 @@
+generated_at=2026-06-18T10:57:19Z
+## fix/gvhd-p0-security-evidence...origin/main [ahead 4]
+ M README.md
+ M ci/run-local-security-scan.sh
+ M docs/chapter5/tv3-devsecops-observability-redteam.md
+ M docs/evidence/tv3/README.md
+ M docs/evidence/tv3/bandit-report.txt
+ M docs/evidence/tv3/fuzzing/fuzzing-summary.md
+ M docs/evidence/tv3/mttd-mttr-analysis.md
+ M docs/evidence/tv3/security-scan-local.txt
+ M docs/evidence/tv3/trivy-report.txt
+ M infra/docker-compose.yml
+ M tests/final/main-regression.sh
+ M tests/metrics/README.md
+ M tests/metrics/measure-mttd-mttr.sh
+ M tests/restler/README.md
+ M tests/restler/run-restler-check.sh
+ M tests/security/run-fuzzing.sh
+?? docs/evidence/final/final-file-tree-maxdepth4.txt
+?? docs/evidence/final/final-git-identity.txt
+?? docs/evidence/final/final-git-status.txt
+?? docs/evidence/final/final-main-commit.txt
+?? docs/evidence/final/final-quality-gate-summary.txt
+?? docs/evidence/final/final-recent-commits.txt
+?? docs/evidence/tv3/metrics/401_unauthorized_spike-diagnostics-matched-samples.json
+?? docs/evidence/tv3/metrics/401_unauthorized_spike-diagnostics-selected-raw.json
+?? docs/evidence/tv3/metrics/401_unauthorized_spike-diagnostics.md
+?? docs/evidence/tv3/metrics/401_unauthorized_spike-selected-query-response.json
+?? docs/evidence/tv3/metrics/429_rate_limit_spike-diagnostics-matched-samples.json
+?? docs/evidence/tv3/metrics/429_rate_limit_spike-diagnostics-selected-raw.json
+?? docs/evidence/tv3/metrics/429_rate_limit_spike-diagnostics.md
+?? docs/evidence/tv3/metrics/429_rate_limit_spike-selected-query-response.json
+?? docs/evidence/tv3/metrics/loki-label-values.json
+?? docs/evidence/tv3/metrics/loki-labels.json
+?? docs/evidence/tv3/metrics/loki-sample-recent-logs.md
+?? docs/evidence/tv3/metrics/mttd-mttr-alert-based-analysis.md
+?? docs/evidence/tv3/metrics/mttd-mttr-alert-based-results.csv
+?? docs/evidence/tv3/restler/
+?? scripts/generate-final-evidence.sh

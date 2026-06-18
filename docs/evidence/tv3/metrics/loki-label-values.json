@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-06-18T10:53:26Z",
+  "source": "http://localhost:3100/loki/api/v1/label/<name>/values",
+  "values": {
+    "compose_service": {
+      "status": "success"
+    },
+    "container": {
+      "data": [
+        "/infra-admin-service-1",
+        "/infra-billing-service-1",
+        "/infra-order-service-1",
+        "/infra-user-service-1"
+      ],
+      "status": "success"
+    },
+    "container_name": {
+      "status": "success"
+    },
+    "filename": {
+      "data": [
+        "/var/lib/docker/containers/00e22bb872685c98607967de3f30b9b6239b8263f5a731ec9655bcbe9f212b51/00e22bb872685c98607967de3f30b9b6239b8263f5a731ec9655bcbe9f212b51-json.log",
+        "/var/lib/docker/containers/0a7787335fb0d3689e014076f76657beb2c123b3fd33e2f47dca498d8f7edfb0/0a7787335fb0d3689e014076f76657beb2c123b3fd33e2f47dca498d8f7edfb0-json.log",
+        "/var/lib/docker/containers/0d0a9e619606028f5847ab3ab8dd2c1c950473aa61b5b7d4a8e012079d4eded4/0d0a9e619606028f5847ab3ab8dd2c1c950473aa61b5b7d4a8e012079d4eded4-json.log",
+        "/var/lib/docker/containers/1c6cfc6a70528bdb5e313625fdb65701b6923e7f521f4a89c47cbabd1d25de59/1c6cfc6a70528bdb5e313625fdb65701b6923e7f521f4a89c47cbabd1d25de59-json.log",
+        "/var/lib/docker/containers/280de2bc34b7b65a4b54afedaff4e18eaf09b805a3b6b38122a3b1408c5d9943/280de2bc34b7b65a4b54afedaff4e18eaf09b805a3b6b38122a3b1408c5d9943-json.log",
+        "/var/lib/docker/containers/2816e4b410c8e850f8fcf323638e8466cd8228eb709475ae6205bb8298af5026/2816e4b410c8e850f8fcf323638e8466cd8228eb709475ae6205bb8298af5026-json.log",
+        "/var/lib/docker/containers/353bf3fcb3321987ce24923313c1e71613905285c93f643a443b5ef34f3f2176/353bf3fcb3321987ce24923313c1e71613905285c93f643a443b5ef34f3f2176-json.log",
+        "/var/lib/docker/containers/3db6d2fe96765d4997a74b9ad5da536a29f3d9aaf687a015e96737c33109f896/3db6d2fe96765d4997a74b9ad5da536a29f3d9aaf687a015e96737c33109f896-json.log",
+        "/var/lib/docker/containers/423c197715f7799b981b63ea175bb70826baa2d2d346376c491683c17d3f3824/423c197715f7799b981b63ea175bb70826baa2d2d346376c491683c17d3f3824-json.log",
+        "/var/lib/docker/containers/49299ab24da37d638a9742a013e1a0f2d667e9fa730a2326a02fcef691743a66/49299ab24da37d638a9742a013e1a0f2d667e9fa730a2326a02fcef691743a66-json.log",
+        "/var/lib/docker/containers/4b0d7b8a7e54ff98a8819834b61457219375648d62082e75041360d39e25ed20/4b0d7b8a7e54ff98a8819834b61457219375648d62082e75041360d39e25ed20-json.log",
+        "/var/lib/docker/containers/504482a24a7319cf1acf01b9ccf6ed79c6bebd5346e0ad0da5efb20af4fc3451/504482a24a7319cf1acf01b9ccf6ed79c6bebd5346e0ad0da5efb20af4fc3451-json.log",
+        "/var/lib/docker/containers/56481c9dc383013164981dbfcadb58d2bcbdbc3f3b58213bba213e8262204709/56481c9dc383013164981dbfcadb58d2bcbdbc3f3b58213bba213e8262204709-json.log",
+        "/var/lib/docker/containers/5cfbaa6c4dc6fbf063182858a5bf734c103788c4eee89f7b2f734d54750d9e83/5cfbaa6c4dc6fbf063182858a5bf734c103788c4eee89f7b2f734d54750d9e83-json.log",
+        "/var/lib/docker/containers/6153adbf05e192b1dcf36c2c22185eb3fefc0a20aaa3450f6f4037ca24283063/6153adbf05e192b1dcf36c2c22185eb3fefc0a20aaa3450f6f4037ca24283063-json.log",
+        "/var/lib/docker/containers/6fe0447dd91d99d32d14807cf539605a821e30c07781f3dedfba5e661012447d/6fe0447dd91d99d32d14807cf539605a821e30c07781f3dedfba5e661012447d-json.log",
+        "/var/lib/docker/containers/7011216c6cac1bc7d8768d599230103e6623a698a4db1cc0343a0e8170abff8f/7011216c6cac1bc7d8768d599230103e6623a698a4db1cc0343a0e8170abff8f-json.log",
+        "/var/lib/docker/containers/8b7a5e8718fec27914d7df11c871ea4b4335bda0bc6f1c61cfdaa64c93bab896/8b7a5e8718fec27914d7df11c871ea4b4335bda0bc6f1c61cfdaa64c93bab896-json.log",
+        "/var/lib/docker/containers/92921ec51840796c110f537f372a5aab2252f7a06a976a37142c4b3d521ddf77/92921ec51840796c110f537f372a5aab2252f7a06a976a37142c4b3d521ddf77-json.log",
+        "/var/lib/docker/containers/9538f774ce63dbf8a227f46f29d77fd57f7b2703be8a0ca4035b20047a4df148/9538f774ce63dbf8a227f46f29d77fd57f7b2703be8a0ca4035b20047a4df148-json.log",
+        "/var/lib/docker/containers/9fdf3732a90bc15cb241a083f4b8d3cdfd8db8e512ff86cfb96501c7e8b9fa1f/9fdf3732a90bc15cb241a083f4b8d3cdfd8db8e512ff86cfb96501c7e8b9fa1f-json.log",
+        "/var/lib/docker/containers/a4f2db2efd9c75b19a2f136747bebf38adc81416cb8232e5393a013aa4421956/a4f2db2efd9c75b19a2f136747bebf38adc81416cb8232e5393a013aa4421956-json.log",
+        "/var/lib/docker/containers/ab72411e20f3ea1592b6c711444d581f78c308fe2535a4322faf625672291052/ab72411e20f3ea1592b6c711444d581f78c308fe2535a4322faf625672291052-json.log",
+        "/var/lib/docker/containers/b7d6d132bfd79e09d0d4cc9a53c5c3707e3313a45db697bf3ceba38b25e4d478/b7d6d132bfd79e09d0d4cc9a53c5c3707e3313a45db697bf3ceba38b25e4d478-json.log",
+        "/var/lib/docker/containers/cecd92e73b7c183b9c64aef81b95be227b29dadf78d98857f309ee8b523f6817/cecd92e73b7c183b9c64aef81b95be227b29dadf78d98857f309ee8b523f6817-json.log",
+        "/var/lib/docker/containers/e5746dff08320099cb8ba15668f38e549380adbc75f79c3ba3d521b314cdbd27/e5746dff08320099cb8ba15668f38e549380adbc75f79c3ba3d521b314cdbd27-json.log",
+        "/var/lib/docker/containers/e57a3bd885a47700a103570939bcbe76710b7b38c7a84a7d3fbc12f4c0a8d437/e57a3bd885a47700a103570939bcbe76710b7b38c7a84a7d3fbc12f4c0a8d437-json.log",
+        "/var/lib/docker/containers/e5e9d712352c8b1fd7e42741d783039b4d63860e61629d9ef59f692df73e3e0d/e5e9d712352c8b1fd7e42741d783039b4d63860e61629d9ef59f692df73e3e0d-json.log",
+        "/var/lib/docker/containers/e71121c77a2955191f238e25801531b98e1534ddb9ecb036a45215b6344dae85/e71121c77a2955191f238e25801531b98e1534ddb9ecb036a45215b6344dae85-json.log"
+      ],
+      "status": "success"
+    },
+    "job": {
+      "data": [
+        "docker"
+      ],
+      "status": "success"
+    },
+    "service": {
+      "data": [
+        "admin-service",
+        "billing-service",
+        "order-service",
+        "user-service"
+      ],
+      "status": "success"
+    },
+    "service_name": {
+      "data": [
+        "admin-service",
+        "billing-service",
+        "docker",
+        "order-service",
+        "user-service"
+      ],
+      "status": "success"
+    }
+  }
+}

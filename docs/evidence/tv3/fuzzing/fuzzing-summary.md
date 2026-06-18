@@ -1,4 +1,4 @@
-# API Fuzzing Evidence Summary (TV3)
+# Structured Negative API Test Evidence Summary (TV3)
 
 **Date:** 2026-06-18T05:50:03Z
 **Tool:** `tests/security/run-fuzzing.sh`
@@ -30,7 +30,10 @@
 
 ## RESTler Status
 
-RESTler Docker image was not available locally. The structured fuzz-negative suite ran against the Kong gateway and produced `docs/evidence/tv3/fuzzing/fuzzing-run.log` plus valid JSON findings in `docs/evidence/tv3/fuzzing/fuzzing-findings.json`.
+This evidence is not RESTler fuzzing. Real RESTler execution is produced only by
+`tests/restler/run-restler-check.sh`, which must compile `services/openapi.yaml`
+and run RESTler `test` plus `fuzz-lean` mode. RESTler output belongs under
+`docs/evidence/tv3/restler/`.
 
 ## Conclusion
 

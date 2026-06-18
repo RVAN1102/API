@@ -53,4 +53,4 @@ The Billing service implements HMAC-SHA256 signature verification.
 
 ## 5.5 MTTD / MTTR Metrics
 
-We implemented a measurement script (`tests/metrics/measure-mttd-mttr.sh`) to calculate Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR). In our synchronous API architecture, detection (logging) and response (HTTP 4xx blocking) occur almost instantly during the request cycle, yielding MTTD and MTTR values in the low milliseconds.
+We implemented a measurement script (`tests/metrics/measure-mttd-mttr.sh`) to calculate Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR) from monitoring evidence. MTTD is measured from `attack_start` to `alert_fired` using Loki/Grafana alert state or LogQL threshold polling. MTTR is measured from `alert_fired` to `remediation_done` or verified containment. HTTP response latency is not used as an MTTD proxy.

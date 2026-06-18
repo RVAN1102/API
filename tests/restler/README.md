@@ -14,4 +14,13 @@ The fuzzing targets the OpenAPI spec defined in `services/openapi.yaml`.
 bash tests/restler/run-restler-check.sh
 ```
 
-Reports are generated in `docs/evidence/tv3/`.
+Reports are generated in `docs/evidence/tv3/restler/`.
+
+The runner fails if RESTler is unavailable. It does not replace RESTler with
+curl or structured negative tests.
+
+Supported runtimes:
+
+- `RESTLER_CMD=/path/to/restler`
+- `RESTLER_DLL=/path/to/Restler.dll`
+- Docker image `mcr.microsoft.com/restlerfuzzer/restler:v8.5.0`

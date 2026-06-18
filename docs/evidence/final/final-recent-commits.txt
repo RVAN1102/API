@@ -1,0 +1,21 @@
+generated_at=2026-06-18T10:57:19Z
+f6a2b5e (HEAD -> fix/gvhd-p0-security-evidence) docs: update gitleaks evidence references
+6fffa21 fix: remove tracked secrets and generate demo certs on demand
+1cb24b0 fix: enforce docker network egress control
+9009ca6 chore: add branch guard
+41fe5c8 (origin/main, origin/HEAD, main) merge: tv3 devsecops observability security evidence
+3595507 (review/tv3-devsecops-new-on-main) fix: render keycloak realm secrets at runtime
+11bd319 test: fix tv3 zap openapi active scan evidence
+7c8b296 chore: remove unrelated evidence noise from tv3 devsecops branch
+0d31cdf merge: sync tv3 devsecops with latest main
+5b27b28 tv3: add active scans, fuzzing results and evidence files
+c5d0ca2 Merge pull request #5 from RVAN1102/fix/tv2-opa-policy-engine
+5a9ecd0 (fix/tv2-opa-policy-engine) authz: add opa policy engine enforcement
+29ab6ea Merge pull request #4 from RVAN1102/fix/tv1-webhook-test-ephemeral-client-cert
+eecfc46 (fix/tv1-webhook-test-ephemeral-client-cert) test: fix webhook mtls certificate regression
+9059f01 (fix/tv1-webhook-client-cert-key) merge: tv1 edge webhook ssrf egress final
+a7ba452 (qa/tv1-edge-ssrf-egress-clean) qa: add tv1 edge webhook ssrf egress final evidence
+c99f2d3 chore: preserve evidence artifacts line endings
+9c4ca99 Merge pull request #3 from RVAN1102/fix/tv2-authz-logs-dto-openapi
+4166d93 authz: add structured logs dto schemas and backend introspection
+16a6c1e Merge pull request #2 from RVAN1102/fix/tv2-token-introspection-authz-hardening
