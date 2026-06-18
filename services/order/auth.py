@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
@@ -34,6 +34,12 @@ TOKEN_INTROSPECTION_CLIENT_SECRET: str = os.environ.get(
     "ORDER_TOKEN_INTROSPECTION_CLIENT_SECRET",
     os.environ.get("TOKEN_INTROSPECTION_CLIENT_SECRET", ""),
 )
+ALLOWED_TOKEN_CLIENT_IDS = {
+    "sme-web-client",
+    "sme-lab-automation-client",
+    "billing-service-client",
+    "admin-service-client",
+}
 
 _jwks_cache: Optional[Dict[str, Any]] = None
 
@@ -84,6 +90,45 @@ async def _get_signing_key(token: str) -> Any:
     )
 
 
+def _claim_as_string(value: Any) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item.strip()
+    return ""
+
+
+def _audiences(payload: Dict[str, Any]) -> Set[str]:
+    aud = payload.get("aud")
+    if isinstance(aud, str) and aud.strip():
+        return {aud.strip()}
+    if isinstance(aud, list):
+        return {item.strip() for item in aud if isinstance(item, str) and item.strip()}
+    return set()
+
+
+def _token_client_id(payload: Dict[str, Any]) -> str:
+    return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
+
+
+def _require_known_token_client(payload: Dict[str, Any]) -> None:
+    token_client = _token_client_id(payload)
+    if token_client in ALLOWED_TOKEN_CLIENT_IDS:
+        return
+    if not token_client and _audiences(payload) & ALLOWED_TOKEN_CLIENT_IDS:
+        return
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden_client",
+            "message": "Token client is not allowed for order endpoints",
+        },
+    )
+
+
 async def validate_token(token: str) -> Dict[str, Any]:
     try:
         signing_key = await _get_signing_key(token)
@@ -107,6 +152,7 @@ async def validate_token(token: str) -> Dict[str, Any]:
                 "message": f"Unexpected issuer: {payload.get('iss')}",
             },
         )
+    _require_known_token_client(payload)
     return payload
 
 
