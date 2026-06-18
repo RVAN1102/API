@@ -77,7 +77,7 @@ curl -s -o /dev/null -w "Expired token replay: %{http_code}\n" \
 ```bash
 curl -s -o /dev/null -w "Fake token: %{http_code}\n" \
   http://localhost:8000/api/v1/users/me \
-  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.ZmFrZS5wYXlsb2Fk.ZmFrZXNpZ25hdHVyZQ" \
+  -H "Authorization: Bearer [REDACTED_JWT]" \
   -H "X-Correlation-ID: token-replay-fake"
 ```
 
