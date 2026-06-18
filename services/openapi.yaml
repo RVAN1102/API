@@ -323,6 +323,66 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
+  /api/v1/admin/metadata-fetch/vulnerable:
+    post:
+      tags:
+        - Admin
+        - SSRF
+      operationId: metadataFetchVulnerable
+      summary: Execute the intentionally vulnerable metadata fetch endpoint
+      description: Intentionally fetches the requested URL without SSRF validation for controlled lab evidence. Requires a valid admin bearer token.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceFetchRequest'
+      responses:
+        '200':
+          description: Metadata fetch attempt completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceFetchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/v1/admin/metadata-fetch/fixed:
+    post:
+      tags:
+        - Admin
+        - SSRF
+      operationId: metadataFetchFixed
+      summary: Execute the SSRF-protected metadata fetch endpoint
+      description: Validates the requested URL before fetching and blocks metadata, loopback, private, and dangerous targets. Requires a valid admin bearer token.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceFetchRequest'
+      responses:
+        '200':
+          description: Metadata fetch attempt completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceFetchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
   /api/v1/webhooks/payment:
     post:
       tags:

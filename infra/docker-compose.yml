@@ -101,6 +101,9 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: topic10-sme-api
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      TOKEN_INTROSPECTION_ENABLED: "true"
+      ORDER_TOKEN_INTROSPECTION_CLIENT_ID: "billing-service-client"
+      ORDER_TOKEN_INTROSPECTION_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
       OPA_URL: "http://opa:8181"
     depends_on:
       - opa
@@ -164,6 +167,9 @@ services:
       KEYCLOAK_URL: "http://keycloak:8080"
       KEYCLOAK_REALM: "topic10-sme-api"
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      TOKEN_INTROSPECTION_ENABLED: "true"
+      ADMIN_TOKEN_INTROSPECTION_CLIENT_ID: "admin-service-client"
+      ADMIN_TOKEN_INTROSPECTION_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:?ADMIN_SERVICE_CLIENT_SECRET is required}"
       OPA_URL: "http://opa:8181"
     depends_on:
       - opa
@@ -273,6 +279,7 @@ services:
     command: -config.file=/etc/loki/loki-config.yml
     volumes:
       - ../observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - ../observability/alerts/loki-alert-rules.yml:/loki/rules/fake/loki-alert-rules.yml:ro
       - loki-data:/loki
     expose:
       - "3100"
@@ -287,6 +294,18 @@ services:
       timeout: 5s
       retries: 6
       start_period: 15s
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    volumes:
+      - ../observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    expose:
+      - "9093"
+    networks:
+      - observability-internal
 
   # ---------------------------------------------------------------------------
   # TV3 – Promtail (log collector – reads Docker container logs)
