@@ -47,8 +47,8 @@ The Billing service implements HMAC-SHA256 signature verification.
 - **Attack Script:** `webhook-forgery.sh` attempts to send webhooks with missing or invalid signatures.
 - **Replay Defense:** The service enforces a max timestamp age (e.g., 5 minutes) and tracks nonces to prevent replay attacks.
 
-### 5.4.3 API Fuzzing (RESTler) & Baseline Scanning (ZAP)
-- **ZAP:** Baseline scans against the OpenAPI definition to catch common misconfigurations and missing headers.
+### 5.4.3 API Fuzzing (RESTler) & OWASP ZAP Active Scan/API Scan
+- **ZAP:** OWASP ZAP Active Scan/API Scan runs against the OpenAPI definition through Kong and is the final DAST evidence. The retired passive-only workflow is not final DAST evidence.
 - **RESTler:** Stateful API fuzzing configuration targeting the OpenAPI spec to find logic flaws and crashes.
 
 ## 5.5 MTTD / MTTR Metrics

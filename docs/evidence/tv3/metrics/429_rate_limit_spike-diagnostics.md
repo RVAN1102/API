@@ -1,12 +1,12 @@
 
 ## Attack Traffic
 
-- attack_start: `2026-06-18T10:53:28Z`
+- attack_start: `2026-06-18T13:55:50Z`
 - attack_statuses: `404 404 404 404 404 404 404 404 404 404 429 429 429 429 429 429 429 429 429 429`
 - detection_threshold: `3`
 # MTTD Candidate Query Diagnostics: 429
 
-**Generated:** 2026-06-18T10:53:28Z
+**Generated:** 2026-06-18T13:55:50Z
 **Loki:** `http://localhost:3100`
 
 ## Label Evidence
@@ -20,13 +20,13 @@
 |---|---|---:|---|
 | `{job="docker"}` | `"status_code":429` | `0` | no |
 | `{job="docker"}` | `"status":429` | `0` | no |
-| `{job="docker"}` | ` 429 ` | `2.0` | no |
+| `{job="docker"}` | ` 429 ` | `27.0` | no |
 
 ## Selected Query
 
 - selector: `{job="docker"}`
 - pattern: ` 429 `
-- initial_count: `2.0`
+- initial_count: `27.0`
 - raw_response: `docs/evidence/tv3/metrics/429_rate_limit_spike-diagnostics-selected-raw.json`
 
 ```logql
@@ -43,16 +43,16 @@ sum(count_over_time({job="docker"} |= " 429 " [5m]))
 
 ```json
 [
-  "172.20.0.1 - - [18/Jun/2026:10:53:26 +0000] \"GET /api/v1/users/me HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"85040621be507c25525079457ad14218\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:53:26 +0000] \"GET /api/v1/users/me HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"0f2e9c6c9e7b4c7a2d694d3639df263b\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"e45f17098d63256ea42ea36693b8015f\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"89a0b54aee934d57ab588a2d83d30c7b\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"893fd942c2cfe31e7db7e4277de61f76\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"5ffff47038257c3d6a107b34f3158e6f\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"1af0b749ad665d53e7c50727382cbc4d\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"2d223f5cf1713977a46b2a1bedaf2d65\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"972be86245949a7dce199d062710bd11\"\n",
-  "172.20.0.1 - - [18/Jun/2026:10:44:37 +0000] \"POST /api/v1/admin/maintenance HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"ae58ea55f2d6c90feb8d0509f656085b\"\n"
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"d503ea4d4348744a9fa47a6f71ecde6e\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"6f67564282ed5408b2925653decca74f\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"51edfc6d981cb62dcd59b30afcc6d55d\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"df7dd146b60852296ec0616b0395a76d\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"6c383677da15dc19d5ac29389e863374\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"5d89bf601cb0fe36c1f3930472631c6d\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"de4dc21444a3df2b2aba137d1766bc6c\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"9ce8f42093375f5300e1622168712830\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"6f65510d5316954591b51d77c1d7d21f\"\n",
+  "192.168.16.1 - - [18/Jun/2026:13:55:50 +0000] \"GET /api/v1/users HTTP/1.1\" 429 92 \"-\" \"curl/8.5.0\" kong_request_id: \"aad9d86fd74aa014b493a17db6cb8075\"\n"
 ]
 ```
 
@@ -64,6 +64,4 @@ sum(count_over_time({job="docker"} |= " 429 " [5m]))
 - threshold: `3`
 - raw_response_file: `docs/evidence/tv3/metrics/429_rate_limit_spike-selected-query-response.json`
 
-- poll_time=2026-06-18T10:53:28Z count=2.0 threshold=3
-
-- poll_time=2026-06-18T10:53:33Z count=13.0 threshold=3
+- poll_time=2026-06-18T13:55:51Z count=27.0 threshold=3

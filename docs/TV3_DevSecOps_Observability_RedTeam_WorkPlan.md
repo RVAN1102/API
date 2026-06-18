@@ -137,14 +137,14 @@ tests/attack/bola-object-access.sh
 tests/attack/rate-limit-trigger.sh
 ```
 
-### 3.5. ZAP
+### 3.5. OWASP ZAP Active Scan/API Scan
 
 ```text
-tests/zap/README.md
-tests/zap/run-zap-baseline.sh
-tests/zap/zap-baseline.conf
-docs/evidence/tv3/zap-baseline-summary.txt
-docs/evidence/tv3/zap-baseline-report.html
+tests/security/zap-active-scan.sh
+docs/evidence/tv3/zap/zap-active-run.log
+docs/evidence/tv3/zap/zap-active-summary.md
+docs/evidence/tv3/zap/zap-active-report.html
+docs/evidence/tv3/zap/zap-active-report.json
 ```
 
 ### 3.6. RESTler/Fuzzing
@@ -783,11 +783,11 @@ git push
 
 ---
 
-## 13. Giai đoạn 8 – OWASP ZAP baseline scan
+## 13. Giai đoạn 8 – OWASP ZAP Active Scan/API Scan
 
 ### Mục tiêu
 
-Tạo workflow scan baseline cho API Gateway.
+Tạo workflow OWASP ZAP Active Scan/API Scan cho API Gateway.
 
 ### Target chuẩn
 
@@ -797,38 +797,27 @@ http://localhost:8000
 
 ### Việc cần làm
 
-- Tạo `tests/zap/run-zap-baseline.sh`.
-- Tạo `tests/zap/zap-baseline.conf`.
-- Viết `tests/zap/README.md`.
-- Lưu report summary.
-- Nếu có HTML report thì lưu `docs/evidence/tv3/zap-baseline-report.html`.
+- Dùng `tests/security/zap-active-scan.sh`.
+- Chạy OWASP ZAP Active Scan/API Scan qua OpenAPI definition.
+- Lưu run log, summary, HTML report và JSON report trong `docs/evidence/tv3/zap/`.
+- Ghi rõ retired passive-only workflow không phải bằng chứng DAST cuối cùng.
 - Không scan domain ngoài Internet.
 
 ### File phải có
 
 ```text
-tests/zap/run-zap-baseline.sh
-tests/zap/zap-baseline.conf
-tests/zap/README.md
-docs/evidence/tv3/zap-baseline-summary.txt
-docs/evidence/tv3/zap-baseline-report.html
+tests/security/zap-active-scan.sh
+docs/evidence/tv3/zap/zap-active-run.log
+docs/evidence/tv3/zap/zap-active-summary.md
+docs/evidence/tv3/zap/zap-active-report.html
+docs/evidence/tv3/zap/zap-active-report.json
 ```
 
 ### Commit
 
-Nếu có HTML report:
-
 ```bash
-git add tests/zap docs/evidence/tv3/zap-baseline-summary.txt docs/evidence/tv3/zap-baseline-report.html
-git commit -m "test: add zap baseline scan workflow"
-git push
-```
-
-Nếu chưa có HTML report:
-
-```bash
-git add tests/zap docs/evidence/tv3/zap-baseline-summary.txt
-git commit -m "test: add zap baseline scan workflow"
+git add tests/security/zap-active-scan.sh docs/evidence/tv3/zap
+git commit -m "test: add zap active api scan workflow"
 git push
 ```
 
@@ -1058,7 +1047,7 @@ Structured JSON logging
 Loki/Promtail/Grafana
 Security alert rules
 Attack simulation
-OWASP ZAP baseline
+OWASP ZAP Active Scan/API Scan
 RESTler/Fuzzapi plan
 CI security scan
 MTTD/MTTR
@@ -1124,7 +1113,7 @@ docs/evidence/tv3/attack-token-replay.txt
 docs/evidence/tv3/attack-webhook-forgery.txt
 docs/evidence/tv3/attack-bola.txt
 docs/evidence/tv3/attack-rate-limit.txt
-docs/evidence/tv3/zap-baseline-summary.txt
+docs/evidence/tv3/zap/zap-active-summary.md
 docs/evidence/tv3/restler-check-summary.txt
 docs/evidence/tv3/security-scan-local.txt
 docs/evidence/tv3/mttd-mttr-results.csv
@@ -1196,9 +1185,7 @@ tests/attack/webhook-forgery.sh
 tests/attack/bola-object-access.sh
 tests/attack/rate-limit-trigger.sh
 
-tests/zap/README.md
-tests/zap/run-zap-baseline.sh
-tests/zap/zap-baseline.conf
+tests/security/zap-active-scan.sh
 
 tests/restler/README.md
 tests/restler/restler-settings.json
@@ -1280,7 +1267,7 @@ Nếu không đủ thời gian làm hết, ưu tiên theo thứ tự:
 ```text
 8. Loki/Promtail/Grafana
 9. Alert rules
-10. ZAP baseline workflow
+10. OWASP ZAP Active Scan/API Scan workflow
 11. CI security scan
 12. MTTD/MTTR measurement
 ```
@@ -1311,7 +1298,7 @@ TV3 được xem là hoàn thành khi đạt đủ điều kiện:
 - Loki/Promtail/Grafana có config hoặc tài liệu triển khai rõ.
 - Có alert rules cho 401/403, 429, SSRF, BOLA, webhook.
 - Có attack scripts cho SSRF, token replay, webhook forgery, BOLA, rate limit.
-- Có ZAP baseline workflow hoặc test plan chạy được.
+- Có OWASP ZAP Active Scan/API Scan workflow chạy được.
 - Có RESTler/Fuzzapi test plan.
 - Có CI security scan workflow/local script.
 - Có MTTD/MTTR result hoặc measurement plan rõ ràng.

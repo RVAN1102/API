@@ -1,6 +1,6 @@
 # Alert-Based MTTD/MTTR Analysis
 
-**Generated:** 2026-06-18T10:53:33Z
+**Generated:** 2026-06-18T13:55:51Z
 **Source of truth:** Loki LogQL threshold polling at `http://localhost:3100`
 **Target:** `http://localhost:8000`
 
@@ -18,8 +18,9 @@
 
 | Scenario | MTTD (s) | MTTR (s) | Selector | Pattern | Count | Containment Status | Note |
 |---|---:|---:|---|---|---:|---:|---|
-| 401_unauthorized_spike | 2 | 0 | `{service_name="user-service"}` | `401` | 30.0 | 429 | logql_threshold_observed_value_30.0; containment_verified |
-| 429_rate_limit_spike | 5 | 0 | `{job="docker"}` | ` 429 ` | 13.0 | 429 | logql_threshold_observed_value_13.0; containment_verified |
+| 401_unauthorized_spike | 0 | 0 | `{service="user-service"}` | `auth_failure` | 10.0 | 429 | logql_threshold_observed_value_10.0; containment_verified |
+| 403_forbidden_bola_spike | 7 | 0 | `{service="order-service"}` | `"status_code": 403` | 10.0 | 403 | logql_threshold_observed_value_10.0; containment_verified |
+| 429_rate_limit_spike | 1 | 0 | `{job="docker"}` | ` 429 ` | 27.0 | 429 | logql_threshold_observed_value_27.0; containment_verified |
 
 ## Evidence Files
 

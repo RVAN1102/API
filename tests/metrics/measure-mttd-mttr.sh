@@ -21,6 +21,7 @@ POLL_INTERVAL_SECONDS="${POLL_INTERVAL_SECONDS:-5}"
 DETECTION_TIMEOUT_SECONDS="${DETECTION_TIMEOUT_SECONDS:-180}"
 LOKI_READY_TIMEOUT_SECONDS="${LOKI_READY_TIMEOUT_SECONDS:-60}"
 MTTD_401_THRESHOLD="${MTTD_401_THRESHOLD:-5}"
+MTTD_403_THRESHOLD="${MTTD_403_THRESHOLD:-3}"
 MTTD_429_THRESHOLD="${MTTD_429_THRESHOLD:-3}"
 
 mkdir -p "${REPORT_DIR}"
@@ -66,6 +67,20 @@ SELECTORS_429=(
   '{}'
 )
 
+SELECTORS_403=(
+  '{service="order-service"}'
+  '{service_name="order-service"}'
+  '{container="/infra-order-service-1"}'
+  '{container=~".*order.*"}'
+  '{job="docker"}'
+  '{container=~".*kong.*"}'
+  '{container_name=~".*kong.*"}'
+  '{compose_service="kong"}'
+  '{service_name="kong"}'
+  '{filename=~".*order.*"}'
+  '{}'
+)
+
 PATTERNS_401=(
   'auth_failure'
   'invalid_token'
@@ -74,6 +89,21 @@ PATTERNS_401=(
   '"status": 401'
   '"status":401'
   '401'
+)
+
+PATTERNS_403=(
+  '"event_type": "bola_attempt"'
+  '"event_type": "authz_forbidden"'
+  'event_type":"bola_attempt'
+  'event_type":"authz_forbidden'
+  'bola_attempt'
+  'authz_forbidden'
+  '"status_code": 403'
+  '"status_code":403'
+  '"status": 403'
+  '"status":403'
+  ' 403 '
+  '403'
 )
 
 PATTERNS_429=(
@@ -300,6 +330,49 @@ except Exception:
   done
 }
 
+wait_for_gateway_readiness() {
+  local health_url="${BASE_URL}/api/v1/users/health"
+  local code
+
+  for _attempt in $(seq 1 30); do
+    if code="$(curl -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
+      :
+    else
+      code="000"
+    fi
+    [ "${code}" = "200" ] && return 0
+    sleep 2
+  done
+
+  echo "[ERROR] Kong did not return HTTP 200 from ${health_url} within 60s." >&2
+  return 1
+}
+
+reset_kong_before_forbidden_scenario() {
+  if [ -f "infra/docker-compose.yml" ] && command -v docker >/dev/null 2>&1; then
+    echo "[INFO] Resetting Kong before 403 scenario to avoid rate-limit contamination"
+    docker compose -f infra/docker-compose.yml restart kong >/dev/null
+    wait_for_gateway_readiness
+  else
+    echo "[INFO] Docker compose not available; waiting for gateway readiness before 403 scenario"
+    wait_for_gateway_readiness
+  fi
+}
+
+get_ci_alice_token() {
+  bash demo/auth/get-user-token.sh ci-alice >/tmp/mttd-ci-alice-token.log 2>&1 \
+    || {
+      echo "[ERROR] Could not obtain ci-alice token; see /tmp/mttd-ci-alice-token.log" >&2
+      return 1
+    }
+  [ -s /tmp/user-token.txt ] \
+    || {
+      echo "[ERROR] ci-alice token file was not produced." >&2
+      return 1
+    }
+  cat /tmp/user-token.txt
+}
+
 probe_candidates() {
   local status_code="$1"
   local diagnostics_file="$2"
@@ -415,7 +488,7 @@ if data.get("status") != "success":
 lines = []
 for stream in data.get("data", {}).get("result", []):
     for _, line in stream.get("values", [])[:10]:
-        if status_code in line or "auth_failure" in line or "invalid_token" in line:
+        if status_code in line or "auth_failure" in line or "invalid_token" in line or "bola_attempt" in line or "authz_forbidden" in line:
             lines.append(line)
 print(json.dumps(lines[:10], indent=2))' "${status_code}"
     echo '```'
@@ -476,11 +549,44 @@ trigger_429_spike() {
   echo "${statuses}"
 }
 
+trigger_403_spike() {
+  local statuses=""
+  local status token first_status
+
+  reset_kong_before_forbidden_scenario
+  token="$(get_ci_alice_token)"
+
+  for i in $(seq 1 5); do
+    status="$(curl -s -o /dev/null -w "%{http_code}" \
+      "${BASE_URL}/api/v1/orders/ord-bob-2001/fixed" \
+      -H "Authorization: Bearer ${token}" \
+      -H "X-Correlation-ID: mttd-403-bola-${i}" || echo "000")"
+    statuses="${statuses}${statuses:+ }${status}"
+  done
+
+  first_status="${statuses%% *}"
+  if [ "${first_status}" != "403" ]; then
+    echo "[ERROR] 403 scenario did not produce a real 403 response before any rate-limit noise; statuses=${statuses}" >&2
+    return 1
+  fi
+
+  echo "${statuses}"
+}
+
 verify_401_containment() {
   curl -s -o /dev/null -w "%{http_code}" \
     "${BASE_URL}/api/v1/users/me" \
     -H "Authorization: Bearer invalid.mttd.verify" \
     -H "X-Correlation-ID: mttd-401-verify" || echo "000"
+}
+
+verify_403_containment() {
+  local token
+  token="$(get_ci_alice_token)"
+  curl -s -o /dev/null -w "%{http_code}" \
+    "${BASE_URL}/api/v1/orders/ord-bob-2001/fixed" \
+    -H "Authorization: Bearer ${token}" \
+    -H "X-Correlation-ID: mttd-403-bola-verify" || echo "000"
 }
 
 verify_429_containment() {
@@ -506,7 +612,22 @@ run_scenario() {
   : > "${diagnostics_file}"
   attack_start_iso="$(now_iso)"
   attack_start_epoch="$(now_epoch)"
-  statuses="$("${trigger_fn}")"
+  if ! statuses="$("${trigger_fn}")"; then
+    statuses="${statuses:-trigger_failed}"
+    note="attack_trigger_failed"
+    {
+      echo ""
+      echo "## Attack Traffic"
+      echo ""
+      echo "- attack_start: \`${attack_start_iso}\`"
+      echo "- attack_statuses: \`${statuses}\`"
+      echo "- detection_threshold: \`${threshold}\`"
+      echo "- trigger_result: failed"
+    } >> "${diagnostics_file}"
+    write_row "${scenario}" "${attack_start_iso}" "" "" "" "" "loki_logql_threshold" "" "" "" "${threshold}" "0" "${statuses}" "" "${note}" "${diagnostics_file}"
+    echo "[FAIL] ${scenario}: trigger failed"
+    return 1
+  fi
 
   {
     echo ""
@@ -623,6 +744,14 @@ run_scenario \
   trigger_401_spike \
   verify_401_containment \
   '^(401|403|429)$' || FAILURES=$((FAILURES + 1))
+
+run_scenario \
+  "403_forbidden_bola_spike" \
+  "403" \
+  "${MTTD_403_THRESHOLD}" \
+  trigger_403_spike \
+  verify_403_containment \
+  '^403$' || FAILURES=$((FAILURES + 1))
 
 run_scenario \
   "429_rate_limit_spike" \

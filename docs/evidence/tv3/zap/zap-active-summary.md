@@ -25,10 +25,10 @@ ZAP by [Checkmarx](https://checkmarx.com/).
 | X-Content-Type-Options Header Missing | Low | 4 |
 | A Client Error response code was returned by the server | Informational | 60 |
 | Non-Storable Content | Informational | Systemic |
-| Sec-Fetch-Dest Header is Missing | Informational | Systemic |
-| Sec-Fetch-Mode Header is Missing | Informational | Systemic |
-| Sec-Fetch-Site Header is Missing | Informational | Systemic |
-| Sec-Fetch-User Header is Missing | Informational | Systemic |
+| Sec-Fetch-Dest Header is Missing | Informational | 4 |
+| Sec-Fetch-Mode Header is Missing | Informational | 4 |
+| Sec-Fetch-Site Header is Missing | Informational | 4 |
+| Sec-Fetch-User Header is Missing | Informational | 4 |
 | Storable and Cacheable Content | Informational | 4 |
 
 
@@ -191,8 +191,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `404`
   * Other Info: ``
-* URL: http://localhost:8000/5229812978343309281
-  * Node Name: `http://localhost:8000/5229812978343309281`
+* URL: http://localhost:8000/2291788917542178958
+  * Node Name: `http://localhost:8000/2291788917542178958`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -212,8 +212,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `404`
   * Other Info: ``
-* URL: http://localhost:8000/api/3266248030183945495
-  * Node Name: `http://localhost:8000/api/3266248030183945495`
+* URL: http://localhost:8000/api/8738691109996394301
+  * Node Name: `http://localhost:8000/api/8738691109996394301`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -233,8 +233,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `404`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/8781942358330379357
-  * Node Name: `http://localhost:8000/api/v1/8781942358330379357`
+* URL: http://localhost:8000/api/v1/5887164291499273727
+  * Node Name: `http://localhost:8000/api/v1/5887164291499273727`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -261,8 +261,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/admin/4007812227501452039
-  * Node Name: `http://localhost:8000/api/v1/admin/4007812227501452039`
+* URL: http://localhost:8000/api/v1/admin/7553276863016447161
+  * Node Name: `http://localhost:8000/api/v1/admin/7553276863016447161`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -296,8 +296,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/billing/3026730012853599911
-  * Node Name: `http://localhost:8000/api/v1/billing/3026730012853599911`
+* URL: http://localhost:8000/api/v1/billing/3134622656245721998
+  * Node Name: `http://localhost:8000/api/v1/billing/3134622656245721998`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -317,8 +317,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/4000001566402305290
-  * Node Name: `http://localhost:8000/api/v1/orders/4000001566402305290`
+* URL: http://localhost:8000/api/v1/orders/2945948438672128196
+  * Node Name: `http://localhost:8000/api/v1/orders/2945948438672128196`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -338,8 +338,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/internal/4201134461270040261
-  * Node Name: `http://localhost:8000/api/v1/orders/internal/4201134461270040261`
+* URL: http://localhost:8000/api/v1/orders/internal/7348343369402804088
+  * Node Name: `http://localhost:8000/api/v1/orders/internal/7348343369402804088`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -359,8 +359,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/ord-alice-1001/5765114180886680961
-  * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001/5765114180886680961`
+* URL: http://localhost:8000/api/v1/orders/ord-alice-1001/7975401262036768588
+  * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001/7975401262036768588`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -394,8 +394,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/ord-bob-2001/691074649565276629
-  * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/691074649565276629`
+* URL: http://localhost:8000/api/v1/orders/ord-bob-2001/7956102833460257525
+  * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/7956102833460257525`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -436,8 +436,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `429`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/users/7406146115447455904
-  * Node Name: `http://localhost:8000/api/v1/users/7406146115447455904`
+* URL: http://localhost:8000/api/v1/users/849953127988256592
+  * Node Name: `http://localhost:8000/api/v1/users/849953127988256592`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -471,8 +471,8 @@ Raised by the 'Alert on HTTP Response Code Error' script
   * Attack: ``
   * Evidence: `404`
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/webhooks/8129936376887285665
-  * Node Name: `http://localhost:8000/api/v1/webhooks/8129936376887285665`
+* URL: http://localhost:8000/api/v1/webhooks/1068188158635759835
+  * Node Name: `http://localhost:8000/api/v1/webhooks/1068188158635759835`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -626,6 +626,13 @@ Instances: 60
 
 The response contents are not storable by caching components such as proxy servers. If the response does not contain sensitive, personal or user-specific information, it may benefit from being stored and cached, to improve performance.
 
+* URL: http://localhost:8000/api/v1/orders
+  * Node Name: `http://localhost:8000/api/v1/orders`
+  * Method: `GET`
+  * Parameter: ``
+  * Attack: ``
+  * Evidence: `403`
+  * Other Info: ``
 * URL: http://localhost:8000/api/v1/orders/ord-alice-1001
   * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001`
   * Method: `GET`
@@ -642,13 +649,6 @@ The response contents are not storable by caching components such as proxy serve
   * Other Info: ``
 * URL: http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable
   * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable`
-  * Method: `GET`
-  * Parameter: ``
-  * Attack: ``
-  * Evidence: `403`
-  * Other Info: ``
-* URL: http://localhost:8000/api/v1/users/me
-  * Node Name: `http://localhost:8000/api/v1/users/me`
   * Method: `GET`
   * Parameter: ``
   * Attack: ``
@@ -712,13 +712,6 @@ Specifies how and where the data would be used. For instance, if the value is au
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/health
-  * Node Name: `http://localhost:8000/api/v1/orders/health`
-  * Method: `GET`
-  * Parameter: `Sec-Fetch-Dest`
-  * Attack: ``
-  * Evidence: ``
-  * Other Info: ``
 * URL: http://localhost:8000/api/v1/orders/ord-alice-1001
   * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001`
   * Method: `GET`
@@ -726,23 +719,23 @@ Specifies how and where the data would be used. For instance, if the value is au
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/users/me
-  * Node Name: `http://localhost:8000/api/v1/users/me`
+* URL: http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable
+  * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable`
   * Method: `GET`
   * Parameter: `Sec-Fetch-Dest`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/billing/checkout
-  * Node Name: `http://localhost:8000/api/v1/billing/checkout ()({order_id,amount,currency})`
-  * Method: `POST`
+* URL: http://localhost:8000/api/v1/users/health
+  * Node Name: `http://localhost:8000/api/v1/users/health`
+  * Method: `GET`
   * Parameter: `Sec-Fetch-Dest`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
 
-Instances: Systemic
 
+Instances: 4
 
 ### Solution
 
@@ -778,13 +771,6 @@ Allows to differentiate between requests for navigating between HTML pages and r
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/health
-  * Node Name: `http://localhost:8000/api/v1/orders/health`
-  * Method: `GET`
-  * Parameter: `Sec-Fetch-Mode`
-  * Attack: ``
-  * Evidence: ``
-  * Other Info: ``
 * URL: http://localhost:8000/api/v1/orders/ord-alice-1001
   * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001`
   * Method: `GET`
@@ -792,23 +778,23 @@ Allows to differentiate between requests for navigating between HTML pages and r
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/users/me
-  * Node Name: `http://localhost:8000/api/v1/users/me`
+* URL: http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable
+  * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable`
   * Method: `GET`
   * Parameter: `Sec-Fetch-Mode`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/billing/checkout
-  * Node Name: `http://localhost:8000/api/v1/billing/checkout ()({order_id,amount,currency})`
-  * Method: `POST`
+* URL: http://localhost:8000/api/v1/users/health
+  * Node Name: `http://localhost:8000/api/v1/users/health`
+  * Method: `GET`
   * Parameter: `Sec-Fetch-Mode`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
 
-Instances: Systemic
 
+Instances: 4
 
 ### Solution
 
@@ -844,13 +830,6 @@ Specifies the relationship between request initiator's origin and target's origi
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/health
-  * Node Name: `http://localhost:8000/api/v1/orders/health`
-  * Method: `GET`
-  * Parameter: `Sec-Fetch-Site`
-  * Attack: ``
-  * Evidence: ``
-  * Other Info: ``
 * URL: http://localhost:8000/api/v1/orders/ord-alice-1001
   * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001`
   * Method: `GET`
@@ -858,23 +837,23 @@ Specifies the relationship between request initiator's origin and target's origi
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/users/me
-  * Node Name: `http://localhost:8000/api/v1/users/me`
+* URL: http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable
+  * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable`
   * Method: `GET`
   * Parameter: `Sec-Fetch-Site`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/billing/checkout
-  * Node Name: `http://localhost:8000/api/v1/billing/checkout ()({order_id,amount,currency})`
-  * Method: `POST`
+* URL: http://localhost:8000/api/v1/users/health
+  * Node Name: `http://localhost:8000/api/v1/users/health`
+  * Method: `GET`
   * Parameter: `Sec-Fetch-Site`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
 
-Instances: Systemic
 
+Instances: 4
 
 ### Solution
 
@@ -910,13 +889,6 @@ Specifies if a navigation request was initiated by a user.
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/orders/health
-  * Node Name: `http://localhost:8000/api/v1/orders/health`
-  * Method: `GET`
-  * Parameter: `Sec-Fetch-User`
-  * Attack: ``
-  * Evidence: ``
-  * Other Info: ``
 * URL: http://localhost:8000/api/v1/orders/ord-alice-1001
   * Node Name: `http://localhost:8000/api/v1/orders/ord-alice-1001`
   * Method: `GET`
@@ -924,23 +896,23 @@ Specifies if a navigation request was initiated by a user.
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/users/me
-  * Node Name: `http://localhost:8000/api/v1/users/me`
+* URL: http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable
+  * Node Name: `http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable`
   * Method: `GET`
   * Parameter: `Sec-Fetch-User`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
-* URL: http://localhost:8000/api/v1/billing/checkout
-  * Node Name: `http://localhost:8000/api/v1/billing/checkout ()({order_id,amount,currency})`
-  * Method: `POST`
+* URL: http://localhost:8000/api/v1/users/health
+  * Node Name: `http://localhost:8000/api/v1/users/health`
+  * Method: `GET`
   * Parameter: `Sec-Fetch-User`
   * Attack: ``
   * Evidence: ``
   * Other Info: ``
 
-Instances: Systemic
 
+Instances: 4
 
 ### Solution
 
