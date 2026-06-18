@@ -1,0 +1,20 @@
+TV2 OPA Policy Engine Evidence
+Generated: Thu Jun 18 08:59:45 +07 2026
+
+OPA service health/status: http://localhost:8181/health -> 200
+Policy path/name: opa/policies/authz.rego package topic10.authz
+
+Allow/Deny matrix:
+- admin_maintenance admin-service-client/admin-maintenance: allow
+- admin_maintenance billing-service-client/order-ownership-read: deny
+- order_verify_ownership billing-service-client alice owns alice: allow
+- order_verify_ownership billing-service-client alice vs bob: deny
+- order_verify_ownership missing requested_username: deny
+- billing_checkout human alice order-service ownership_confirmed=true: allow
+- billing_checkout billing-service-client: deny
+- billing_checkout client-supplied ownership_confirmed=true: deny
+
+OPA authz test summary: 22/22 passed, 0 failed
+Final regression summary: Suites passed: 9; Suites failed: 0; [OK] All regression suites passed.
+
+Secret handling: no full JWT, client_secret, password, refresh_token, private key, Vault token, or .env secret is written here.

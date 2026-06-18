@@ -3,7 +3,7 @@ openapi: 3.0.3
 info:
   title: SME Cloud-Native Microservices API - Topic 10
   version: 1.0.0
-  description: API contract for gateway routing, authorization enforcement, security testing, and API fuzzing.
+  description: API contract for gateway routing, authorization enforcement, configurable backend token introspection on high-risk endpoints, structured auth-failure logging, security testing, and API fuzzing.
 
 servers:
   - url: https://localhost:8443
@@ -52,7 +52,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/UserMeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/users/profile:
+    get:
+      tags:
+        - Users
+      operationId: getCurrentUserProfileDetail
+      summary: Get current authenticated user profile details
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -70,6 +90,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/orders:
+    get:
+      tags:
+        - Orders
+      operationId: listOrders
+      summary: List orders visible to the authenticated caller
+      description: Users receive their own orders; admins receive all demo orders.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Orders visible to the caller
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/orders/{order_id}:
+    get:
+      tags:
+        - Orders
+      operationId: getOrderById
+      summary: Get order detail through the ownership-protected endpoint
+      description: Returns the order only when the caller owns it or has the admin role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          description: Order identifier
+          schema:
+            type: string
+          example: "ord-alice-1001"
+      responses:
+        '200':
+          description: Order detail is returned when the caller is authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /api/v1/orders/{order_id}/vulnerable:
     get:
@@ -137,7 +209,7 @@ paths:
         - Orders
       operationId: verifyOrderOwnershipInternal
       summary: Verify order ownership for internal Billing service calls
-      description: Internal service-to-service endpoint. Requires a valid Client Credentials access token for `billing-service-client` with role `order-ownership-read`. Human user tokens and other service clients are rejected.
+      description: Internal service-to-service endpoint. Requires a valid Client Credentials access token for `billing-service-client` with role `order-ownership-read`. Human user tokens and other service clients are rejected. The backend validates the JWT signature and issuer first. When `TOKEN_INTROSPECTION_ENABLED=true`, the backend then calls Keycloak token introspection and rejects inactive tokens or introspection failures with 401.
       security:
         - bearerAuth: []
       parameters:
@@ -189,6 +261,7 @@ paths:
         - Billing
       operationId: createCheckoutSession
       summary: Create a checkout request and trigger payment processing
+      description: Requires a valid user/admin JWT and verifies order ownership through the Order service before accepting checkout. The backend validates the JWT signature and issuer first. When `TOKEN_INTROSPECTION_ENABLED=true`, the backend then calls Keycloak token introspection and rejects inactive tokens or introspection failures with 401.
       security:
         - bearerAuth: []
       requestBody:
@@ -227,9 +300,9 @@ paths:
     post:
       tags:
         - Admin
-      operationId: runMaintenanceFetch
-      summary: Execute maintenance fetch operation
-      description: This endpoint is used to demonstrate SSRF behavior in the vulnerable version and URL allowlist/blocklist enforcement in the fixed version.
+      operationId: runMaintenance
+      summary: Execute an admin maintenance action
+      description: Requires a valid Client Credentials access token for `admin-service-client` with role `admin-maintenance`. Human users and other service clients are rejected. The backend validates the JWT signature and issuer first. When `TOKEN_INTROSPECTION_ENABLED=true`, the backend then calls Keycloak token introspection and rejects inactive tokens or introspection failures with 401.
       security:
         - bearerAuth: []
       requestBody:
@@ -237,24 +310,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MaintenanceFetchRequest'
+              $ref: '#/components/schemas/MaintenanceRequest'
       responses:
         '200':
-          description: Maintenance fetch executed
+          description: Maintenance action executed
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MaintenanceFetchResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
+                $ref: '#/components/schemas/MaintenanceResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
-          description: Request blocked by SSRF protection policy
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Forbidden'
 
   /api/v1/webhooks/payment:
     post:
@@ -323,14 +390,14 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
 
     Unauthorized:
-      description: Missing, expired, or invalid JWT. Token revocation is demonstrated through Keycloak introspection/revocation scripts, not backend online revocation enforcement.
+      description: Missing, expired, inactive, or invalid JWT. Protected services emit a structured `auth_failure` JSON log with `correlation_id` and a safe `reason`/`category`. Billing checkout, Order internal verify-ownership, and Admin maintenance perform offline JWT signature/issuer validation first, then configurable Keycloak token introspection when `TOKEN_INTROSPECTION_ENABLED=true`; inactive tokens and introspection failures fail closed with 401.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
 
     Forbidden:
-      description: Authenticated principal does not have permission to access this resource
+      description: Authenticated principal does not have permission to access this resource. Protected services emit a structured `auth_failure` JSON log with `correlation_id` and a safe `reason`/`category`.
       content:
         application/json:
           schema:
@@ -364,12 +431,14 @@ components:
           type: string
           example: "user-service"
 
-    UserProfile:
+    UserMeResponse:
       type: object
       required:
         - user_id
         - username
+        - email
         - roles
+        - correlation_id
       properties:
         user_id:
           type: string
@@ -387,18 +456,37 @@ components:
             type: string
           example:
             - user
+        correlation_id:
+          type: string
+          example: "req-123456"
 
-    OrderDetail:
+    UserProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserMeResponse'
+        - type: object
+          required:
+            - azp
+            - scope
+          properties:
+            azp:
+              type: string
+              example: "topic10-api"
+            scope:
+              type: string
+              example: "openid profile email"
+
+    OrderSummary:
       type: object
       required:
         - order_id
         - owner_id
         - amount
         - status
+        - currency
       properties:
         order_id:
           type: string
-          example: "order-001"
+          example: "ord-alice-1001"
         owner_id:
           type: string
           example: "alice"
@@ -409,6 +497,45 @@ components:
         status:
           type: string
           example: "created"
+        currency:
+          type: string
+          example: "VND"
+
+    OrderDetail:
+      allOf:
+        - $ref: '#/components/schemas/OrderSummary'
+        - type: object
+          required:
+            - correlation_id
+          properties:
+            note:
+              type: string
+              example: "BOLA FIXED: ownership verified"
+            correlation_id:
+              type: string
+              example: "req-123456"
+
+    OrderListResponse:
+      type: object
+      required:
+        - caller
+        - orders
+        - count
+        - correlation_id
+      properties:
+        caller:
+          type: string
+          example: "alice"
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderSummary'
+        count:
+          type: integer
+          example: 2
+        correlation_id:
+          type: string
+          example: "req-123456"
 
     CheckoutRequest:
       type: object
@@ -418,7 +545,7 @@ components:
       properties:
         order_id:
           type: string
-          example: "order-001"
+          example: "ord-alice-1001"
         amount:
           type: number
           format: float
@@ -445,6 +572,7 @@ components:
       required:
         - order_id
         - allowed
+        - correlation_id
       properties:
         order_id:
           type: string
@@ -459,15 +587,58 @@ components:
     CheckoutAcceptedResponse:
       type: object
       required:
-        - checkout_id
+        - payment_id
+        - order_id
         - status
+        - amount
+        - currency
+        - correlation_id
       properties:
-        checkout_id:
+        payment_id:
           type: string
-          example: "checkout-001"
+          example: "pay-1a2b3c4d"
+        order_id:
+          type: string
+          example: "ord-alice-1001"
         status:
           type: string
           example: "accepted"
+        amount:
+          type: number
+          format: float
+          example: 150000
+        currency:
+          type: string
+          example: "VND"
+        correlation_id:
+          type: string
+          example: "req-123456"
+
+    MaintenanceRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          example: "health-check"
+
+    MaintenanceResponse:
+      type: object
+      required:
+        - status
+        - action
+        - correlation_id
+      properties:
+        status:
+          type: string
+          example: "executed"
+        action:
+          type: string
+          example: "health-check"
+        correlation_id:
+          type: string
+          example: "req-123456"
 
     MaintenanceFetchRequest:
       type: object
@@ -526,6 +697,20 @@ components:
     ErrorResponse:
       type: object
       required:
+        - detail
+      properties:
+        detail:
+          oneOf:
+            - $ref: '#/components/schemas/ErrorDetail'
+            - type: string
+              example: "Not authenticated"
+            - type: array
+              items:
+                type: object
+
+    ErrorDetail:
+      type: object
+      required:
         - error
         - message
       properties:
@@ -535,6 +720,6 @@ components:
         message:
           type: string
           example: "Access denied"
-        correlation_id:
+        event_type:
           type: string
-          example: "req-123456"
+          example: "bola_attempt"

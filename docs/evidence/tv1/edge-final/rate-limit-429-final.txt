@@ -1,0 +1,2 @@
+===== Rate limit on protected route =====
+[0;32m[PASS][0m Rate limit enforced – 429 received

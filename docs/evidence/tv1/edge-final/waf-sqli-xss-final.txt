@@ -1,0 +1,4 @@
+===== WAF SQLi Test =====
+[0;32m[PASS][0m SQLi payload blocked by WAF (403)
+===== WAF XSS Test =====
+[0;32m[PASS][0m XSS payload blocked by WAF (403)

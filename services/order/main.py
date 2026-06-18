@@ -23,14 +23,17 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from auth import extract_identity, get_current_token_payload
+from auth import extract_identity, get_current_introspected_token_payload, get_current_token_payload
 from authz import (
     ROLE_ORDER_OWNERSHIP_READ,
     check_order_ownership,
     get_effective_subject,
+    get_token_client_id,
     require_service_client_role,
     require_user_or_admin,
 )
@@ -90,6 +93,8 @@ ORDERS: Dict[str, Dict[str, Any]] = {
 }
 
 BILLING_SERVICE_CLIENT_ID = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
+OPA_URL = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_ALLOW_URL = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 
 class OwnershipVerificationRequest(BaseModel):
@@ -97,8 +102,36 @@ class OwnershipVerificationRequest(BaseModel):
     subject: str
 
 
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+class OrderResponse(BaseModel):
+    order_id: str
+    owner_id: str
+    amount: float
+    status: str
+    currency: str
+    correlation_id: Optional[str] = None
+    note: Optional[str] = None
+
+
+class OrderListResponse(BaseModel):
+    caller: str
+    orders: List[OrderResponse]
+    count: int
+    correlation_id: str
+
+
+class OwnershipVerificationResponse(BaseModel):
+    order_id: str
+    allowed: bool
+    correlation_id: str
+
+
 async def require_order_ownership_read(
-    payload: Dict[str, Any] = Depends(get_current_token_payload),
+    payload: Dict[str, Any] = Depends(get_current_introspected_token_payload),
 ) -> Dict[str, Any]:
     require_service_client_role(
         payload,
@@ -106,6 +139,116 @@ async def require_order_ownership_read(
         ROLE_ORDER_OWNERSHIP_READ,
     )
     return payload
+
+
+def _roles(payload: Dict[str, Any]) -> List[str]:
+    roles = payload.get("realm_access", {}).get("roles", [])
+    return roles if isinstance(roles, list) else []
+
+
+def _claim_as_string(value: Any) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item.strip()
+    return ""
+
+
+def _subject_type(payload: Dict[str, Any]) -> str:
+    return "service" if get_token_client_id(payload) == BILLING_SERVICE_CLIENT_ID else "human"
+
+
+async def require_opa_allow(input_data: Dict[str, Any]) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_error", "message": "Authorization policy engine returned an error"},
+        )
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    if not isinstance(body, dict) or body.get("result") is not True:
+        reason = "ownership_denied" if input_data.get("action") == "order_verify_ownership" else "opa_denied"
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=_claim_as_string(input_data.get("method")) or "POST",
+            path=_claim_as_string(input_data.get("path")) or "/api/v1/orders/internal/verify-ownership",
+            status_code=status.HTTP_403_FORBIDDEN,
+            client_ip=_claim_as_string(input_data.get("client_ip")) or "unknown",
+            correlation_id=_claim_as_string(input_data.get("correlation_id")),
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "forbidden", "message": "OPA policy denied authorization"},
+        )
+
+
+def _auth_failure_reason(status_code: int, detail: Any, path: str) -> Optional[str]:
+    if status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return None
+    if not path.startswith("/api/v1/orders"):
+        return None
+
+    detail_text = json.dumps(detail, default=str).lower()
+    if "not authenticated" in detail_text:
+        return "missing_token"
+    if "expired" in detail_text:
+        return "expired_token"
+    if status_code == status.HTTP_401_UNAUTHORIZED or "invalid_token" in detail_text:
+        return "invalid_token"
+    if "required service client" in detail_text:
+        return "service_client_forbidden"
+    if "permission to access this order" in detail_text or "bola_attempt" in detail_text:
+        return "ownership_denied"
+    if "required role" in detail_text:
+        return "user_required"
+    return "missing_role"
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    reason = _auth_failure_reason(exc.status_code, exc.detail, request.url.path)
+    if reason:
+        correlation_id = request.headers.get("X-Correlation-ID", "")
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=request.method,
+            path=request.url.path,
+            status_code=exc.status_code,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=correlation_id,
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -134,13 +277,18 @@ async def log_requests(request: Request, call_next):
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/orders/health", tags=["Orders"])
+@app.get("/api/v1/orders/health", tags=["Orders"], response_model=HealthResponse)
 async def health_check():
     """Public health check. No authentication required."""
     return {"status": "ok", "service": "order-service"}
 
 
-@app.get("/api/v1/orders", tags=["Orders"])
+@app.get(
+    "/api/v1/orders",
+    tags=["Orders"],
+    response_model=OrderListResponse,
+    response_model_exclude_none=True,
+)
 async def list_orders(
     request: Request,
     payload: Dict[str, Any] = Depends(get_current_token_payload),
@@ -167,11 +315,15 @@ async def list_orders(
     }
 
 
-@app.post("/api/v1/orders/internal/verify-ownership", tags=["Orders", "Internal"])
+@app.post(
+    "/api/v1/orders/internal/verify-ownership",
+    tags=["Orders", "Internal"],
+    response_model=OwnershipVerificationResponse,
+)
 async def verify_order_ownership(
     body: OwnershipVerificationRequest,
     request: Request,
-    _payload: Dict[str, Any] = Depends(require_order_ownership_read),
+    payload: Dict[str, Any] = Depends(require_order_ownership_read),
 ):
     """
     Verify order ownership for internal service-to-service callers.
@@ -197,6 +349,24 @@ async def verify_order_ownership(
             detail={"error": "not_found", "message": "Order not found"},
         )
 
+    await require_opa_allow(
+        {
+            "action": "order_verify_ownership",
+            "service": "order-service",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else "unknown",
+            "subject_type": _subject_type(payload),
+            "username": _claim_as_string(payload.get("preferred_username")),
+            "client_id": get_token_client_id(payload),
+            "roles": _roles(payload),
+            "order_id": body.order_id,
+            "order_owner": order["owner_id"],
+            "requested_username": body.subject,
+            "correlation_id": correlation_id,
+        }
+    )
+
     allowed = order["owner_id"] == body.subject
     log_event(
         level="INFO" if allowed else "WARNING",
@@ -219,7 +389,12 @@ async def verify_order_ownership(
     }
 
 
-@app.get("/api/v1/orders/{order_id}", tags=["Orders"])
+@app.get(
+    "/api/v1/orders/{order_id}",
+    tags=["Orders"],
+    response_model=OrderResponse,
+    response_model_exclude_none=True,
+)
 async def get_order(
     order_id: str,
     request: Request,
@@ -242,7 +417,12 @@ async def get_order(
     return {**order, "correlation_id": correlation_id}
 
 
-@app.get("/api/v1/orders/{order_id}/vulnerable", tags=["Orders", "BOLA"])
+@app.get(
+    "/api/v1/orders/{order_id}/vulnerable",
+    tags=["Orders", "BOLA"],
+    response_model=OrderResponse,
+    response_model_exclude_none=True,
+)
 async def get_order_vulnerable(
     order_id: str,
     request: Request,
@@ -296,7 +476,12 @@ async def get_order_vulnerable(
     }
 
 
-@app.get("/api/v1/orders/{order_id}/fixed", tags=["Orders", "BOLA"])
+@app.get(
+    "/api/v1/orders/{order_id}/fixed",
+    tags=["Orders", "BOLA"],
+    response_model=OrderResponse,
+    response_model_exclude_none=True,
+)
 async def get_order_fixed(
     order_id: str,
     request: Request,

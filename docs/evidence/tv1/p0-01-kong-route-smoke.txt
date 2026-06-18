@@ -1,11 +1,11 @@
 ===== TV1 P0.1 Kong route smoke =====
-Tue Jun 16 05:32:07 PM +07 2026
-feat/tv1-edge-webhook-closeout
-355d7f7 Merge remote-tracking branch 'origin/main' into feat/tv1-edge-webhook-closeout
-834852b merge tv2 authz core closeout into main
-b196d9e fix: stabilize post-mfa regression automation
-af31643 merge tv2 authz core closeout into main
-6b3aa24 docs: capture tv2 pre-merge regression evidence
+Wed, Jun 17, 2026  8:43:08 PM
+qa/tv1-edge-ssrf-egress-final
+d496461 qa: done everything
+364d6a1 qa: add tv1 edge ssrf egress final evidence"
+f641d8f chore(tv1): finalize edge hardening, webhook security and ssrf defense evidence
+16a6c1e Merge pull request #2 from RVAN1102/fix/tv2-token-introspection-authz-hardening
+b1276cd test: add token lifecycle introspection revocation checks
 
 ===== Health via Kong =====
 users/health -> 200

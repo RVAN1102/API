@@ -32,6 +32,7 @@ from urllib.parse import urlparse
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwk, jwt
 from pydantic import BaseModel
@@ -85,12 +86,30 @@ _jwks_cache: Optional[Dict[str, Any]] = None
 
 KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
-EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+KEYCLOAK_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
+EXPECTED_ISSUER: str = KEYCLOAK_ISSUER
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+INTROSPECTION_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
 
 ROLE_ADMIN = "admin"
 ROLE_ADMIN_MAINTENANCE = "admin-maintenance"
 ADMIN_SERVICE_CLIENT_ID = os.environ.get("ADMIN_SERVICE_CLIENT_ID", "admin-service-client")
+ADMIN_SERVICE_CLIENT_SECRET = os.environ.get("ADMIN_SERVICE_CLIENT_SECRET", "")
+TOKEN_INTROSPECTION_ENABLED: bool = (
+    os.environ.get("TOKEN_INTROSPECTION_ENABLED", "false").lower() == "true"
+)
+TOKEN_INTROSPECTION_CLIENT_ID: str = (
+    os.environ.get("ADMIN_TOKEN_INTROSPECTION_CLIENT_ID")
+    or os.environ.get("TOKEN_INTROSPECTION_CLIENT_ID")
+    or ADMIN_SERVICE_CLIENT_ID
+)
+TOKEN_INTROSPECTION_CLIENT_SECRET: str = (
+    os.environ.get("ADMIN_TOKEN_INTROSPECTION_CLIENT_SECRET")
+    or os.environ.get("TOKEN_INTROSPECTION_CLIENT_SECRET")
+    or ADMIN_SERVICE_CLIENT_SECRET
+)
+OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 
 # ---------------------------------------------------------------------------
@@ -168,10 +187,74 @@ async def validate_token(token: str) -> Dict[str, Any]:
     return payload
 
 
+def _introspection_failed_exception() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "error": "invalid_token",
+            "message": "Token introspection failed or token is inactive",
+        },
+    )
+
+
+def _introspection_headers() -> Dict[str, str]:
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    issuer_netloc = urlparse(KEYCLOAK_ISSUER).netloc
+    if issuer_netloc:
+        headers["Host"] = issuer_netloc
+    return headers
+
+
+async def require_introspection_active(token: str) -> None:
+    if not TOKEN_INTROSPECTION_ENABLED:
+        return
+
+    if not TOKEN_INTROSPECTION_CLIENT_ID or not TOKEN_INTROSPECTION_CLIENT_SECRET:
+        raise _introspection_failed_exception()
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                INTROSPECTION_URL,
+                data={
+                    "token": token,
+                    "client_id": TOKEN_INTROSPECTION_CLIENT_ID,
+                    "client_secret": TOKEN_INTROSPECTION_CLIENT_SECRET,
+                },
+                headers=_introspection_headers(),
+            )
+    except httpx.HTTPError:
+        raise _introspection_failed_exception()
+
+    if response.status_code != 200:
+        raise _introspection_failed_exception()
+
+    try:
+        body = response.json()
+        active = isinstance(body, dict) and body.get("active") is True
+    except ValueError:
+        active = False
+
+    if not active:
+        raise _introspection_failed_exception()
+
+
+async def validate_token_with_introspection(token: str) -> Dict[str, Any]:
+    payload = await validate_token(token)
+    await require_introspection_active(token)
+    return payload
+
+
 async def get_current_token_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     return await validate_token(credentials.credentials)
+
+
+async def get_current_introspected_token_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> Dict[str, Any]:
+    return await validate_token_with_introspection(credentials.credentials)
 
 
 def _claim_as_string(value: Any) -> str:
@@ -193,6 +276,59 @@ def has_role(payload: Dict[str, Any], *roles: str) -> bool:
     return any(r in user_roles for r in roles)
 
 
+def _roles(payload: Dict[str, Any]) -> List[str]:
+    roles = payload.get("realm_access", {}).get("roles", [])
+    return roles if isinstance(roles, list) else []
+
+
+def _subject_type(payload: Dict[str, Any]) -> str:
+    return "service" if _token_client_id(payload) == ADMIN_SERVICE_CLIENT_ID else "human"
+
+
+async def require_opa_allow(input_data: Dict[str, Any]) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_error", "message": "Authorization policy engine returned an error"},
+        )
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    if not isinstance(body, dict) or body.get("result") is not True:
+        reason = "opa_denied"
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=_claim_as_string(input_data.get("method")) or "POST",
+            path=_claim_as_string(input_data.get("path")) or "/api/v1/admin/maintenance",
+            status_code=status.HTTP_403_FORBIDDEN,
+            client_ip=_claim_as_string(input_data.get("client_ip")) or "unknown",
+            correlation_id=_claim_as_string(input_data.get("correlation_id")),
+            message="OPA policy denied authorization",
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "forbidden", "message": "OPA policy denied authorization"},
+        )
+
+
 def require_role(payload: Dict[str, Any], *required_roles: str) -> None:
     user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
     if not any(r in user_roles for r in required_roles):
@@ -208,6 +344,29 @@ def require_role(payload: Dict[str, Any], *required_roles: str) -> None:
         )
 
 
+def require_service_client_role(
+    payload: Dict[str, Any],
+    required_client_id: str,
+    required_role: str,
+) -> None:
+    token_client_id = _token_client_id(payload)
+    if token_client_id == required_client_id and has_role(payload, required_role):
+        return
+
+    user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden",
+            "message": (
+                f"Required service client '{required_client_id}' with role "
+                f"'{required_role}'. Token client: '{token_client_id}'. "
+                f"Token roles: {user_roles}"
+            ),
+        },
+    )
+
+
 async def require_admin_access(
     payload: Dict[str, Any] = Depends(get_current_token_payload),
 ) -> Dict[str, Any]:
@@ -216,24 +375,14 @@ async def require_admin_access(
 
 
 async def require_maintenance_access(
-    payload: Dict[str, Any] = Depends(get_current_token_payload),
+    payload: Dict[str, Any] = Depends(get_current_introspected_token_payload),
 ) -> Dict[str, Any]:
-    token_client_id = _token_client_id(payload)
-    if token_client_id == ADMIN_SERVICE_CLIENT_ID and has_role(payload, ROLE_ADMIN_MAINTENANCE):
-        return payload
-
-    user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail={
-            "error": "forbidden",
-            "message": (
-                f"Required service client '{ADMIN_SERVICE_CLIENT_ID}' with role "
-                f"'{ROLE_ADMIN_MAINTENANCE}'. Token client: '{token_client_id}'. "
-                f"Token roles: {user_roles}"
-            ),
-        },
+    require_service_client_role(
+        payload,
+        ADMIN_SERVICE_CLIENT_ID,
+        ROLE_ADMIN_MAINTENANCE,
     )
+    return payload
 
 # ---------------------------------------------------------------------------
 # SSRF Protection helpers
@@ -326,6 +475,55 @@ def validate_ssrf_url(url: str) -> None:
         )
 
 
+def _auth_failure_reason(status_code: int, detail: Any, path: str) -> Optional[str]:
+    if status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return None
+    if not path.startswith("/api/v1/admin/"):
+        return None
+
+    detail_text = json.dumps(detail, default=str).lower()
+    if "ssrf_blocked" in detail_text:
+        return None
+    if "not authenticated" in detail_text:
+        return "missing_token"
+    if "expired" in detail_text:
+        return "expired_token"
+    if status_code == status.HTTP_401_UNAUTHORIZED or "invalid_token" in detail_text:
+        return "invalid_token"
+    if "required service client" in detail_text:
+        return "service_client_forbidden"
+    if "required role" in detail_text or "admin" in detail_text:
+        return "admin_required"
+    return "missing_role"
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    reason = _auth_failure_reason(exc.status_code, exc.detail, request.url.path)
+    if reason:
+        correlation_id = request.headers.get("X-Correlation-ID", "")
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=request.method,
+            path=request.url.path,
+            status_code=exc.status_code,
+            client_ip=request.client.host if request.client else "unknown",
+            correlation_id=correlation_id,
+            message="JWT authn/authz failure",
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Middleware
 # ---------------------------------------------------------------------------
@@ -357,6 +555,17 @@ class MaintenanceRequest(BaseModel):
     action: str
 
 
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+class MaintenanceResponse(BaseModel):
+    status: str
+    action: str
+    correlation_id: str
+
+
 class MetadataFetchRequest(BaseModel):
     fetch_url: str
 
@@ -365,23 +574,37 @@ class MetadataFetchRequest(BaseModel):
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/admin/health", tags=["Admin"])
+@app.get("/api/v1/admin/health", tags=["Admin"], response_model=HealthResponse)
 async def health_check():
     """Public health check."""
     return {"status": "ok", "service": "admin-service"}
 
 
-@app.post("/api/v1/admin/maintenance", tags=["Admin"])
+@app.post("/api/v1/admin/maintenance", tags=["Admin"], response_model=MaintenanceResponse)
 async def run_maintenance(
     body: MaintenanceRequest,
     request: Request,
-    _payload: Dict[str, Any] = Depends(require_maintenance_access),
+    payload: Dict[str, Any] = Depends(require_maintenance_access),
 ):
     """
     Execute a maintenance action.
     Protected: requires a service-account Bearer JWT with role 'admin-maintenance'.
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
+    await require_opa_allow(
+        {
+            "action": "admin_maintenance",
+            "service": "admin-service",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else "unknown",
+            "subject_type": _subject_type(payload),
+            "username": _claim_as_string(payload.get("preferred_username")),
+            "client_id": _token_client_id(payload),
+            "roles": _roles(payload),
+            "correlation_id": correlation_id,
+        }
+    )
     log_event("INFO", "api_request", "POST", "/api/v1/admin/maintenance",
               200, request.client.host if request.client else "unknown",
               correlation_id, f"Maintenance action: {body.action}")

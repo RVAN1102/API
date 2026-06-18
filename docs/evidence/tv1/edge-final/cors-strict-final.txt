@@ -1,0 +1,4 @@
+===== Allowed origin =====
+[0;32m[PASS][0m Allowed origin http://localhost:3000 is permitted
+===== Evil origin =====
+[0;32m[PASS][0m Evil origin https://evil.example is NOT allowed

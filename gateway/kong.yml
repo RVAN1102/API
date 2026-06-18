@@ -206,6 +206,15 @@ plugins:
                 })
               end
             end
+            
+            -- mTLS check: clear spoofed headers, check nginx var, and inject verification result
+            kong.service.request.clear_header("X-Mtls-Client-Verified")
+            local verify_result = ngx.var.ssl_client_verify
+            if verify_result == "SUCCESS" then
+              kong.service.request.set_header("X-Mtls-Client-Verified", "SUCCESS")
+            else
+              kong.service.request.set_header("X-Mtls-Client-Verified", "FAILED")
+            end
           end
 
   # HSTS is emitted only when the client-facing request uses HTTPS.

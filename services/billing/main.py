@@ -38,6 +38,17 @@ from pydantic import BaseModel
 WEBHOOK_SECRET: str = os.environ.get("WEBHOOK_SECRET", "dev-webhook-secret-change-me")
 WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
 
+# ---------------------------------------------------------------------------
+# mTLS configuration
+# When WEBHOOK_MTLS_REQUIRED=true (default in production), the billing service
+# expects Kong to have verified the client TLS certificate and injected
+# the header X-Mtls-Client-Verified: SUCCESS.
+# Set WEBHOOK_MTLS_REQUIRED=false in dev/test mode to bypass (with log warning).
+# ---------------------------------------------------------------------------
+WEBHOOK_MTLS_REQUIRED: bool = os.environ.get("WEBHOOK_MTLS_REQUIRED", "true").lower() == "true"
+WEBHOOK_MTLS_HEADER: str = "X-Mtls-Client-Verified"
+WEBHOOK_MTLS_SUCCESS_VALUE: str = "SUCCESS"
+
 KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
@@ -46,6 +57,8 @@ TOKEN_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connec
 ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "http://order-service:8000")
 BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
 BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
+OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 # ---------------------------------------------------------------------------
 # Logging – structured JSON
@@ -222,6 +235,64 @@ def has_role(payload: Dict[str, Any], *roles: str) -> bool:
     return any(r in user_roles for r in roles)
 
 
+def _roles(payload: Dict[str, Any]) -> List[str]:
+    roles = payload.get("realm_access", {}).get("roles", [])
+    return roles if isinstance(roles, list) else []
+
+
+def _token_client_id(payload: Dict[str, Any]) -> str:
+    return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
+
+
+def _subject_type(payload: Dict[str, Any]) -> str:
+    service_clients = {BILLING_SERVICE_CLIENT_ID, "admin-service-client"}
+    return "service" if _token_client_id(payload) in service_clients else "human"
+
+
+async def require_opa_allow(input_data: Dict[str, Any]) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_error", "message": "Authorization policy engine returned an error"},
+        )
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    if not isinstance(body, dict) or body.get("result") is not True:
+        reason = "ownership_denied" if input_data.get("action") == "billing_checkout" else "opa_denied"
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=_claim_as_string(input_data.get("method")) or "POST",
+            path=_claim_as_string(input_data.get("path")) or "/api/v1/billing/checkout",
+            status_code=status.HTTP_403_FORBIDDEN,
+            client_ip=_claim_as_string(input_data.get("client_ip")) or "unknown",
+            correlation_id=_claim_as_string(input_data.get("correlation_id")),
+            message="OPA policy denied authorization",
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "forbidden", "message": "OPA policy denied authorization"},
+        )
+
+
 def _is_automation_fixture(payload: Dict[str, Any]) -> bool:
     value = payload.get("automation_fixture")
     if isinstance(value, bool):
@@ -380,11 +451,28 @@ async def require_order_owner_via_order_service(
     payload: Dict[str, Any],
     order_id: str,
     correlation_id: str,
-) -> None:
+    request: Request,
+) -> str:
     subject = get_effective_subject(payload)
     if subject and await verify_order_ownership_with_order_service(order_id, subject, correlation_id):
-        return
+        return subject
 
+    log_event(
+        level="WARNING",
+        event_type="auth_failure",
+        method="POST",
+        path="/api/v1/billing/checkout",
+        status_code=403,
+        client_ip=request.client.host if request.client else "unknown",
+        correlation_id=correlation_id,
+        message="Checkout ownership denied",
+        extra={
+            "reason": "ownership_denied",
+            "category": "ownership_denied",
+            "security_event": True,
+            "order_id": order_id,
+        },
+    )
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail={
@@ -460,7 +548,24 @@ async def create_checkout(
     Requires order ownership unless the caller has role 'admin'.
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
-    await require_order_owner_via_order_service(payload, body.order_id, correlation_id)
+    subject = await require_order_owner_via_order_service(payload, body.order_id, correlation_id, request)
+    await require_opa_allow(
+        {
+            "action": "billing_checkout",
+            "service": "billing-service",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else "unknown",
+            "subject_type": _subject_type(payload),
+            "username": subject,
+            "client_id": _token_client_id(payload),
+            "roles": _roles(payload),
+            "order_id": body.order_id,
+            "ownership_confirmed": True,
+            "ownership_confirmation_source": "order-service",
+            "correlation_id": correlation_id,
+        }
+    )
 
     import uuid
     payment_id = f"pay-{uuid.uuid4().hex[:8]}"
@@ -493,20 +598,70 @@ async def receive_payment_webhook(request: Request):
     Receive a payment webhook with HMAC-SHA256 signature verification.
 
     Required headers (TV1 contract):
-      X-Webhook-Timestamp  – Unix timestamp (string)
-      X-Webhook-Nonce      – Random string (replay prevention)
-      X-Webhook-Signature  – sha256=<hex_digest>
+      X-Webhook-Timestamp      – Unix timestamp (string)
+      X-Webhook-Nonce          – Random string (replay prevention)
+      X-Webhook-Signature      – sha256=<hex_digest>
+      X-Mtls-Client-Verified   – Must be "SUCCESS" (injected by Kong after
+                                   nginx ssl_verify_client succeeds).
+                                   Only enforced when WEBHOOK_MTLS_REQUIRED=true.
 
     Message format: timestamp + "." + nonce + "." + raw_body
     Algorithm: HMAC-SHA256
 
     Returns:
       200  – webhook accepted
-      401  – missing or invalid signature
+      401  – missing/invalid signature OR mTLS client cert not verified
       403  – expired timestamp or replayed nonce
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
     client_ip = request.client.host if request.client else "unknown"
+
+    # --- mTLS client certificate check ---
+    # Kong's nginx (ssl_verify_client on) injects X-Mtls-Client-Verified: SUCCESS
+    # when the client presents a valid cert signed by the configured CA.
+    mtls_header_value = request.headers.get(WEBHOOK_MTLS_HEADER, "")
+    if WEBHOOK_MTLS_REQUIRED:
+        if mtls_header_value != WEBHOOK_MTLS_SUCCESS_VALUE:
+            log_event(
+                "WARNING",
+                "webhook_mtls_rejected",
+                "POST",
+                "/api/v1/webhooks/payment",
+                401,
+                client_ip,
+                correlation_id,
+                "mTLS client certificate not verified",
+                {
+                    "security_event": True,
+                    "decision": "rejected",
+                    "reason": "mtls_client_cert_required",
+                    "header_present": bool(mtls_header_value),
+                },
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={
+                    "error": "mtls_client_cert_required",
+                    "message": (
+                        "Webhook channel requires mutual TLS. "
+                        "Client certificate must be verified by the gateway "
+                        f"(header {WEBHOOK_MTLS_HEADER} must equal '{WEBHOOK_MTLS_SUCCESS_VALUE}')."
+                    ),
+                },
+            )
+    else:
+        # Dev/test mode: mTLS bypass with audit log
+        log_event(
+            "WARNING",
+            "webhook_mtls_bypass",
+            "POST",
+            "/api/v1/webhooks/payment",
+            0,
+            client_ip,
+            correlation_id,
+            "mTLS enforcement is DISABLED (WEBHOOK_MTLS_REQUIRED=false). NOT for production.",
+            {"security_event": True, "mtls_header_value": mtls_header_value},
+        )
 
     # --- Read headers ---
     timestamp_str = request.headers.get("X-Webhook-Timestamp", "")
