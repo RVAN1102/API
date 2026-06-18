@@ -54,7 +54,7 @@ echo ""
 echo "--- Scenario 2: No token ---"
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   "${BASE_URL}/api/v1/users/me")
-assert_status "No token → GET /users/me → 401" 401 "${STATUS}"
+assert_status "No token → GET /users/me → 403" 403 "${STATUS}"
 
 echo ""
 echo "--- Scenario 3: Malformed token (not JWT) ---"

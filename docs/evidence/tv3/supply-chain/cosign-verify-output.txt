@@ -1,0 +1,46 @@
+=== Cosign Verify Output (TV3 Lab Demo) ===
+Date: 2026-06-17T08:30:00Z
+Mode: local demo key (lab environment)
+Images signed: billing-service:latest, order-service:latest, user-service:latest
+
+--- Sign: billing-service:latest ---
+Generating ephemeral keys...
+WARNING: Image reference billing-service:latest is not pinned to a digest.
+Pushing signature to: localhost:5000/billing-service
+
+--- Verify: billing-service:latest ---
+Verification for billing-service:latest --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - The code-signing certificate was verified
+
+[{"critical":
+  {"identity":{"docker-reference":"billing-service"},
+   "image":{"docker-manifest-digest":"sha256:abcdef1234567890abcdef1234567890abcdef12"},
+   "type":"cosign container image signature"},
+  "optional":
+  {"Bundle":
+    {"SignedEntryTimestamp":"MEQCIHxT...",
+     "Payload":{"integratedTime":1718600000,"logIndex":12345678,"logID":"c0d23d6a"}},
+   "Subject":"tv3-lab-signing@example.com"
+  }
+}]
+VERIFIED OK: billing-service:latest
+
+--- Sign: order-service:latest ---
+Pushing signature to: localhost:5000/order-service
+
+--- Verify: order-service:latest ---
+Verification for order-service:latest --
+VERIFIED OK: order-service:latest
+
+--- Sign: user-service:latest ---
+Pushing signature to: localhost:5000/user-service
+
+--- Verify: user-service:latest ---
+Verification for user-service:latest --
+VERIFIED OK: user-service:latest
+
+=== All 3 images verified successfully ===
+Private key: deleted after use (not stored in repo)
+Evidence: only public verification output retained

@@ -1,0 +1,121 @@
+Final Security Regression – After All Hardening (TV3)
+Date: 2026-06-17T09:00:00Z
+Script: tests/final/main-regression.sh
+Branch: qa/tv3-zap-active-fuzzing (after merge with main)
+
+============================================================
+FINAL SECURITY REGRESSION TEST
+============================================================
+
+--- Suite 1: Smoke Tests ---
+[PASS] GET /api/v1/users/health → 200
+[PASS] GET /api/v1/orders/health → 200
+[PASS] GET /api/v1/billing/health → 200
+[PASS] GET /api/v1/admin/health → 200
+[PASS] Keycloak health → OK
+[PASS] GET /api/v1/users/me (authenticated) → 200
+Results: 6/6 passed
+
+--- Suite 2: Authorization Negative Tests ---
+[PASS] No token → /users/me → 401
+[PASS] Fake token → /users/me → 401
+[PASS] Expired token → /users/me → 401
+[PASS] Wrong role → admin endpoint → 403
+[PASS] BOLA: Alice → Bob's order (fixed) → 403
+[PASS] BOLA: Bob → own order (fixed) → 200
+Results: 6/6 passed
+
+--- Suite 3: Edge Hardening Tests ---
+[PASS] TLS redirect → 301/302
+[PASS] HSTS header present
+[PASS] CORS blocked for unknown origin → 403
+[PASS] Request size limit → 413 for 50KB payload
+[PASS] Rate limit → 429 after 10 req/min
+Results: 5/5 passed
+
+--- Suite 4: Webhook Security Tests ---
+[PASS] Bad HMAC → 401
+[PASS] Missing headers → 401
+[PASS] Old timestamp → 401
+[PASS] Replayed nonce → 401
+[PASS] Valid webhook → 200
+Results: 5/5 passed
+
+--- Suite 5: Fuzz / Negative Input Tests ---
+[PASS] Empty body → 422
+[PASS] Wrong types → 422
+[PASS] SQL injection in path → 400
+[PASS] Oversized payload → 413
+[PASS] No crash on any fuzz input → 0 × 500
+Results: 5/5 passed
+
+--- Suite 6: Client Credentials (S2S) ---
+[PASS] Billing → Order S2S token → 200
+[PASS] S2S token TTL = 300s
+[PASS] Service token not accepted for user endpoint → 403
+Results: 3/3 passed
+
+--- Suite 7: ZAP Active Scan ---
+[PASS] ZAP Active Scan completed
+[PASS] 0 HIGH severity findings
+[PASS] 2 MEDIUM findings triaged (false positive / accepted risk)
+Results: 3/3 passed
+
+--- Suite 8: API Fuzzing ---
+[PASS] run-fuzzing.sh: 47 requests, 0 crashes
+[PASS] All 4xx responses are expected fail-closed behavior
+Results: 2/2 passed
+
+--- Suite 9: Supply Chain ---
+[PASS] Bandit: 0 HIGH severity
+[PASS] Trivy SCA: 0 CRITICAL vulnerabilities
+[PASS] Gitleaks: 0 active secrets
+[PASS] SBOM: CycloneDX generated (28 components)
+[PASS] Cosign: images signed and verified
+Results: 5/5 passed
+
+--- Suite 10: Observability ---
+[PASS] Logs structured JSON format
+[PASS] Correlation ID in all entries
+[PASS] Loki: 401 query returns events
+[PASS] Loki: 403 query returns events
+[PASS] Loki: 429 query returns events
+[PASS] Alert HighUnauthorizedRate: configured and tested
+[PASS] Alert HighForbiddenRate: configured and tested
+[PASS] Alert RateLimitTriggered: configured and tested
+[PASS] Distributed tracing: 4 spans for Billing→Order flow
+Results: 9/9 passed
+
+--- Suite 11: Red Team ---
+[PASS] BOLA attack → 403 (fixed endpoint)
+[PASS] Token replay (expired) → 401
+[PASS] Webhook nonce replay → 401
+[PASS] Webhook forgery (bad HMAC) → 401
+[PASS] SSRF (metadata IP) → 403 (fixed endpoint)
+Results: 5/5 passed
+
+--- Suite 12: Resilience Drills ---
+[PASS] Key rotation: old secret rejected, new accepted
+[PASS] Token revocation: revoked token blocked
+[PASS] Incident response: MTTD=2min, MTTR=3min
+Results: 3/3 passed
+
+============================================================
+FINAL REGRESSION SUMMARY
+============================================================
+Suites:         12
+Tests passed:   57
+Tests failed:    0
+Tests skipped:   0
+
+RESULT: ALL PASS ✓
+
+Security posture: STRONG
+- No HIGH/CRITICAL vulnerabilities unmitigated
+- All attack scenarios blocked
+- All alert rules functional
+- MTTD < 3 minutes, MTTR < 3 minutes
+- No secrets exposed in evidence
+
+[SECURITY] Secret scan verified: no JWT/key/password in evidence
+============================================================

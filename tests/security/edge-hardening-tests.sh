@@ -2,7 +2,7 @@
 # tests/security/edge-hardening-tests.sh
 #
 # Edge hardening tests – wraps TV1's Kong gateway security config.
-# TV3 does NOT modify gateway config; this script only TESTS it.
+
 #
 # Tests:
 #   - TLS 1.3 handshake succeeds
@@ -54,11 +54,11 @@ echo ""
 echo "===== TLS 1.3 should succeed ====="
 
 if command -v openssl > /dev/null 2>&1; then
-  if echo | openssl s_client -connect localhost:8443 -tls1_3 2>/tmp/tv3-tls13.txt > /dev/null 2>&1; then
+  if echo | openssl s_client -connect localhost:8443 -tls1_3 2>/tmp/edge-tls13.txt > /dev/null 2>&1; then
     pass "TLS 1.3 handshake completed"
   else
     # On Windows, openssl may not be available or may not support -tls1_3
-    if grep -qi "TLSv1.3\|tls1_3" /tmp/tv3-tls13.txt 2>/dev/null; then
+    if grep -qi "TLSv1.3\|tls1_3" /tmp/edge-tls13.txt 2>/dev/null; then
       pass "TLS 1.3 handshake completed (from stderr)"
     else
       fail "TLS 1.3 handshake failed"
@@ -74,8 +74,8 @@ echo ""
 echo "===== TLS 1.2 should fail ====="
 
 if command -v openssl > /dev/null 2>&1; then
-  if echo | openssl s_client -connect localhost:8443 -tls1_2 > /tmp/tv3-tls12.txt 2>&1; then
-    if grep -qi "Protocol  *: TLSv1.2" /tmp/tv3-tls12.txt; then
+  if echo | openssl s_client -connect localhost:8443 -tls1_2 > /tmp/edge-tls12.txt 2>&1; then
+    if grep -qi "Protocol  *: TLSv1.2" /tmp/edge-tls12.txt; then
       fail "TLS 1.2 unexpectedly negotiated"
     else
       pass "TLS 1.2 did not negotiate"
@@ -138,7 +138,7 @@ if command -v python3 > /dev/null 2>&1; then
   python3 -c "
 import json, sys
 payload = json.dumps({'data': 'A' * (2 * 1024 * 1024)})
-with open('/tmp/tv3-large-payload.json', 'w') as f:
+with open('/tmp/edge-large-payload.json', 'w') as f:
     f.write(payload)
 "
 
@@ -146,7 +146,7 @@ with open('/tmp/tv3-large-payload.json', 'w') as f:
     "${BASE_URL}/api/v1/billing/checkout" \
     -H "Authorization: Bearer abc" \
     -H "Content-Type: application/json" \
-    --data-binary @/tmp/tv3-large-payload.json 2>/dev/null || echo "000")"
+    --data-binary @/tmp/edge-large-payload.json 2>/dev/null || echo "000")"
 
   case "$code" in
     413|417|400)
@@ -160,7 +160,7 @@ elif command -v python > /dev/null 2>&1; then
   python -c "
 import json
 payload = json.dumps({'data': 'A' * (2 * 1024 * 1024)})
-with open('/tmp/tv3-large-payload.json', 'w') as f:
+with open('/tmp/edge-large-payload.json', 'w') as f:
     f.write(payload)
 "
 

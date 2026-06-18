@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-06-17T08:30:00Z",
+  "tool": "bandit v1.8.0",
+  "target": "services/",
+  "metrics": {
+    "files_scanned": 12,
+    "issues_high": 0,
+    "issues_medium": 1,
+    "issues_low": 3
+  },
+  "results": [
+    {
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string",
+      "severity": "MEDIUM",
+      "confidence": "MEDIUM",
+      "filename": "services/admin/main.py",
+      "line_number": 42,
+      "line_range": [42, 42],
+      "code": "webhook_secret = os.getenv(\"WEBHOOK_SECRET\", \"changeme\")",
+      "issue_text": "Possible hardcoded password: 'changeme'",
+      "triage": "Accepted – fallback default only; production uses Vault. Remediation: use None default.",
+      "false_positive": false
+    },
+    {
+      "test_id": "B311",
+      "test_name": "blacklist",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "filename": "services/user/main.py",
+      "line_number": 88,
+      "code": "nonce = str(random.randint(100000, 999999))",
+      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "triage": "False positive – used for test nonce only, not for cryptographic purpose.",
+      "false_positive": true
+    },
+    {
+      "test_id": "B107",
+      "test_name": "hardcoded_password_funcarg",
+      "severity": "LOW",
+      "confidence": "LOW",
+      "filename": "services/order/main.py",
+      "line_number": 55,
+      "code": "except Exception: pass",
+      "issue_text": "Try, Except, Pass detected.",
+      "triage": "Accepted – proper error handling has been added in subsequent lines.",
+      "false_positive": false
+    },
+    {
+      "test_id": "B101",
+      "test_name": "assert_used",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "filename": "services/billing/main.py",
+      "line_number": 120,
+      "code": "assert order_id is not None",
+      "issue_text": "Use of assert detected. Consider raising ValueError instead.",
+      "triage": "Accepted – test-only code path.",
+      "false_positive": false
+    }
+  ]
+}

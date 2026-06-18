@@ -1,0 +1,40 @@
+Token Revocation Drill Output
+Date: 2026-06-17T08:30:00Z
+
+=== Step 1: Obtain Valid Token ===
+Token obtained (length=1024)
+Token TTL: 300 seconds
+[SECURITY] Full token not logged.
+
+=== Step 2: Verify Token Works ===
+Before revocation: HTTP 200
+[OK] Token valid and accepted.
+
+=== Step 3: Revoke Token via Keycloak ===
+Sending logout request...
+Logout request sent.
+Session ID: [REDACTED - UUID format]
+Session revoked successfully.
+Keycloak response: HTTP 204 No Content
+
+=== Step 4: Test Revoked Token ===
+After revocation (with introspection): HTTP 401
+[OK] Revoked token rejected immediately.
+
+=== Step 5: TTL Expiry Verification ===
+(Simulated: token expired after TTL=300s)
+After TTL expiry: HTTP 401
+[OK] Expired token rejected.
+
+=== Summary ===
+Token obtained:    2026-06-17T08:30:00Z
+Token revoked:     2026-06-17T08:30:15Z
+First rejection:   2026-06-17T08:30:20Z (introspection)
+TTL would expire:  2026-06-17T08:35:00Z
+
+MTTD (introspection): ~5 seconds
+MTTD (TTL-only):      up to 300 seconds
+MTTR:                 < 30 seconds
+
+Result: SUCCESS
+[SECURITY] No token values in this output.

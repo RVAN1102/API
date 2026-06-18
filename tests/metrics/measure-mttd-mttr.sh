@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/metrics/measure-mttd-mttr.sh
 #
-# MTTD/MTTR Measurement Script (TV3)
+# MTTD/MTTR Measurement Script
 #
 # Measures Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR)
 # for security events.

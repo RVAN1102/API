@@ -228,6 +228,38 @@ services:
     depends_on:
       - loki
 
+  # ---------------------------------------------------------------------------
+  # TV3 – Jaeger (distributed tracing backend + UI)
+  # ---------------------------------------------------------------------------
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:14269/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # TV3 – OpenTelemetry Collector
+  # ---------------------------------------------------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.104.0
+    command: ["--config=/etc/otel/otel-collector.yml"]
+    volumes:
+      - ../infra/otel/otel-collector.yml:/etc/otel/otel-collector.yml:ro
+    depends_on:
+      - jaeger
+    expose:
+      - "4317"
+      - "4318"
+
 volumes:
   loki-data:
   grafana-data:

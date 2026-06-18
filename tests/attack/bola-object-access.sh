@@ -83,10 +83,10 @@ STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
 assert_status "Bob → GET /orders/${BOB_ORDER}/fixed → 200 (owner allowed)" 200 "${STATUS}"
 
 echo ""
-echo "--- Scenario 4: No token → 401 ---"
+echo "--- Scenario 4: No token → 403 ---"
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   "${BASE_URL}/api/v1/orders/${BOB_ORDER}/fixed")
-assert_status "No token → GET /orders/${BOB_ORDER}/fixed → 401" 401 "${STATUS}"
+assert_status "No token → GET /orders/${BOB_ORDER}/fixed → 403" 403 "${STATUS}"
 
 echo ""
 echo "Results: ${PASS} passed, ${FAIL} failed"

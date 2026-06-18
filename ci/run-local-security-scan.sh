@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ci/run-local-security-scan.sh
 #
-# Local security scan runner (TV3).
+# Local security scan runner.
 # Runs the same checks as the GitHub Actions workflow locally.
 #
 # Tools used:

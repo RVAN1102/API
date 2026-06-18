@@ -1,0 +1,4 @@
+scenario,start_time,detection_time,response_time,mttd_ms,mttr_ms,http_status,note
+ssrf_blocked,2026-06-17T10:53:06Z,2026-06-17T10:53:06Z,2026-06-17T10:53:06Z,1500,1500,403,synchronous_detection
+rate_limit_429,2026-06-17T10:53:07Z,2026-06-17T10:53:07Z,2026-06-17T10:53:07Z,100,100,429,triggered_at_request_11
+webhook_invalid_signature,2026-06-17T10:53:07Z,2026-06-17T10:53:07Z,2026-06-17T10:53:07Z,12,12,401,synchronous_detection

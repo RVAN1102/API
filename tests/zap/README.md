@@ -1,4 +1,4 @@
-# OWASP ZAP Baseline Scan (TV3)
+# OWASP ZAP Baseline Scan
 
 This directory contains configuration for running automated API security scans using OWASP ZAP against the Kong API Gateway.
 

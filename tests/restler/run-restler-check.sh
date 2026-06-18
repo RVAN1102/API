@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/restler/run-restler-check.sh
 #
-# RESTler API Fuzzing (TV3)
+# RESTler API Fuzzing
 #
 # Runs RESTler compile + test against the OpenAPI spec.
 # RESTler must be installed separately (see README).
