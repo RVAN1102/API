@@ -38,6 +38,7 @@ mkdir -p "${REPORT_DIR}"
 echo "=== OWASP ZAP Active Scan ===" | tee "${LOG_FILE}"
 echo "Date: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" | tee -a "${LOG_FILE}"
 echo "Target: ${BASE_URL}" | tee -a "${LOG_FILE}"
+echo "Scan mode: active" | tee -a "${LOG_FILE}"
 echo "" | tee -a "${LOG_FILE}"
 
 # --------------------------------------------------
@@ -63,16 +64,9 @@ USER_TOKEN=""
   if [ -z "${USER_TOKEN}" ]; then
     echo "[WARN] Could not obtain token from Keycloak. Running unauthenticated scan only." | tee -a "${LOG_FILE}"
     echo "[WARN] Protected endpoints will return 401 – expected for unauthenticated scan." | tee -a "${LOG_FILE}"
-    AUTH_ARGS=""
   else
     TOKEN_LEN=${#USER_TOKEN}
-    echo "[OK] Token obtained. Length: ${TOKEN_LEN} chars." | tee -a "${LOG_FILE}"
-    AUTH_ARGS="-config replacer.full_list(0).description=auth1 \
-               -config replacer.full_list(0).enabled=true \
-               -config replacer.full_list(0).matchtype=REQ_HEADER \
-               -config replacer.full_list(0).matchstr=Authorization \
-               -config replacer.full_list(0).regex=false \
-               -config replacer.full_list(0).replacement=Bearer\\ ${USER_TOKEN}"
+    echo "[OK] Auth token obtained; token not logged. Length: ${TOKEN_LEN} chars." | tee -a "${LOG_FILE}"
   fi
 
 echo "" | tee -a "${LOG_FILE}"
@@ -111,13 +105,15 @@ echo "" | tee -a "${LOG_FILE}"
 echo "--- Step 3: Validating OpenAPI spec ---" | tee -a "${LOG_FILE}"
 
 OPENAPI_SPEC="services/openapi.yaml"
+OPENAPI_SPEC_CONTAINER="/zap/wrk/${OPENAPI_SPEC}"
 if [ ! -f "${OPENAPI_SPEC}" ]; then
   echo "[FAIL] OpenAPI spec not found at ${OPENAPI_SPEC}" | tee -a "${LOG_FILE}"
   exit 1
 fi
 
 ENDPOINT_COUNT=$(grep -c "operationId:" "${OPENAPI_SPEC}" 2>/dev/null || echo "0")
-echo "[OK] OpenAPI spec found: ${OPENAPI_SPEC}" | tee -a "${LOG_FILE}"
+echo "[OK] OpenAPI spec path: ${OPENAPI_SPEC}" | tee -a "${LOG_FILE}"
+echo "[OK] ZAP container OpenAPI spec path: ${OPENAPI_SPEC_CONTAINER}" | tee -a "${LOG_FILE}"
 echo "[OK] Endpoints in spec: ${ENDPOINT_COUNT}" | tee -a "${LOG_FILE}"
 echo "" | tee -a "${LOG_FILE}"
 
@@ -127,7 +123,9 @@ echo "" | tee -a "${LOG_FILE}"
 echo "--- Step 4: Running ZAP Active Scan ---" | tee -a "${LOG_FILE}"
 echo "[INFO] Using Docker image: ghcr.io/zaproxy/zaproxy:stable" | tee -a "${LOG_FILE}"
 echo "[INFO] Scan mode: active (not baseline)" | tee -a "${LOG_FILE}"
-echo "[INFO] Target: ${BASE_URL}" | tee -a "${LOG_FILE}"
+echo "[INFO] OpenAPI target: ${OPENAPI_SPEC_CONTAINER}" | tee -a "${LOG_FILE}"
+echo "[INFO] Runtime base URL override: ${BASE_URL}" | tee -a "${LOG_FILE}"
+echo "[INFO] zap-api-scan.py -t ${OPENAPI_SPEC_CONTAINER} -f openapi -a -O ${BASE_URL}" | tee -a "${LOG_FILE}"
 echo "" | tee -a "${LOG_FILE}"
 
 ZAP_EXIT=0
@@ -136,10 +134,12 @@ docker run --rm \
   -v "$(pwd):/zap/wrk:rw" \
   ghcr.io/zaproxy/zaproxy:stable \
   zap-api-scan.py \
-    -t "${BASE_URL}/api/v1/users/health" \
+    -t "${OPENAPI_SPEC_CONTAINER}" \
     -f openapi \
-    -S \
+    -a \
+    -O "${BASE_URL}" \
     -d \
+    -s \
     -l WARN \
     -r "/zap/wrk/${REPORT_DIR}/zap-active-report.html" \
     -w "/zap/wrk/${REPORT_DIR}/zap-active-summary.md" \
@@ -148,9 +148,10 @@ docker run --rm \
     2>&1 | tee -a "${LOG_FILE}" || ZAP_EXIT=$?
 
 # ZAP exits non-zero on findings – that's expected
+echo "" | tee -a "${LOG_FILE}"
+echo "[INFO] ZAP exited with code ${ZAP_EXIT}" | tee -a "${LOG_FILE}"
 if [ "${ZAP_EXIT}" -ne 0 ]; then
-  echo "" | tee -a "${LOG_FILE}"
-  echo "[INFO] ZAP exited with code ${ZAP_EXIT} (non-zero may indicate findings, not failure)." | tee -a "${LOG_FILE}"
+  echo "[INFO] Non-zero exit may indicate findings, not script failure." | tee -a "${LOG_FILE}"
 fi
 
 echo "" | tee -a "${LOG_FILE}"
