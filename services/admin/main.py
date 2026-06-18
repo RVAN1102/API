@@ -95,6 +95,12 @@ ROLE_ADMIN = "admin"
 ROLE_ADMIN_MAINTENANCE = "admin-maintenance"
 ADMIN_SERVICE_CLIENT_ID = os.environ.get("ADMIN_SERVICE_CLIENT_ID", "admin-service-client")
 ADMIN_SERVICE_CLIENT_SECRET = os.environ.get("ADMIN_SERVICE_CLIENT_SECRET", "")
+ALLOWED_TOKEN_CLIENT_IDS = {
+    "sme-web-client",
+    "sme-lab-automation-client",
+    "billing-service-client",
+    "admin-service-client",
+}
 TOKEN_INTROSPECTION_ENABLED: bool = (
     os.environ.get("TOKEN_INTROSPECTION_ENABLED", "false").lower() == "true"
 )
@@ -184,6 +190,7 @@ async def validate_token(token: str) -> Dict[str, Any]:
                 "message": f"Unexpected issuer: {payload.get('iss')}",
             },
         )
+    require_known_token_client(payload)
     return payload
 
 
@@ -269,6 +276,31 @@ def _claim_as_string(value: Any) -> str:
 
 def _token_client_id(payload: Dict[str, Any]) -> str:
     return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
+
+
+def _audiences(payload: Dict[str, Any]) -> set[str]:
+    aud = payload.get("aud")
+    if isinstance(aud, str) and aud.strip():
+        return {aud.strip()}
+    if isinstance(aud, list):
+        return {item.strip() for item in aud if isinstance(item, str) and item.strip()}
+    return set()
+
+
+def require_known_token_client(payload: Dict[str, Any]) -> None:
+    token_client = _token_client_id(payload)
+    if token_client in ALLOWED_TOKEN_CLIENT_IDS:
+        return
+    if not token_client and _audiences(payload) & ALLOWED_TOKEN_CLIENT_IDS:
+        return
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden_client",
+            "message": "Token client is not allowed for admin endpoints",
+        },
+    )
 
 
 def has_role(payload: Dict[str, Any], *roles: str) -> bool:

@@ -89,6 +89,21 @@ if [ -z "${BILLING_SERVICE_CLIENT_SECRET:-}" ]; then
   exit 1
 fi
 
+echo "===== Refresh token rotation config ====="
+ROTATION_CHECKS="$(python3 - "${PROJECT_ROOT}/idp/realm-export/topic10-realm.json" <<'PY'
+import json
+import sys
+
+realm = json.load(open(sys.argv[1], encoding="utf-8"))
+print(f"revokeRefreshToken={str(realm.get('revokeRefreshToken')).lower()}")
+print(f"refreshTokenMaxReuse={realm.get('refreshTokenMaxReuse')}")
+PY
+)"
+echo "${ROTATION_CHECKS}"
+assert_equals "refresh token rotation enabled" "true" "$(printf '%s\n' "${ROTATION_CHECKS}" | awk -F= '$1=="revokeRefreshToken"{print $2}')"
+assert_equals "refresh token max reuse" "0" "$(printf '%s\n' "${ROTATION_CHECKS}" | awk -F= '$1=="refreshTokenMaxReuse"{print $2}')"
+
+echo ""
 echo "===== Obtain service token ====="
 if bash "${PROJECT_ROOT}/demo/auth/get-billing-service-token.sh" > "${BILLING_TOKEN_OUTPUT}" 2>&1; then
   pass "billing service token obtained"

@@ -102,6 +102,16 @@ assert_status "users me fake token" 401 \
     "${BASE_URL}/api/v1/users/me" \
     -H "$(bearer_header "fake.jwt.token")")"
 
+assert_status "users me automation token allowed" 200 \
+  "$(curl -s -o /dev/null -w "%{http_code}" \
+    "${BASE_URL}/api/v1/users/me" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")")"
+
+assert_status "users me service token forbidden" 403 \
+  "$(curl -s -o /dev/null -w "%{http_code}" \
+    "${BASE_URL}/api/v1/users/me" \
+    -H "$(bearer_header "${ADMIN_SERVICE_TOKEN}")")"
+
 echo ""
 
 # ── Admin RBAC ────────────────────────────────────

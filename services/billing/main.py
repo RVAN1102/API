@@ -59,6 +59,7 @@ BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "bi
 BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
 OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
 OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
+ALLOWED_HUMAN_CLIENT_IDS = {"sme-web-client", "sme-lab-automation-client"}
 
 # ---------------------------------------------------------------------------
 # Logging – structured JSON
@@ -244,6 +245,31 @@ def _token_client_id(payload: Dict[str, Any]) -> str:
     return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
 
 
+def _audiences(payload: Dict[str, Any]) -> Set[str]:
+    aud = payload.get("aud")
+    if isinstance(aud, str) and aud.strip():
+        return {aud.strip()}
+    if isinstance(aud, list):
+        return {item.strip() for item in aud if isinstance(item, str) and item.strip()}
+    return set()
+
+
+def require_human_client(payload: Dict[str, Any]) -> None:
+    token_client = _token_client_id(payload)
+    if token_client in ALLOWED_HUMAN_CLIENT_IDS:
+        return
+    if not token_client and _audiences(payload) & ALLOWED_HUMAN_CLIENT_IDS:
+        return
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "forbidden_client",
+            "message": "Token client is not allowed for checkout",
+        },
+    )
+
+
 def _subject_type(payload: Dict[str, Any]) -> str:
     service_clients = {BILLING_SERVICE_CLIENT_ID, "admin-service-client"}
     return "service" if _token_client_id(payload) in service_clients else "human"
@@ -334,6 +360,7 @@ def get_effective_subject(payload: Dict[str, Any]) -> str:
 async def require_checkout_access(
     payload: Dict[str, Any] = Depends(get_current_token_payload),
 ) -> Dict[str, Any]:
+    require_human_client(payload)
     require_role(payload, ROLE_USER, ROLE_ADMIN)
     return payload
 

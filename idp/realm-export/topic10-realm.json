@@ -17,6 +17,8 @@
   "maxDeltaTimeSeconds": 43200,
   "accessTokenLifespan": 300,
   "accessTokenLifespanForImplicitFlow": 900,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 36000,
   "offlineSessionIdleTimeout": 2592000,
