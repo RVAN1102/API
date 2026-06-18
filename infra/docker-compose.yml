@@ -1,5 +1,22 @@
 services:
   # ---------------------------------------------------------------------------
+  # TV2 – OPA policy decision point
+  # ---------------------------------------------------------------------------
+  opa:
+    image: openpolicyagent/opa:0.70.0
+    command:
+      - run
+      - --server
+      - --addr=0.0.0.0:8181
+      - /policies
+    volumes:
+      - ../opa/policies:/policies:ro
+    expose:
+      - "8181"
+    ports:
+      - "127.0.0.1:8181:8181"
+
+  # ---------------------------------------------------------------------------
   # API Gateway (TV1) - Kong OSS in DB-less mode
   # ---------------------------------------------------------------------------
   kong:
@@ -69,6 +86,9 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: topic10-sme-api
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      OPA_URL: "http://opa:8181"
+    depends_on:
+      - opa
     expose:
       - "8000"
     healthcheck:
@@ -95,7 +115,10 @@ services:
       BILLING_SERVICE_CLIENT_ID: "billing-service-client"
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
       ORDER_SERVICE_URL: "http://order-service:8000"
+      OPA_URL: "http://opa:8181"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+    depends_on:
+      - opa
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
       interval: 10s
@@ -116,6 +139,9 @@ services:
       KEYCLOAK_URL: "http://keycloak:8080"
       KEYCLOAK_REALM: "topic10-sme-api"
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      OPA_URL: "http://opa:8181"
+    depends_on:
+      - opa
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
       interval: 10s

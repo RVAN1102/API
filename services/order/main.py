@@ -23,6 +23,7 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -32,6 +33,7 @@ from authz import (
     ROLE_ORDER_OWNERSHIP_READ,
     check_order_ownership,
     get_effective_subject,
+    get_token_client_id,
     require_service_client_role,
     require_user_or_admin,
 )
@@ -91,6 +93,8 @@ ORDERS: Dict[str, Dict[str, Any]] = {
 }
 
 BILLING_SERVICE_CLIENT_ID = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
+OPA_URL = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_ALLOW_URL = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 
 class OwnershipVerificationRequest(BaseModel):
@@ -135,6 +139,68 @@ async def require_order_ownership_read(
         ROLE_ORDER_OWNERSHIP_READ,
     )
     return payload
+
+
+def _roles(payload: Dict[str, Any]) -> List[str]:
+    roles = payload.get("realm_access", {}).get("roles", [])
+    return roles if isinstance(roles, list) else []
+
+
+def _claim_as_string(value: Any) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item.strip()
+    return ""
+
+
+def _subject_type(payload: Dict[str, Any]) -> str:
+    return "service" if get_token_client_id(payload) == BILLING_SERVICE_CLIENT_ID else "human"
+
+
+async def require_opa_allow(input_data: Dict[str, Any]) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_error", "message": "Authorization policy engine returned an error"},
+        )
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    if not isinstance(body, dict) or body.get("result") is not True:
+        reason = "ownership_denied" if input_data.get("action") == "order_verify_ownership" else "opa_denied"
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=_claim_as_string(input_data.get("method")) or "POST",
+            path=_claim_as_string(input_data.get("path")) or "/api/v1/orders/internal/verify-ownership",
+            status_code=status.HTTP_403_FORBIDDEN,
+            client_ip=_claim_as_string(input_data.get("client_ip")) or "unknown",
+            correlation_id=_claim_as_string(input_data.get("correlation_id")),
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "forbidden", "message": "OPA policy denied authorization"},
+        )
 
 
 def _auth_failure_reason(status_code: int, detail: Any, path: str) -> Optional[str]:
@@ -257,7 +323,7 @@ async def list_orders(
 async def verify_order_ownership(
     body: OwnershipVerificationRequest,
     request: Request,
-    _payload: Dict[str, Any] = Depends(require_order_ownership_read),
+    payload: Dict[str, Any] = Depends(require_order_ownership_read),
 ):
     """
     Verify order ownership for internal service-to-service callers.
@@ -282,6 +348,24 @@ async def verify_order_ownership(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "not_found", "message": "Order not found"},
         )
+
+    await require_opa_allow(
+        {
+            "action": "order_verify_ownership",
+            "service": "order-service",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else "unknown",
+            "subject_type": _subject_type(payload),
+            "username": _claim_as_string(payload.get("preferred_username")),
+            "client_id": get_token_client_id(payload),
+            "roles": _roles(payload),
+            "order_id": body.order_id,
+            "order_owner": order["owner_id"],
+            "requested_username": body.subject,
+            "correlation_id": correlation_id,
+        }
+    )
 
     allowed = order["owner_id"] == body.subject
     log_event(

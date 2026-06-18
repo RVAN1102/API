@@ -68,6 +68,17 @@ reset_kong_after_edge() {
   sleep 30
 }
 
+reset_kong_before_opa() {
+  echo ""
+  echo "[INFO] Resetting Kong before OPA authz test"
+  if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
+    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+  else
+    echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
+  fi
+  sleep 20
+}
+
 echo "=============================================="
 echo "  FINAL REGRESSION TEST"
 echo "  $(date)"
@@ -78,6 +89,8 @@ run_suite "Client Credentials" "tests/security/client-credentials-tests.sh"
 run_suite "Token Lifecycle" "tests/security/token-lifecycle-tests.sh"
 run_suite "Real S2S Ownership" "tests/security/s2s-ownership-tests.sh"
 run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
+reset_kong_before_opa
+run_suite "OPA Authz" "tests/security/opa-authz-tests.sh"
 run_suite "Edge Hardening" "tests/security/edge-hardening-tests.sh"
 reset_kong_after_edge
 run_suite "Webhook Security" "tests/security/webhook-tests.sh"

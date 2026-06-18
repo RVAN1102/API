@@ -57,6 +57,8 @@ TOKEN_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connec
 ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "http://order-service:8000")
 BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
 BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
+OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 # ---------------------------------------------------------------------------
 # Logging – structured JSON
@@ -233,6 +235,64 @@ def has_role(payload: Dict[str, Any], *roles: str) -> bool:
     return any(r in user_roles for r in roles)
 
 
+def _roles(payload: Dict[str, Any]) -> List[str]:
+    roles = payload.get("realm_access", {}).get("roles", [])
+    return roles if isinstance(roles, list) else []
+
+
+def _token_client_id(payload: Dict[str, Any]) -> str:
+    return _claim_as_string(payload.get("azp")) or _claim_as_string(payload.get("client_id"))
+
+
+def _subject_type(payload: Dict[str, Any]) -> str:
+    service_clients = {BILLING_SERVICE_CLIENT_ID, "admin-service-client"}
+    return "service" if _token_client_id(payload) in service_clients else "human"
+
+
+async def require_opa_allow(input_data: Dict[str, Any]) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_error", "message": "Authorization policy engine returned an error"},
+        )
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    if not isinstance(body, dict) or body.get("result") is not True:
+        reason = "ownership_denied" if input_data.get("action") == "billing_checkout" else "opa_denied"
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=_claim_as_string(input_data.get("method")) or "POST",
+            path=_claim_as_string(input_data.get("path")) or "/api/v1/billing/checkout",
+            status_code=status.HTTP_403_FORBIDDEN,
+            client_ip=_claim_as_string(input_data.get("client_ip")) or "unknown",
+            correlation_id=_claim_as_string(input_data.get("correlation_id")),
+            message="OPA policy denied authorization",
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "forbidden", "message": "OPA policy denied authorization"},
+        )
+
+
 def _is_automation_fixture(payload: Dict[str, Any]) -> bool:
     value = payload.get("automation_fixture")
     if isinstance(value, bool):
@@ -391,11 +451,28 @@ async def require_order_owner_via_order_service(
     payload: Dict[str, Any],
     order_id: str,
     correlation_id: str,
-) -> None:
+    request: Request,
+) -> str:
     subject = get_effective_subject(payload)
     if subject and await verify_order_ownership_with_order_service(order_id, subject, correlation_id):
-        return
+        return subject
 
+    log_event(
+        level="WARNING",
+        event_type="auth_failure",
+        method="POST",
+        path="/api/v1/billing/checkout",
+        status_code=403,
+        client_ip=request.client.host if request.client else "unknown",
+        correlation_id=correlation_id,
+        message="Checkout ownership denied",
+        extra={
+            "reason": "ownership_denied",
+            "category": "ownership_denied",
+            "security_event": True,
+            "order_id": order_id,
+        },
+    )
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail={
@@ -471,7 +548,24 @@ async def create_checkout(
     Requires order ownership unless the caller has role 'admin'.
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
-    await require_order_owner_via_order_service(payload, body.order_id, correlation_id)
+    subject = await require_order_owner_via_order_service(payload, body.order_id, correlation_id, request)
+    await require_opa_allow(
+        {
+            "action": "billing_checkout",
+            "service": "billing-service",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else "unknown",
+            "subject_type": _subject_type(payload),
+            "username": subject,
+            "client_id": _token_client_id(payload),
+            "roles": _roles(payload),
+            "order_id": body.order_id,
+            "ownership_confirmed": True,
+            "ownership_confirmation_source": "order-service",
+            "correlation_id": correlation_id,
+        }
+    )
 
     import uuid
     payment_id = f"pay-{uuid.uuid4().hex[:8]}"
