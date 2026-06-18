@@ -34,7 +34,7 @@ if [ -z "${ACCESS_TOKEN}" ]; then
     "${KEYCLOAK_URL}/realms/topic10-sme-api/protocol/openid-connect/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "grant_type=password" \
-    -d "client_id=sme-web-client" \
+    -d "client_id=sme-lab-automation-client" \
     -d "username=admin01" \
     -d "password=admin-password-123" \
     -d "scope=openid profile email" 2>&1)" || true

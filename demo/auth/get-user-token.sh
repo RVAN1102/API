@@ -16,7 +16,7 @@ set -euo pipefail
 
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 REALM="topic10-sme-api"
-CLIENT_ID="sme-web-client"
+CLIENT_ID="sme-lab-automation-client"
 USERNAME="${1:-${USERNAME:-alice}}"
 TOKEN_FILE="/tmp/user-token.txt"
 

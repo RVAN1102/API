@@ -45,7 +45,7 @@ if [ -z "${USER_TOKEN}" ]; then
     "${KC_URL}/realms/topic10-sme-api/protocol/openid-connect/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "grant_type=password" \
-    -d "client_id=sme-web-client" \
+    -d "client_id=sme-lab-automation-client" \
     -d "username=ci-alice" \
     -d "password=ci-alice-password-123" 2>/dev/null || echo "{}")
   USER_TOKEN=$(echo "${TOKEN_RESP}" | python3 -c \
