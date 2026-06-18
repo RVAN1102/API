@@ -1,8 +1,8 @@
 # Final Quality Gate Summary
 
-**Generated:** 2026-06-18T10:57:19Z
+**Generated:** 2026-06-18T11:04:46Z
 **Branch:** `fix/gvhd-p0-security-evidence`
-**HEAD:** `f6a2b5e9ec21e0f323c01e31ffefc04d1e2e0449`
+**HEAD:** `234f2a95837e27c365458e238043af6e28d5561d`
 **Quality gate status:** Not asserted by this script.
 
 ## Required Reproducible Checks

@@ -1,5 +1,6 @@
-generated_at=2026-06-18T10:57:19Z
-f6a2b5e (HEAD -> fix/gvhd-p0-security-evidence) docs: update gitleaks evidence references
+generated_at=2026-06-18T11:04:46Z
+234f2a9 (HEAD -> fix/gvhd-p0-security-evidence) fix: add real restler and logql detection evidence
+f6a2b5e docs: update gitleaks evidence references
 6fffa21 fix: remove tracked secrets and generate demo certs on demand
 1cb24b0 fix: enforce docker network egress control
 9009ca6 chore: add branch guard
@@ -18,4 +19,3 @@ a7ba452 (qa/tv1-edge-ssrf-egress-clean) qa: add tv1 edge webhook ssrf egress fin
 c99f2d3 chore: preserve evidence artifacts line endings
 9c4ca99 Merge pull request #3 from RVAN1102/fix/tv2-authz-logs-dto-openapi
 4166d93 authz: add structured logs dto schemas and backend introspection
-16a6c1e Merge pull request #2 from RVAN1102/fix/tv2-token-introspection-authz-hardening
