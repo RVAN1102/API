@@ -225,6 +225,7 @@ fi
 if [ -n "${RUN_SUMMARY}" ]; then
   [ "${REQUESTS_RENDERED}" = "unknown" ] && REQUESTS_RENDERED="$(json_value "${RUN_SUMMARY}" "total_requests_sent")"
   BUGS_FOUND="$(json_value "${RUN_SUMMARY}" "total_bug_buckets")"
+  [ -z "${BUGS_FOUND}" ] && BUGS_FOUND="$(json_value "${RUN_SUMMARY}" "bugCount")"
 fi
 if [ -n "${BUG_BUCKETS}" ]; then
   if [ -s "${BUG_BUCKETS}" ]; then
@@ -267,6 +268,8 @@ fi
   echo "## Status Codes"
   echo ""
   echo "${STATUS_CODES}"
+  echo ""
+  echo "401, 403, and 429 responses on protected or rate-limited routes are expected fail-closed behavior when RESTler does not provide a valid token or intentionally exercises negative cases."
   echo ""
   echo "## Evidence Files"
   echo ""

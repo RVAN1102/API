@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
 # TV1 Edge Hardening Security – Automated Test Suite
-# Output: docs/evidence/tv1/edge-final/
+# Output: .artifacts/test-runs/tv1/edge-final/
 # =============================================================================
 set -uo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1/edge-final"
+EVIDENCE_DIR="${EVIDENCE_DIR:-${REPO_ROOT}/.artifacts/test-runs/tv1/edge-final}"
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8000}"
 HTTPS_HOST="${HTTPS_HOST:-localhost:8443}"
 
@@ -62,6 +62,36 @@ log "===== TLS 1.3 only and HSTS ====="
     limitation "HSTS not confirmed"
   fi
 } > "${EVIDENCE_DIR}/tls-13-only-and-hsts.txt" 2>&1
+
+# =============================================================================
+# 1b. Security Headers
+# =============================================================================
+log "===== Security Headers ====="
+{
+  echo "===== Security Headers Test ====="
+  headers="$(curl -k -si "https://${HTTPS_HOST}/api/v1/users/health" 2>/dev/null || true)"
+
+  check_header() {
+    local header_name="$1"
+    local expected="$2"
+    if echo "${headers}" | grep -Eiq "^${header_name}: ${expected}"$'\r'"?$"; then
+      pass "${header_name}: ${expected}"
+    else
+      fail "${header_name} missing or unexpected"
+    fi
+  }
+
+  check_header "X-Content-Type-Options" "nosniff"
+  check_header "Cross-Origin-Resource-Policy" "same-origin"
+  check_header "Referrer-Policy" "no-referrer"
+  check_header "X-Frame-Options" "DENY"
+
+  if echo "${headers}" | grep -Eiq "^Permissions-Policy: .*camera=\(\).*microphone=\(\).*geolocation=\(\)"; then
+    pass "Permissions-Policy restricts camera, microphone, and geolocation"
+  else
+    fail "Permissions-Policy missing required restrictions"
+  fi
+} > "${EVIDENCE_DIR}/security-headers-final.txt" 2>&1
 
 # =============================================================================
 # 2. CORS Strict
@@ -171,3 +201,8 @@ log "===== WAF SQLi/XSS ====="
 # =============================================================================
 cat "${RESULT_FILE}"
 echo "Edge hardening tests completed. Check ${EVIDENCE_DIR}"
+
+if grep -q "^FAIL:" "${RESULT_FILE}"; then
+  echo "[ERROR] Edge hardening tests have failures."
+  exit 1
+fi

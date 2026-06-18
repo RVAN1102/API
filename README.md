@@ -68,7 +68,7 @@ Supporting Services:
 - Loki/Promtail/Grafana observability stack
 - Security alert rules (BOLA, SSRF, webhook, rate-limit)
 - Attack simulation scripts (SSRF, token replay, webhook forgery, BOLA, rate-limit)
-- OWASP ZAP baseline scan
+- OWASP ZAP Active Scan
 - RESTler API fuzzing plan
 - CI security scan (Bandit, Gitleaks, Trivy)
 - MTTD/MTTR measurement
@@ -76,6 +76,14 @@ Supporting Services:
 ## Quick Start
 
 ```bash
+# Create the local Compose environment file first.
+cp infra/.env.example infra/.env
+
+# Edit infra/.env and set at least:
+#   BILLING_SERVICE_CLIENT_SECRET
+#   ADMIN_SERVICE_CLIENT_SECRET
+#   WEBHOOK_SECRET
+
 # Start all services
 docker compose -f infra/docker-compose.yml up -d --build
 
@@ -174,6 +182,18 @@ bash tests/attack/rate-limit-trigger.sh
 ```bash
 bash ci/run-local-security-scan.sh
 ```
+
+## Final Regression
+
+Run the final regression gate before review or merge:
+
+```bash
+bash tests/final/main-regression.sh
+```
+
+The regression expects `infra/.env` or shell environment variables to provide
+`BILLING_SERVICE_CLIENT_SECRET`, `ADMIN_SERVICE_CLIENT_SECRET`, and
+`WEBHOOK_SECRET`.
 
 ## Final Evidence Before Packaging
 

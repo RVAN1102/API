@@ -11,6 +11,13 @@
 ## 1. Start the Stack
 
 ```bash
+cp infra/.env.example infra/.env
+
+# Edit infra/.env and set at least:
+#   BILLING_SERVICE_CLIENT_SECRET
+#   ADMIN_SERVICE_CLIENT_SECRET
+#   WEBHOOK_SECRET
+
 docker compose -f infra/docker-compose.yml up -d --build
 
 # If Keycloak fails or you encounter Network Errors, use the clean restart script:
@@ -253,6 +260,18 @@ bash ci/run-local-security-scan.sh
 ```
 
 Results saved to `docs/evidence/tv3/security-scan-local.txt`.
+
+---
+
+## Final Regression Gate
+
+Run this before review or merge:
+
+```bash
+bash tests/final/main-regression.sh
+```
+
+Expected result: `Suites passed: 9`, `Suites failed: 0`.
 
 ---
 

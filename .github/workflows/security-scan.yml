@@ -29,13 +29,16 @@ jobs:
 
       - name: Run Bandit on services
         run: |
+          set +e
           bandit -r services/ \
             --exclude services/*/test_*.py \
-            --severity-level medium \
+            --severity-level high \
             --confidence-level medium \
             --format txt \
-            --output bandit-report.txt || true
+            --output bandit-report.txt
+          BANDIT_EXIT=$?
           cat bandit-report.txt
+          exit ${BANDIT_EXIT}
 
       - name: Upload Bandit report
         uses: actions/upload-artifact@v4
@@ -72,7 +75,7 @@ jobs:
           scan-type: fs
           scan-ref: "."
           format: table
-          exit-code: "0"
+          exit-code: "1"
           severity: "HIGH,CRITICAL"
           output: trivy-report.txt
 

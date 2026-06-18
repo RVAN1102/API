@@ -1,0 +1,46 @@
+# Authoritative Evidence Index
+
+This index points to the official, reviewable evidence set for the current hardening baseline. The evidence supports the statement that known P0 findings were addressed and validated by regression; it does not claim that the system has no remaining vulnerabilities.
+
+## Final Regression
+
+- Final regression 9/9: `docs/evidence/final/main-regression-final.txt`
+- Post-hardening final regression: `docs/evidence/final/final-security-regression-after-all-hardening.txt`
+- Quality gate summary: `docs/evidence/final/final-quality-gate-summary.txt`
+
+## Identity, Authorization, And Service-To-Service
+
+- Client Credentials: `docs/evidence/tv2/gvhd-client-credentials-tests.txt`
+- Token lifecycle, introspection, and revocation: `docs/evidence/tv2/token-lifecycle-introspection-revocation.txt`
+- Real S2S ownership: `docs/evidence/tv2/real-s2s-billing-order-ownership.txt`
+- Authz negative regression: `docs/evidence/tv2/gvhd-authz-negative-after-client-credentials.txt`
+- OPA authz policy and backend enforcement: `docs/evidence/tv2/opa-policy-engine.txt`
+
+## Edge And Webhook Security
+
+- Edge hardening: `docs/evidence/tv1/edge-final/`
+- Webhook security final cases: `docs/evidence/tv1/webhook-final/`
+- Gateway route smoke: `docs/evidence/tv1/p0-01-kong-route-smoke.txt`
+- TLS 1.3 and HSTS: `docs/evidence/tv1/p0-02-kong-tls13-only.txt`, `docs/evidence/tv1/p0-03-kong-hsts.txt`
+
+## SSRF And Network Egress
+
+- SSRF vulnerable/fixed endpoint evidence: `docs/evidence/tv1/ssrf-egress/`
+- Network egress control runtime evidence: `docs/evidence/tv1/ssrf-egress/network-egress-control-runtime-after-fix.txt`
+
+## Observability And Alerting
+
+- Loki alert rules loaded at runtime: `docs/evidence/tv3/observability/loki-rules-runtime-loaded-after-p0-fix.yml`
+- Alert diagnostics and selected samples: `docs/evidence/tv3/metrics/`
+
+## DAST, Fuzzing, And Security Scans
+
+- ZAP Active Scan report and summary: `docs/evidence/tv3/zap/zap-active-summary.md`, `docs/evidence/tv3/zap/zap-active-report.json`
+- RESTler execution summary: `docs/evidence/tv3/restler/restler-summary.md`
+- Structured fuzzing summary: `docs/evidence/tv3/fuzzing/fuzzing-summary.md`
+- Local security scan evidence: `docs/evidence/tv3/security-scan-local.txt`
+- Supply-chain evidence, SBOM, and signing summaries: `docs/evidence/tv3/supply-chain/`
+
+## Runtime Test Artifacts
+
+New local regression runs write transient evidence to `.artifacts/test-runs/` by default. That directory is intentionally ignored so rerunning regression does not overwrite the official evidence above or dirty the working tree.

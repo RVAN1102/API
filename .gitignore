@@ -13,6 +13,7 @@ infra/certs/*
 !infra/certs/README.md
 
 # Generated demo state and reports
+.artifacts/
 demo/webhook/.nonce-cache.json
 demo/tls/certs/
 demo/mtls/certs/
