@@ -110,20 +110,25 @@ echo "===== 2. SSRF Fixed: Block Metadata ====="
 } > "${EVIDENCE_DIR}/ssrf-fixed-block-metadata-ip.txt" 2>&1
 
 # =============================================================================
-# 3. Fixed SSRF: Allow Valid Host
+# 3. Fixed SSRF: Application URL Validation for Public Host
 # =============================================================================
-echo "===== 3. SSRF Fixed: Allow Valid Host ====="
+echo "===== 3. SSRF Fixed: Application URL Validation for Public Host ====="
 {
-  echo "--- Fetching https://httpbin.org/get from fixed endpoint ---"
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+  echo "--- Requesting https://example.com through fixed endpoint ---"
+  echo "Application-layer SSRF validation permits this public URL."
+  echo "Docker network egress control may still prevent the container from completing the outbound fetch."
+  BODY_FILE="$(mktemp)"
+  STATUS=$(curl -s -o "${BODY_FILE}" -w "%{http_code}" -X POST \
     "${GATEWAY_URL}/api/v1/admin/metadata-fetch/fixed" \
     -H "Content-Type: application/json" \
     -H "${AUTH_HEADER}" \
-    -d '{"fetch_url":"https://httpbin.org/get"}')
+    -d '{"fetch_url":"https://example.com"}')
+  cat "${BODY_FILE}"
+  rm -f "${BODY_FILE}"
   if [ "${STATUS}" = "200" ]; then
-    echo "[PASS] Fixed endpoint allowed valid host fetch (HTTP 200)"
+    echo "[PASS] Fixed endpoint accepted a syntactically safe public URL after URL validation (HTTP 200)"
   else
-    echo "[FAIL] Fixed endpoint did not return 200 (got ${STATUS})"
+    echo "[FAIL] Fixed endpoint did not accept safe public URL for validation-path test (got ${STATUS})"
   fi
 } > "${EVIDENCE_DIR}/ssrf-fixed-allowlist-valid-host.txt" 2>&1
 
@@ -132,15 +137,21 @@ echo "===== 3. SSRF Fixed: Allow Valid Host ====="
 # =============================================================================
 echo "===== 4. Network Egress Control Evidence ====="
 {
-  echo "--- SSRF Network Egress Control Strategy ---"
-  echo "In this lab, egress control is primarily handled by the Admin Service's application-layer validation (URL blocklist & DNS rebinding checks)."
-  echo "For production environments (e.g., AWS/Kubernetes), network-layer egress control should be applied using:"
-  echo "1. AWS Security Groups: Deny outbound traffic to 169.254.169.254 for application pods."
-  echo "2. Kubernetes NetworkPolicies: Egress rules explicitly denying traffic to cloud metadata IP."
-  echo "3. Docker/iptables equivalent:"
-  echo "   iptables -I DOCKER-USER -d 169.254.169.254 -j DROP"
+  echo "--- SSRF Network Egress Control Evidence ---"
+  echo "Docker-level network egress control is implemented in infra/docker-compose.yml."
+  echo "Backend services are attached only to internal:true Docker networks:"
+  echo "- user-service, order-service, billing-service, and admin-service are not attached to infra_default or any other non-internal network."
+  echo "- Kong remains on infra_default for host/test access and joins per-service internal upstream networks."
+  echo "- billing-service and order-service share billing-order-s2s-internal for the approved internal S2S path."
   echo ""
-  echo "Application-layer block evidence has been captured in ssrf-fixed-block-metadata-ip.txt."
+  echo "Runtime proof is produced by:"
+  echo "  bash tests/security/network-egress-control-tests.sh"
+  echo ""
+  echo "Runtime evidence output:"
+  echo "  docs/evidence/tv1/ssrf-egress/network-egress-control-runtime-after-fix.txt"
+  echo ""
+  echo "Application-layer SSRF URL validation remains separate evidence:"
+  echo "  docs/evidence/tv1/ssrf-egress/ssrf-fixed-block-metadata-ip.txt"
 } > "${EVIDENCE_DIR}/network-egress-control-evidence.txt" 2>&1
 
 echo "SSRF Tests completed. Check ${EVIDENCE_DIR}"

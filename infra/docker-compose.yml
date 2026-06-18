@@ -15,6 +15,11 @@ services:
       - "8181"
     ports:
       - "127.0.0.1:8181:8181"
+    networks:
+      - default
+      - order-policy-internal
+      - billing-policy-internal
+      - admin-policy-internal
 
   # ---------------------------------------------------------------------------
   # API Gateway (TV1) - Kong OSS in DB-less mode
@@ -49,6 +54,13 @@ services:
       - "8000:8000"
       - "8443:8443"
       - "127.0.0.1:8001:8001"
+    networks:
+      - default
+      - kong-user-internal
+      - kong-order-internal
+      - kong-billing-internal
+      - kong-admin-internal
+      - kong-webhook-internal
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 5s
@@ -66,6 +78,9 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: topic10-sme-api
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+    networks:
+      - kong-user-internal
+      - user-identity-internal
     expose:
       - "8000"
     healthcheck:
@@ -89,6 +104,11 @@ services:
       OPA_URL: "http://opa:8181"
     depends_on:
       - opa
+    networks:
+      - kong-order-internal
+      - order-identity-internal
+      - order-policy-internal
+      - billing-order-s2s-internal
     expose:
       - "8000"
     healthcheck:
@@ -119,6 +139,11 @@ services:
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
     depends_on:
       - opa
+    networks:
+      - kong-billing-internal
+      - billing-identity-internal
+      - billing-policy-internal
+      - billing-order-s2s-internal
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
       interval: 10s
@@ -142,6 +167,10 @@ services:
       OPA_URL: "http://opa:8181"
     depends_on:
       - opa
+    networks:
+      - kong-admin-internal
+      - admin-identity-internal
+      - admin-policy-internal
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
       interval: 10s
@@ -160,6 +189,8 @@ services:
       WEBHOOK_MAX_AGE_SECONDS: "300"
     volumes:
       - ../demo/webhook/receiver.py:/app/receiver.py:ro
+    networks:
+      - kong-webhook-internal
     expose:
       - "8080"
 
@@ -199,6 +230,12 @@ services:
       - ../idp/realm-export/topic10-realm.json:/opt/keycloak/data/import-template/topic10-sme-api-realm.json:ro
     ports:
       - "8080:8080"
+    networks:
+      - default
+      - user-identity-internal
+      - order-identity-internal
+      - billing-identity-internal
+      - admin-identity-internal
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1"]
       interval: 15s
@@ -217,6 +254,8 @@ services:
       VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
     ports:
       - "8200:8200"
+    networks:
+      - default
     cap_add:
       - IPC_LOCK
     healthcheck:
@@ -237,6 +276,9 @@ services:
       - loki-data:/loki
     expose:
       - "3100"
+    networks:
+      - default
+      - observability-internal
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
       interval: 10s
@@ -256,6 +298,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - loki
+    networks:
+      - observability-internal
 
   # ---------------------------------------------------------------------------
   # TV3 – Grafana (dashboard and alerting)
@@ -276,6 +320,9 @@ services:
       - "3001:3000"
     depends_on:
       - loki
+    networks:
+      - default
+      - observability-internal
 
   # ---------------------------------------------------------------------------
   # TV3 – Jaeger (distributed tracing backend + UI)
@@ -288,6 +335,9 @@ services:
       - "16686:16686"
       - "4317:4317"
       - "4318:4318"
+    networks:
+      - default
+      - telemetry-internal
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:14269/ || exit 1"]
       interval: 10s
@@ -308,7 +358,43 @@ services:
     expose:
       - "4317"
       - "4318"
+    networks:
+      - telemetry-internal
 
 volumes:
   loki-data:
   grafana-data:
+
+networks:
+  default:
+    name: infra_default
+  kong-user-internal:
+    internal: true
+  kong-order-internal:
+    internal: true
+  kong-billing-internal:
+    internal: true
+  kong-admin-internal:
+    internal: true
+  kong-webhook-internal:
+    internal: true
+  user-identity-internal:
+    internal: true
+  order-identity-internal:
+    internal: true
+  billing-identity-internal:
+    internal: true
+  admin-identity-internal:
+    internal: true
+  order-policy-internal:
+    internal: true
+  billing-policy-internal:
+    internal: true
+  admin-policy-internal:
+    internal: true
+  billing-order-s2s-internal:
+    internal: true
+  observability-internal:
+    internal: true
+  telemetry-internal:
+    internal: true

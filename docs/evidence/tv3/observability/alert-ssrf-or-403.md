@@ -40,7 +40,7 @@ bash tests/attack/ssrf-attack.sh
 | 3 | `http://localhost:8200/v1/sys/health` | 403 | 403 | ✅ Blocked |
 | 4 | `http://127.0.0.1:8200/` | 403 | 403 | ✅ Blocked |
 | 5 | `http://[::1]:8200/` | 403 | 403 | ✅ Blocked |
-| 6 | `https://httpbin.org/get` (allowlisted test) | 200 | 200 | ✅ Allowed |
+| 6 | `https://example.com` (public URL validation) | URL validation accepts; Docker blocks direct egress | Runtime evidence file | Defense-in-depth |
 
 ---
 
@@ -91,5 +91,5 @@ bash tests/attack/ssrf-attack.sh
 ✅ Admin vulnerable endpoint demonstrates risk (200) for comparison.  
 ✅ 403 responses logged in structured JSON format with `reason=ssrf_blocked`.  
 ✅ Loki alert rule configured to detect SSRF patterns within 1-minute window.  
-✅ Egress control blocks metadata IPs: `169.254.169.254`, `metadata.google.internal`, localhost.  
+✅ Docker egress control blocks direct backend access to metadata IPs and public Internet targets; runtime proof is written by `tests/security/network-egress-control-tests.sh`.  
 ✅ No sensitive data (tokens, secrets) exposed in alert or log evidence.
