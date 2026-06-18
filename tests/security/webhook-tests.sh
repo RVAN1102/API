@@ -4,17 +4,18 @@
 # Sends webhook requests through Docker network with mTLS client certs,
 # matching the same approach used in tv1-edge-webhook-tests.sh.
 #
-# Output: docs/evidence/tv1/webhook-final/
+# Output: .artifacts/test-runs/tv1/webhook-final/
 # =============================================================================
 set -uo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1/webhook-final"
+EVIDENCE_DIR="${EVIDENCE_DIR:-${REPO_ROOT}/.artifacts/test-runs/tv1/webhook-final}"
 WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
 WEBHOOK_CA_CRT="${REPO_ROOT}/infra/certs/webhook-ca.crt"
 WEBHOOK_CA_KEY="${REPO_ROOT}/infra/certs/webhook-ca.key"
 WEBHOOK_CERT_DIR=""
+CERT_BACKUP_DIR=""
 
 # Git Bash / MSYS2: save original MSYS_NO_PATHCONV
 _ORIG_MSYS_NO_PATHCONV="${MSYS_NO_PATHCONV:-}"
@@ -39,6 +40,10 @@ cleanup() {
       "${WEBHOOK_CERT_DIR}/webhook-client.key"
     rmdir "${WEBHOOK_CERT_DIR}" 2>/dev/null
   fi
+  if [ -n "${CERT_BACKUP_DIR}" ] && [ -d "${CERT_BACKUP_DIR}" ]; then
+    restore_runtime_cert_artifacts
+    rm -rf "${CERT_BACKUP_DIR}"
+  fi
   return 0
 }
 trap cleanup EXIT
@@ -51,6 +56,31 @@ log()  { echo -e "${CYAN}[WEBHOOK]${NC} $*"; }
 pass() { TOTAL=$((TOTAL+1)); PASSED=$((PASSED+1)); echo -e "${GREEN}[PASS]${NC} $*"; echo "PASS:$*" >> "${RESULT_FILE}"; }
 fail() { TOTAL=$((TOTAL+1)); FAILED=$((FAILED+1)); echo -e "${RED}[FAIL]${NC} $*"; echo "FAIL:$*" >> "${RESULT_FILE}"; }
 die()  { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
+
+snapshot_runtime_cert_artifacts() {
+  CERT_BACKUP_DIR="$(mktemp -d /tmp/webhook-runtime-certs.XXXXXX)"
+  for name in webhook-ca.crt webhook-client.crt; do
+    if [ -f "${REPO_ROOT}/infra/certs/${name}" ]; then
+      cp "${REPO_ROOT}/infra/certs/${name}" "${CERT_BACKUP_DIR}/${name}"
+    fi
+  done
+}
+
+restore_runtime_cert_artifacts() {
+  local name
+  for name in webhook-ca.crt webhook-client.crt; do
+    if [ -f "${CERT_BACKUP_DIR}/${name}" ]; then
+      cp "${CERT_BACKUP_DIR}/${name}" "${REPO_ROOT}/infra/certs/${name}"
+    fi
+  done
+  rm -f \
+    "${REPO_ROOT}/infra/certs/webhook-ca.key" \
+    "${REPO_ROOT}/infra/certs/webhook-client.key" \
+    "${REPO_ROOT}/infra/certs/webhook-client.p12" \
+    "${REPO_ROOT}/infra/certs/webhook-ca.srl" \
+    "${REPO_ROOT}/infra/certs/webhook-client.csr" \
+    "${REPO_ROOT}/infra/certs/webhook-client.ext"
+}
 
 wait_for_kong() {
   local code
@@ -75,6 +105,7 @@ wait_for_kong() {
 }
 
 ensure_webhook_certs_and_reload_kong() {
+  snapshot_runtime_cert_artifacts
   bash "${REPO_ROOT}/demo/mtls/ensure-mtls-certs.sh"
 
   echo "[INFO] Restarting Kong so nginx reloads the current webhook CA"

@@ -222,6 +222,14 @@ plugins:
     config:
       header_filter:
         - |
+          kong.response.set_header("X-Content-Type-Options", "nosniff")
+          kong.response.set_header("Cross-Origin-Resource-Policy", "same-origin")
+          kong.response.set_header("Referrer-Policy", "no-referrer")
+          kong.response.set_header("X-Frame-Options", "DENY")
+          kong.response.set_header(
+            "Permissions-Policy",
+            "camera=(), microphone=(), geolocation=()"
+          )
           if kong.request.get_scheme() == "https" then
             kong.response.set_header(
               "Strict-Transport-Security",

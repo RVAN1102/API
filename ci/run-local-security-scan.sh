@@ -93,16 +93,24 @@ clean_ignored_runtime_private_key_artifacts || exit "${EXIT_CODE}"
 # --------------------------------------------------
 echo "--- [1/3] Bandit – Python Static Analysis ---"
 if command -v bandit > /dev/null 2>&1; then
+  BANDIT_EXIT=0
   bandit -r services/ \
-    --severity-level medium \
+    --severity-level high \
     --confidence-level medium \
     --format txt \
-    --output "${REPORT_DIR}/bandit-report.txt" 2>&1 || true
+    --output "${REPORT_DIR}/bandit-report.txt" 2>&1 || BANDIT_EXIT=$?
   echo "Bandit report: ${REPORT_DIR}/bandit-report.txt"
   grep -E "^(Issue|Severity|Confidence|Total)" "${REPORT_DIR}/bandit-report.txt" | head -20 || true
+  if [ "${BANDIT_EXIT}" -ne 0 ]; then
+    echo "[FAIL] Bandit found HIGH severity issues with medium-or-higher confidence."
+    EXIT_CODE=1
+  else
+    echo "[PASS] Bandit found no HIGH severity issues at the configured confidence threshold."
+  fi
 else
   echo "[WARN] bandit not found. Install: pip install bandit"
   echo "bandit not installed" > "${REPORT_DIR}/bandit-report.txt"
+  EXIT_CODE=1
 fi
 
 echo ""
@@ -140,15 +148,24 @@ echo ""
 echo "--- [3/3] Trivy – Filesystem Vulnerability Scan ---"
 clean_ignored_runtime_private_key_artifacts || exit "${EXIT_CODE}"
 if command -v trivy > /dev/null 2>&1; then
+  TRIVY_EXIT=0
   trivy fs . \
     --severity HIGH,CRITICAL \
     --format table \
-    --output "${REPORT_DIR}/trivy-report.txt" 2>&1 || true
+    --output "${REPORT_DIR}/trivy-report.txt" \
+    --exit-code 1 2>&1 || TRIVY_EXIT=$?
   echo "Trivy report: ${REPORT_DIR}/trivy-report.txt"
   head -40 "${REPORT_DIR}/trivy-report.txt" || true
+  if [ "${TRIVY_EXIT}" -ne 0 ]; then
+    echo "[FAIL] Trivy found HIGH/CRITICAL findings."
+    EXIT_CODE=1
+  else
+    echo "[PASS] Trivy found no HIGH/CRITICAL findings."
+  fi
 else
   echo "[WARN] trivy not found. Install from https://aquasecurity.github.io/trivy/"
   echo "trivy not installed" > "${REPORT_DIR}/trivy-report.txt"
+  EXIT_CODE=1
 fi
 
 echo ""

@@ -20,17 +20,17 @@
 #   ZAP_API_KEY   – ZAP API key (default: tv3-zap-api-key)
 #
 # Output:
-#   docs/evidence/tv3/zap/zap-active-report.html
-#   docs/evidence/tv3/zap/zap-active-report.json
-#   docs/evidence/tv3/zap/zap-active-summary.md
-#   docs/evidence/tv3/zap/zap-active-run.log
+#   .artifacts/test-runs/tv3/zap/zap-active-report.html
+#   .artifacts/test-runs/tv3/zap/zap-active-report.json
+#   .artifacts/test-runs/tv3/zap/zap-active-summary.md
+#   .artifacts/test-runs/tv3/zap/zap-active-run.log
 
 set -uo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
 KC_URL="${KC_URL:-http://localhost:8080}"
 ZAP_API_KEY="${ZAP_API_KEY:-tv3-zap-api-key}"
-REPORT_DIR="docs/evidence/tv3/zap"
+REPORT_DIR="${REPORT_DIR:-.artifacts/test-runs/tv3/zap}"
 LOG_FILE="${REPORT_DIR}/zap-active-run.log"
 
 mkdir -p "${REPORT_DIR}"
@@ -161,10 +161,10 @@ echo "" | tee -a "${LOG_FILE}"
 # --------------------------------------------------
 echo "--- Step 5: Generating triage summary ---" | tee -a "${LOG_FILE}"
 
-python3 - <<'PY' 2>/dev/null | tee -a "${LOG_FILE}" || true
+python3 - "${REPORT_DIR}" <<'PY' 2>/dev/null | tee -a "${LOG_FILE}" || true
 import json, pathlib, sys
 
-report_path = pathlib.Path("docs/evidence/tv3/zap/zap-active-report.json")
+report_path = pathlib.Path(sys.argv[1]) / "zap-active-report.json"
 if not report_path.exists():
     print("[WARN] JSON report not found – triage skipped.")
     sys.exit(0)

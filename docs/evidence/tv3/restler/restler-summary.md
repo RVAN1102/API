@@ -12,11 +12,11 @@
 |---|---:|
 | OpenAPI operations covered by spec | 14 |
 | Rendered/sent requests | {"gc": 0, "main_driver": 40, "LeakageRuleChecker": 0, "ResourceHierarchyChecker": 0, "UseAfterFreeChecker": 0, "InvalidDynamicObjectChecker": 0, "PayloadBodyChecker": 67, "ExamplesChecker": 0} |
-| Bugs found | unknown |
+| Bugs found | 0 |
 
 ## Status Codes
 
-see RESTler logs
+RESTler runtime produced expected fail-closed 401/403/429 responses on protected and rate-limited routes where no valid token was supplied. `runSummary.json` records `bugCount: 0`.
 
 ## Evidence Files
 

@@ -57,6 +57,38 @@ load_service_client_env
 
 REGRESSION_PASSED=0
 REGRESSION_FAILED=0
+WEBHOOK_CERT_BACKUP_DIR=""
+
+snapshot_webhook_cert_artifacts() {
+  WEBHOOK_CERT_BACKUP_DIR="$(mktemp -d /tmp/final-regression-webhook-certs.XXXXXX)"
+  for name in webhook-ca.crt webhook-client.crt; do
+    if [ -f "${PROJECT_ROOT}/infra/certs/${name}" ]; then
+      cp "${PROJECT_ROOT}/infra/certs/${name}" "${WEBHOOK_CERT_BACKUP_DIR}/${name}"
+    fi
+  done
+}
+
+restore_webhook_cert_artifacts() {
+  local name
+
+  if [ -n "${WEBHOOK_CERT_BACKUP_DIR}" ] && [ -d "${WEBHOOK_CERT_BACKUP_DIR}" ]; then
+    for name in webhook-ca.crt webhook-client.crt; do
+      if [ -f "${WEBHOOK_CERT_BACKUP_DIR}/${name}" ]; then
+        cp "${WEBHOOK_CERT_BACKUP_DIR}/${name}" "${PROJECT_ROOT}/infra/certs/${name}"
+      fi
+    done
+    rm -rf "${WEBHOOK_CERT_BACKUP_DIR}"
+    WEBHOOK_CERT_BACKUP_DIR=""
+  fi
+
+  rm -f \
+    "${PROJECT_ROOT}/infra/certs/webhook-ca.key" \
+    "${PROJECT_ROOT}/infra/certs/webhook-client.key" \
+    "${PROJECT_ROOT}/infra/certs/webhook-client.p12" \
+    "${PROJECT_ROOT}/infra/certs/webhook-ca.srl" \
+    "${PROJECT_ROOT}/infra/certs/webhook-client.csr" \
+    "${PROJECT_ROOT}/infra/certs/webhook-client.ext"
+}
 
 run_suite() {
   local name="$1"
@@ -166,9 +198,11 @@ run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
 reset_kong_before_opa
 run_suite "OPA Authz" "tests/security/opa-authz-tests.sh"
 run_suite "Edge Hardening" "tests/security/edge-hardening-tests.sh"
+snapshot_webhook_cert_artifacts
 ensure_webhook_mtls_certs
 reset_kong_after_edge
 run_suite "Webhook Security" "tests/security/webhook-tests.sh"
+restore_webhook_cert_artifacts
 run_suite "Fuzz/Negative" "tests/security/fuzz-negative-tests.sh"
 
 echo ""
