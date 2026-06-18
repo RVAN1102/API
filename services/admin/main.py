@@ -108,6 +108,8 @@ TOKEN_INTROSPECTION_CLIENT_SECRET: str = (
     or os.environ.get("TOKEN_INTROSPECTION_CLIENT_SECRET")
     or ADMIN_SERVICE_CLIENT_SECRET
 )
+OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 
 # ---------------------------------------------------------------------------
@@ -272,6 +274,59 @@ def _token_client_id(payload: Dict[str, Any]) -> str:
 def has_role(payload: Dict[str, Any], *roles: str) -> bool:
     user_roles: List[str] = payload.get("realm_access", {}).get("roles", [])
     return any(r in user_roles for r in roles)
+
+
+def _roles(payload: Dict[str, Any]) -> List[str]:
+    roles = payload.get("realm_access", {}).get("roles", [])
+    return roles if isinstance(roles, list) else []
+
+
+def _subject_type(payload: Dict[str, Any]) -> str:
+    return "service" if _token_client_id(payload) == ADMIN_SERVICE_CLIENT_ID else "human"
+
+
+async def require_opa_allow(input_data: Dict[str, Any]) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "opa_error", "message": "Authorization policy engine returned an error"},
+        )
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    if not isinstance(body, dict) or body.get("result") is not True:
+        reason = "opa_denied"
+        log_event(
+            level="WARNING",
+            event_type="auth_failure",
+            method=_claim_as_string(input_data.get("method")) or "POST",
+            path=_claim_as_string(input_data.get("path")) or "/api/v1/admin/maintenance",
+            status_code=status.HTTP_403_FORBIDDEN,
+            client_ip=_claim_as_string(input_data.get("client_ip")) or "unknown",
+            correlation_id=_claim_as_string(input_data.get("correlation_id")),
+            message="OPA policy denied authorization",
+            extra={
+                "reason": reason,
+                "category": reason,
+                "security_event": True,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "forbidden", "message": "OPA policy denied authorization"},
+        )
 
 
 def require_role(payload: Dict[str, Any], *required_roles: str) -> None:
@@ -529,13 +584,27 @@ async def health_check():
 async def run_maintenance(
     body: MaintenanceRequest,
     request: Request,
-    _payload: Dict[str, Any] = Depends(require_maintenance_access),
+    payload: Dict[str, Any] = Depends(require_maintenance_access),
 ):
     """
     Execute a maintenance action.
     Protected: requires a service-account Bearer JWT with role 'admin-maintenance'.
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
+    await require_opa_allow(
+        {
+            "action": "admin_maintenance",
+            "service": "admin-service",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else "unknown",
+            "subject_type": _subject_type(payload),
+            "username": _claim_as_string(payload.get("preferred_username")),
+            "client_id": _token_client_id(payload),
+            "roles": _roles(payload),
+            "correlation_id": correlation_id,
+        }
+    )
     log_event("INFO", "api_request", "POST", "/api/v1/admin/maintenance",
               200, request.client.host if request.client else "unknown",
               correlation_id, f"Maintenance action: {body.action}")
