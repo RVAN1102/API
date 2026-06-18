@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+bash "$ROOT_DIR/demo/mtls/ensure-mtls-certs.sh"
 # =============================================================================
 # TV1 Webhook Security – Automated Test Suite (Regression)
 # Sends webhook requests through Docker network with mTLS client certs,
