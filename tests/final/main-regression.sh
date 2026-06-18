@@ -139,33 +139,16 @@ wait_for_kong() {
 }
 
 ensure_webhook_mtls_certs() {
-  local cert_dir="${PROJECT_ROOT}/infra/certs"
-  local generator="${PROJECT_ROOT}/demo/mtls/generate-mtls-certs.sh"
-  local missing=0
+  local ensure_script="${PROJECT_ROOT}/demo/mtls/ensure-mtls-certs.sh"
 
-  for required in \
-    "${cert_dir}/webhook-ca.crt" \
-    "${cert_dir}/webhook-ca.key" \
-    "${cert_dir}/webhook-client.crt" \
-    "${cert_dir}/webhook-client.key" \
-    "${cert_dir}/webhook-client.p12"; do
-    [ -r "${required}" ] || missing=1
-  done
-
-  if [ "${missing}" -eq 0 ]; then
-    echo "[INFO] Webhook runtime mTLS demo certs are present"
-    return 0
-  fi
-
-  [ -x "${generator}" ] || [ -f "${generator}" ] \
+  [ -x "${ensure_script}" ] || [ -f "${ensure_script}" ] \
     || {
-      echo "[ERROR] Missing webhook mTLS generator: ${generator}" >&2
+      echo "[ERROR] Missing webhook mTLS ensure script: ${ensure_script}" >&2
       return 1
     }
 
-  echo "[INFO] Generating missing local-only webhook mTLS demo certs"
-  bash "${generator}"
-  echo "[INFO] Generated webhook mTLS runtime certs. Do not commit infra/certs/*.key or infra/certs/*.p12."
+  echo "[INFO] Ensuring local-only webhook mTLS demo certs are present and consistent"
+  bash "${ensure_script}"
   echo "[INFO] Before final security scan/package creation, remove runtime private artifacts: rm -f infra/certs/*.key infra/certs/*.p12"
 }
 
