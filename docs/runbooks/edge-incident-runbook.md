@@ -1,4 +1,4 @@
-# TV1 Edge Incident Runbook
+# Edge Incident Runbook
 
 ## Mục đích
 Tài liệu này hướng dẫn cách xử lý nhanh các sự cố liên quan đến API Gateway, Webhook Security và các cuộc tấn công SSRF.

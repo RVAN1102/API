@@ -1,4 +1,4 @@
-# Authorization Code + PKCE Flow (TV2)
+# Authorization Code + PKCE Flow
 
 ## Overview
 

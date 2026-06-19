@@ -1,7 +1,7 @@
-# Runbook – Incident Response (TV3 P1-04)
+# Runbook – Incident Response
 
 **Version:** 1.0  
-**Owner:** TV3 (Huy)  
+**Maintainer:** Security/operations reviewer
 **Last updated:** 2026-06-17  
 **Purpose:** Step-by-step incident response for API security events
 
@@ -176,9 +176,9 @@ Template:
 
 | Role | Contact |
 |------|---------|
-| TV3 Security Lead | Huy |
-| TV2 Auth Lead | [TV2 member] |
-| TV1 Infra Lead | [TV1 member] |
+| Security Lead | Assigned during demo/review |
+| Identity/Auth Lead | Assigned during demo/review |
+| Edge/Infrastructure Lead | Assigned during demo/review |
 | GVHD | [Lecturer] |
 
 ---

@@ -1,13 +1,16 @@
-# Chapter 4: Implementation (TV2 - Identity, Core Services, Vault)
+# Chapter 4: Implementation - Identity, Core Services, Vault
 
 ## 4.1 Keycloak Implementation
 
 Keycloak is deployed via Docker Compose. The realm configuration is codified in `idp/realm-export/topic10-realm.json`.
 
 ### 4.1.1 Realm Configuration (`topic10-sme-api`)
-- **Clients:** `sme-web-client` (Public, PKCE) and `sme-service-client` (Confidential).
+- **Clients:** `sme-web-client` (Public, PKCE), `billing-service-client`
+  (`order-ownership-read`), and `admin-service-client`
+  (`admin-maintenance`).
 - **Users:** Test accounts `alice`, `bob` (users) and `admin01` (admin).
-- **MFA:** OTP is configured as an optional required action.
+- **MFA:** `CONFIGURE_TOTP` is assigned as a required action for lab human
+  users (`alice`, `bob`, `admin01`). CI automation uses dedicated lab accounts.
 
 ## 4.2 Core Services (User & Order)
 

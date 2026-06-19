@@ -34,16 +34,21 @@ vault secrets enable -version=2 -path=secret kv 2>/dev/null || echo "KV v2 alrea
 echo ""
 echo "--- Writing secret paths ---"
 
-# Webhook secret (shared with billing service and TV1 webhook demo)
+# Webhook secret shared by the billing service and webhook demo
 vault kv put secret/api/webhook \
   webhook_secret="dev-webhook-secret-change-me"
 echo "[OK] secret/api/webhook"
 
-# Service client credentials (confidential client)
-vault kv put secret/api/service-clients \
-  client_id="sme-service-client" \
-  client_secret="<redacted-set-in-keycloak>"
-echo "[OK] secret/api/service-clients"
+# Service client credentials (confidential clients, least privilege)
+vault kv put secret/api/service-clients/billing-service-client \
+  client_id="billing-service-client" \
+  client_secret="${BILLING_SERVICE_CLIENT_SECRET:-set-in-keycloak-not-committed}"
+echo "[OK] secret/api/service-clients/billing-service-client"
+
+vault kv put secret/api/service-clients/admin-service-client \
+  client_id="admin-service-client" \
+  client_secret="${ADMIN_SERVICE_CLIENT_SECRET:-set-in-keycloak-not-committed}"
+echo "[OK] secret/api/service-clients/admin-service-client"
 
 # Order service config
 vault kv put secret/api/order-service \

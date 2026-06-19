@@ -4,11 +4,13 @@
 
 ---
 
-## Current `main` Status
+## Current Baseline Status
 
-`main` is the **daily stable checkpoint** for the team.
+The current baseline is defined by `tests/final/main-regression.sh` and the
+authoritative evidence index at
+`docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md`.
 
-### What's in `main`:
+### Implemented And Evidenced
 
 - ✅ Docker Compose stack (Kong, Keycloak, Vault, Grafana, Loki/Promtail, 4 services)
 - ✅ Kong Gateway routes to user/order/billing/admin services
@@ -22,11 +24,11 @@
 - ✅ TLS 1.3, HSTS, CORS, rate limit, request size limit
 - ✅ Structured JSON logs (user/order services)
 - ✅ Security scan (Bandit/Trivy/Gitleaks) – python-jose CVE fixed
-- ✅ TV1 frontend dashboard at http://localhost:3002
-- ✅ QA hardening pass merged
-- ✅ 10 known issues fixed/triaged
+- ✅ Frontend security dashboard at http://localhost:3002
+- ✅ Container runtime hardening and OpenAPI/excessive-data contract tests are integrated
+- ✅ Final regression gate currently runs 11 suites
 
-### Known Limitations:
+### Prototype Boundaries
 
 - ✅ MFA: runtime Keycloak required actions are configured for demo human users (`alice`, `bob`, `admin01` must complete `CONFIGURE_TOTP`; CI automation uses dedicated lab accounts)
 - ✅ Webhook mTLS: implemented and evidenced at Kong (valid client cert accepted, missing cert rejected)
@@ -34,16 +36,7 @@
 - ✅ OPA: policy decision point and backend enforcement evidenced for selected authorization paths
 - ⚠️ Keycloak runs in dev mode (not production-grade)
 - ⚠️ Vault runs in dev mode
-
----
-
-## Branch Ownership
-
-| Member | Responsibility | Merge early when | Merge end-of-day when |
-|--------|---------------|------------------|-----------------------|
-| TV1 | Gateway, Edge, Webhook | Fix gateway/webhook runtime, mTLS, timestamp | Only evidence/summary |
-| TV2 | Identity, Auth, Authz, Core API | Fix Keycloak/JWT/RBAC/BOLA/Billing auth | Only evidence/authz model |
-| TV3 | QA, Regression, Observability, DevSecOps | Create shared test scripts, fix CI/test | Security scan/evidence/docs |
+- ⚠️ This is a lab/prototype baseline with production-oriented controls, not a fully managed production deployment
 
 ---
 

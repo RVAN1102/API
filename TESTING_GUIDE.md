@@ -86,7 +86,7 @@ Expected response for each:
 
 ---
 
-## 3. Get Access Tokens (TV2)
+## 3. Get Access Tokens
 
 > [!IMPORTANT]
 > Wait for Keycloak to be fully up (`http://localhost:8080` accessible) before running these.
@@ -107,7 +107,7 @@ ADMIN_TOKEN=$(cat /tmp/user-token.txt)
 
 ---
 
-## 4. Test User API (TV2)
+## 4. Test User API
 
 ```bash
 # Run automated tests
@@ -133,7 +133,7 @@ curl http://localhost:8000/api/v1/users/me
 
 ---
 
-## 5. Test Order API (TV2)
+## 5. Test Order API
 
 ```bash
 # Run automated tests
@@ -156,7 +156,7 @@ curl "http://localhost:8000/api/v1/orders/ord-alice-1001" \
 
 ---
 
-## 6. Test BOLA Demo (TV2)
+## 6. Test BOLA Demo
 
 ```bash
 # Run BOLA attack simulation
@@ -173,7 +173,7 @@ Expected results:
 
 ---
 
-## 7. Test Billing Service (TV3)
+## 7. Test Billing Service
 
 ```bash
 # Health
@@ -189,7 +189,7 @@ curl -X POST http://localhost:8000/api/v1/billing/checkout \
 
 ---
 
-## 8. Test Admin Service + SSRF (TV3)
+## 8. Test Admin Service + SSRF
 
 ```bash
 # Run SSRF attack simulation
@@ -213,7 +213,7 @@ curl -X POST http://localhost:8000/api/v1/admin/metadata-fetch/fixed \
 
 ---
 
-## 9. Test Webhook Security (TV1 + TV3)
+## 9. Test Webhook Security
 
 ```bash
 # Token replay and webhook forgery
@@ -240,7 +240,7 @@ handler fails closed and does not accept otherwise valid webhooks.
 
 ---
 
-## 10. Test Rate Limiting (TV1)
+## 10. Test Rate Limiting
 
 ```bash
 bash tests/attack/rate-limit-trigger.sh
@@ -250,7 +250,7 @@ Expected: HTTP **429** after 10+ requests to `/api/v1/users`.
 
 ---
 
-## 11. View Grafana Dashboard (TV3)
+## 11. View Grafana Dashboard
 
 1. Open **http://localhost:3001**
 2. Login: `admin` / `admin`
@@ -259,7 +259,7 @@ Expected: HTTP **429** after 10+ requests to `/api/v1/users`.
 
 ---
 
-## 12. Initialize Vault (TV2)
+## 12. Initialize Vault
 
 ```bash
 bash vault/scripts/init-dev-vault.sh
@@ -276,7 +276,7 @@ storage. See `docs/evidence/tv2/vault-lab-secret-bootstrap.md`.
 
 ---
 
-## 13. PKCE Flow Demo (TV2)
+## 13. PKCE Flow Demo
 
 ```bash
 # Generate authorization URL
@@ -287,7 +287,7 @@ Follow the printed URL in a browser to complete the PKCE flow.
 
 ---
 
-## 14. CI Security Scan (TV3)
+## 14. CI Security Scan
 
 ```bash
 # Install bandit first
@@ -343,7 +343,7 @@ Expected result: `Suites passed: 11`, `Suites failed: 0`.
 
 ---
 
-## 15. MTTD/MTTR Measurement (TV3)
+## 15. MTTD/MTTR Measurement
 
 ```bash
 ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/metrics/measure-mttd-mttr.sh
@@ -354,7 +354,7 @@ Results saved to:
 - `docs/evidence/tv3/metrics/mttd-mttr-alert-based-analysis.md`
 - Authoritative summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
 
-## 15b. Latency And Cost Metrics (TV3)
+## 15b. Latency And Cost Metrics
 
 ```bash
 BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
@@ -367,7 +367,7 @@ Transient output is written to `.artifacts/test-runs/metrics/`. Read the p50/p95
 
 ---
 
-## 16. TV1 Gateway Tests
+## 16. Gateway Tests
 
 ```bash
 # Test all routes

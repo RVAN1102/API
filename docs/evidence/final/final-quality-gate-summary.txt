@@ -1,8 +1,8 @@
 # Final Quality Gate Summary
 
-**Generated:** 2026-06-18T11:04:46Z
-**Branch:** `fix/gvhd-p0-security-evidence`
-**HEAD:** `234f2a95837e27c365458e238043af6e28d5561d`
+**Generated:** 2026-06-19T15:45:04Z
+**Branch:** `chore/repo-doc-cleanup`
+**HEAD:** `ac45a0049d85bc6f52b381f840027901e014da2c`
 **Quality gate status:** Not asserted by this script.
 
 ## Required Reproducible Checks

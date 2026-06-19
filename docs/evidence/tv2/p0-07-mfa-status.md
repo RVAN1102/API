@@ -9,10 +9,11 @@ Implemented runtime control:
 - Password-only authentication is no longer considered sufficient for affected human users.
 
 Evidence:
-- Historical pre-merge grep: `docs/evidence/tv2/pre-merge/p0-07-mfa-status-grep.txt`
 - `docs/evidence/tv2/p0-07-mfa-runtime-enforce-command.txt`
 - `docs/evidence/tv2/p0-07-mfa-runtime-status.txt`
 
 Important note:
 - The previous dev-only limitation has been closed for the local runtime after assigning `CONFIGURE_TOTP`.
+- The old grep output that said OTP was not enforced by default was removed
+  with other pre-merge evidence during final repository cleanup.
 - Browser-based login evidence should be captured separately to show the Keycloak OTP/TOTP setup or OTP challenge screen.

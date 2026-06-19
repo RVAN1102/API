@@ -1,4 +1,4 @@
-# IDP – Keycloak Identity Provider (TV2)
+# IDP – Keycloak Identity Provider
 
 ## Overview
 
@@ -53,14 +53,24 @@ redirect_uris:
   - https://app.localhost/*
 ```
 
-### sme-service-client (Confidential – Client Credentials)
+### billing-service-client (Confidential – Client Credentials)
 
 ```text
-client_id:    sme-service-client
+client_id:    billing-service-client
 type:         confidential
 flow:         Client Credentials
 client_secret: <redacted>
-roles:        billing-service, internal-service
+roles:        order-ownership-read
+```
+
+### admin-service-client (Confidential – Client Credentials)
+
+```text
+client_id:    admin-service-client
+type:         confidential
+flow:         Client Credentials
+client_secret: <redacted>
+roles:        admin-maintenance
 ```
 
 ---
@@ -150,9 +160,9 @@ docker cp infra-keycloak-1:/tmp/realm-export/topic10-sme-api-realm.json \
 
 ---
 
-## Test Token (Direct Grant – dev only)
+## Test Token (Password Grant – dev only)
 
-> **Note**: Direct grant (Resource Owner Password) is disabled in the realm by default.
+> **Note**: password-grant login is disabled for normal human users in the realm.
 > For demo token testing, use the `demo/auth/` scripts or the Admin UI token generation.
 
 ```bash

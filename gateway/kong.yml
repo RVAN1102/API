@@ -7,10 +7,10 @@ _transform: true
 
 # ---------------------------------------------------------------------------
 # Services (upstream backends)
-# TV1 routes all traffic through Kong. Real services added by TV2/TV3.
+# Kong routes external traffic to the backend services.
 # ---------------------------------------------------------------------------
 services:
-  # TV2 – User Service (FastAPI)
+  # User Service (FastAPI)
   - name: user-service
     url: https://user-mtls-proxy:8443
     connect_timeout: 3000
@@ -38,7 +38,7 @@ services:
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
 
-  # TV2 – Order Service (FastAPI)
+  # Order Service (FastAPI)
   - name: order-service
     url: https://order-mtls-proxy:8443
     connect_timeout: 3000
@@ -56,7 +56,7 @@ services:
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
 
-  # TV3 – Billing Service (FastAPI)
+  # Billing Service (FastAPI)
   - name: billing-service
     url: https://billing-mtls-proxy:8443
     connect_timeout: 3000
@@ -79,7 +79,7 @@ services:
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
 
-  # TV3 – Admin Service (FastAPI)
+  # Admin Service (FastAPI)
   - name: admin-service
     url: https://admin-mtls-proxy:8443
     connect_timeout: 3000
@@ -97,9 +97,9 @@ services:
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
 
-  # TV1 – Webhook demo receiver (HMAC demo)
+  # Webhook demo receiver (HMAC demo)
   # Billing service also handles /api/v1/webhooks/payment directly,
-  # but the standalone webhook-demo container is kept for TV1 HMAC scripts.
+  # but the standalone webhook-demo container is kept for HMAC demo scripts.
   - name: webhook-demo
     url: http://webhook-demo:8080
     connect_timeout: 3000
@@ -114,7 +114,7 @@ services:
 
 # ---------------------------------------------------------------------------
 # Plugins (global unless route/service specified)
-# TV1 owns all plugin config. TV2/TV3 must not modify without group agreement.
+# Gateway plugin configuration is managed as part of the edge security baseline.
 # ---------------------------------------------------------------------------
 plugins:
   - name: cors

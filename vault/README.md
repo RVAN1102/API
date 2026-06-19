@@ -1,4 +1,4 @@
-# Vault Secret Management (TV2)
+# Vault Secret Management
 
 ## Overview
 
@@ -14,8 +14,8 @@ Dev root token: `dev-root-token` (dev mode only, never commit to production)
 
 | Path                            | Contents                         | Reader              |
 |---------------------------------|----------------------------------|---------------------|
-| `secret/data/api/webhook`       | `webhook_secret` (HMAC key)      | billing-service, TV1 |
-| `secret/data/api/service-clients`| `client_id`, `client_secret`    | billing-service, admin-service |
+| `secret/data/api/webhook`       | `webhook_secret` (HMAC key)      | billing-service / webhook demo |
+| `secret/data/api/service-clients`| billing/admin client IDs and redacted client secret placeholders | billing-service, admin-service |
 | `secret/data/api/order-service` | Order service credentials        | order-service       |
 | `secret/data/api/user-service`  | User service credentials         | user-service        |
 

@@ -1,8 +1,8 @@
-# Demo Video Script (TV3 P1-05)
+# Demo Video Script
 
 **Duration:** ~15-20 minutes  
 **File:** `docs/demo/demo-video-script.md`  
-**Presenter:** TV3 (Huy)
+**Presenter:** Project team
 
 ---
 
@@ -90,7 +90,7 @@ curl -s -X POST \
 
 ---
 
-## Scene 4: Billing → Order Ownership Verify (4:30 – 6:00)
+## Scene 4: Billing → Order Access Check (4:30 – 6:00)
 
 **Narration:** "Khi Alice checkout, Billing gọi Order để kiểm tra ownership trước khi xử lý thanh toán."
 
@@ -273,7 +273,7 @@ cat docs/evidence/final/final-security-regression-after-all-hardening.txt | tail
 
 ## Closing
 
-**Narration:** "TV3 đã hoàn thành: ZAP Active Scan, API Fuzzing, SAST/SCA/SBOM/Cosign, Observability với 3 alert rules, Distributed Tracing, 4 Red Team scenarios, Resilience Drills, p50/p95 metrics, MTTD/MTTR, 3 Runbooks, và Final Regression. Tất cả evidence đều có thể chạy lại."
+**Narration:** "Nhóm đã hoàn thành: ZAP Active Scan, API Fuzzing, SAST/SCA/SBOM/Cosign, Observability với 3 alert rules, Distributed Tracing, 4 Red Team scenarios, Resilience Drills, p50/p95 metrics, MTTD/MTTR, 3 Runbooks, và Final Regression. Tất cả evidence đều có thể chạy lại."
 
 ---
 

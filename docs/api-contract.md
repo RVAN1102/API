@@ -1,8 +1,8 @@
-# API Contract (TV2)
+# API Contract
 
 ## Overview
 
-This document defines the shared API contract between TV1 (Gateway), TV2 (User/Order), and TV3 (Billing/Admin).
+This document defines the shared API contract between the gateway layer and backend services.
 
 ---
 
@@ -18,7 +18,7 @@ This document defines the shared API contract between TV1 (Gateway), TV2 (User/O
 
 ## Endpoints
 
-### User Service (TV2)
+### User Service
 
 | Method | Path                    | Auth | Description            |
 |--------|-------------------------|------|------------------------|
@@ -26,7 +26,7 @@ This document defines the shared API contract between TV1 (Gateway), TV2 (User/O
 | GET    | /api/v1/users/me        | Yes  | Current user identity  |
 | GET    | /api/v1/users/profile   | Yes  | User profile           |
 
-### Order Service (TV2)
+### Order Service
 
 | Method | Path                              | Auth | Description                    |
 |--------|-----------------------------------|------|--------------------------------|
@@ -36,7 +36,7 @@ This document defines the shared API contract between TV1 (Gateway), TV2 (User/O
 | GET    | /api/v1/orders/{orderId}/vulnerable | Yes | BOLA vulnerable endpoint      |
 | GET    | /api/v1/orders/{orderId}/fixed    | Yes  | BOLA fixed endpoint            |
 
-### Billing Service (TV3)
+### Billing Service
 
 | Method | Path                       | Auth | Description             |
 |--------|----------------------------|------|-------------------------|
@@ -44,7 +44,7 @@ This document defines the shared API contract between TV1 (Gateway), TV2 (User/O
 | POST   | /api/v1/billing/checkout   | Yes  | Initiate checkout       |
 | POST   | /api/v1/webhooks/payment   | HMAC | Payment webhook callback|
 
-### Admin Service (TV3)
+### Admin Service
 
 | Method | Path                                    | Auth | Description              |
 |--------|-----------------------------------------|------|--------------------------|
@@ -63,7 +63,7 @@ Content-Type: application/json
 X-Correlation-ID: <unique-request-id>
 ```
 
-Webhook headers (TV1 contract):
+Webhook headers:
 ```
 X-Webhook-Timestamp: <unix_timestamp>
 X-Webhook-Nonce: <unique_nonce>
