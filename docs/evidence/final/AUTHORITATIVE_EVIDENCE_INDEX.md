@@ -5,9 +5,10 @@ This index points to the official, reviewable evidence set for the current harde
 ## Final Regression
 
 - Historical final regression 9/9: `docs/evidence/final/main-regression-final.txt`
-- Post-hardening final regression: `docs/evidence/final/final-security-regression-after-all-hardening.txt`
+- Historical post-hardening final regression: `docs/evidence/final/final-security-regression-after-all-hardening.txt`
 - Quality gate summary: `docs/evidence/final/final-quality-gate-summary.txt`
 - Production-oriented hardening bundle 1: `docs/evidence/final/production-hardening-bundle-1.md`
+- Final stale reference audit: `docs/evidence/final/FINAL_REPO_STALE_AUDIT.md`
 
 ## Identity, Authorization, And Service-To-Service
 

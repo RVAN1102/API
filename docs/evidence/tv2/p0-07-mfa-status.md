@@ -9,7 +9,7 @@ Implemented runtime control:
 - Password-only authentication is no longer considered sufficient for affected human users.
 
 Evidence:
-- `docs/evidence/tv2/p0-07-mfa-status-grep.txt`
+- Historical pre-merge grep: `docs/evidence/tv2/pre-merge/p0-07-mfa-status-grep.txt`
 - `docs/evidence/tv2/p0-07-mfa-runtime-enforce-command.txt`
 - `docs/evidence/tv2/p0-07-mfa-runtime-status.txt`
 

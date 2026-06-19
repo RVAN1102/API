@@ -1,3 +1,10 @@
+# Historical Planning Notice
+
+This document is historical merge-planning material from an earlier integration
+phase. It is superseded by the current final evidence index, final regression
+11-suite result, and runtime documentation. TODO/limitation wording below is
+preserved as planning context, not as the current project status.
+
 # THỨ TỰ MERGE TIẾP THEO SAU KHI ĐÃ MERGE UI TV1
 
 **Mốc hiện tại:** đã merge UI/dashboard của TV1 vào `main`  

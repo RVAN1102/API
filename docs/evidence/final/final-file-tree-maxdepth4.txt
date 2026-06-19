@@ -1,5 +1,5 @@
-generated_at=2026-06-18T11:04:46Z
 .
+./.agents
 ./ci
 ./ci/.gitkeep
 ./ci/run-local-security-scan.sh
@@ -33,6 +33,8 @@ generated_at=2026-06-18T11:04:46Z
 ./demo/k6/.gitkeep
 ./demo/k6/README.md
 ./demo/mtls
+./demo/mtls/ensure-gateway-backend-certs.sh
+./demo/mtls/ensure-mtls-certs.sh
 ./demo/mtls/generate-mtls-certs.sh
 ./demo/mtls/README.md
 ./demo/rate-limit
@@ -51,6 +53,16 @@ generated_at=2026-06-18T11:04:46Z
 ./docs
 ./docs/21_Cloud API‑Based Network Application Security for Small Company Services.md
 ./docs/api-contract.md
+./docs/archive
+./docs/archive/planning
+./docs/archive/planning/HUY_Detailed_Assignment_After_Main_Merge.md
+./docs/archive/planning/Merge_Order_After_TV1_UI_Merge.md
+./docs/archive/planning/NHẤT_Detailed_Assignment_After_Main_Merge.md
+./docs/archive/planning/README.md
+./docs/archive/planning/TV1_Edge_Network_Webhook_Security_WorkPlan.md
+./docs/archive/planning/TV2_Identity_Core_Application_WorkPlan.md
+./docs/archive/planning/TV3_DevSecOps_Observability_RedTeam_WorkPlan.md
+./docs/archive/planning/VẠN_Detailed_Assignment_After_Main_Merge.md
 ./docs/chapter3
 ./docs/chapter3/tv1-edge-gateway-design.md
 ./docs/chapter3/tv2-idp-authz-core-design.md
@@ -64,21 +76,25 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/demo/tv1-edge-webhook-ssrf-demo-script.md
 ./docs/evidence
 ./docs/evidence/final
+./docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
 ./docs/evidence/final/final-file-tree-maxdepth4.txt
 ./docs/evidence/final/final-git-identity.txt
 ./docs/evidence/final/final-git-status.txt
 ./docs/evidence/final/final-main-commit.txt
 ./docs/evidence/final/final-quality-gate-summary.txt
 ./docs/evidence/final/final-recent-commits.txt
+./docs/evidence/final/FINAL_REPO_STALE_AUDIT.md
 ./docs/evidence/final/final-security-regression-after-all-hardening.txt
 ./docs/evidence/final/main-final-smoke.txt
 ./docs/evidence/final/main-regression-after-client-credentials-hardening.txt
 ./docs/evidence/final/main-regression-after-gvhd-billing-fix.txt
 ./docs/evidence/final/main-regression-after-gvhd-hardening-merge.txt
+./docs/evidence/final/main-regression-after-gvhd-p0-hardening.txt
 ./docs/evidence/final/main-regression-after-real-s2s-ownership.txt
 ./docs/evidence/final/main-regression-after-tv1-merge.txt
 ./docs/evidence/final/main-regression-final.txt
 ./docs/evidence/final/main-regression-token-authz.txt
+./docs/evidence/final/production-hardening-bundle-1.md
 ./docs/evidence/qa
 ./docs/evidence/qa/admin-billing-health-after-auth-patch.txt
 ./docs/evidence/qa/admin-maintenance-no-token.txt
@@ -122,10 +138,12 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/evidence/qa/webhook-hmac-checks.txt
 ./docs/evidence/qa/webhook-regression-after-auth-patch.txt
 ./docs/evidence/qa/webhook-source-audit.txt
+./docs/evidence/README.md
 ./docs/evidence/tv1
 ./docs/evidence/tv1/correlation-id-result.txt
 ./docs/evidence/tv1/cors-preflight.txt
 ./docs/evidence/tv1/edge-final
+./docs/evidence/tv1/gateway-backend-mtls
 ./docs/evidence/tv1/gateway-routes.txt
 ./docs/evidence/tv1/hsts-header.txt
 ./docs/evidence/tv1/https-result.txt
@@ -168,7 +186,6 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/evidence/tv2/p0-06-jwt-issuer-jwks-config.txt
 ./docs/evidence/tv2/p0-07-mfa-runtime-enforce-command.txt
 ./docs/evidence/tv2/p0-07-mfa-runtime-status.txt
-./docs/evidence/tv2/p0-07-mfa-status-grep.txt
 ./docs/evidence/tv2/p0-07-mfa-status.md
 ./docs/evidence/tv2/p0-08-tv2-qa-hardening-summary.md
 ./docs/evidence/tv2/p1-02-openapi-contract-status.txt
@@ -180,6 +197,7 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/evidence/tv2/role-scope-access-matrix.md
 ./docs/evidence/tv2/token-lifecycle-introspection-revocation.txt
 ./docs/evidence/tv2/tv2-authz-model-summary.md
+./docs/evidence/tv2/vault-lab-secret-bootstrap.md
 ./docs/evidence/tv3
 ./docs/evidence/tv3/bandit-report.txt
 ./docs/evidence/tv3/fuzzing
@@ -198,6 +216,7 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/evidence/tv3/red-team
 ./docs/evidence/tv3/resilience
 ./docs/evidence/tv3/restler
+./docs/evidence/tv3/secops-metrics
 ./docs/evidence/tv3/security-scan-local.txt
 ./docs/evidence/tv3/supply-chain
 ./docs/evidence/tv3/trivy-report.txt
@@ -205,10 +224,7 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/Framework for Capstone Project.docx
 ./docs/Framework Tailoring for Implementation and Theoretical Research.md
 ./docs/.gitkeep
-./docs/HUY_Detailed_Assignment_After_Main_Merge.md
 ./docs/integration-checklist.md
-./docs/Merge_Order_After_TV1_UI_Merge.md
-./docs/NHẤT_Detailed_Assignment_After_Main_Merge.md
 ./docs/Nhất - Edge, Network & Webhook Security Engineer.docx
 ./docs/PROJECT_STATUS.md
 ./docs/Projects-Topics.docx
@@ -221,10 +237,6 @@ generated_at=2026-06-18T11:04:46Z
 ./docs/runbooks/onboarding-new-client-bff.md
 ./docs/runbooks/tv1-edge-incident-runbook.md
 ./docs/TESTING.md
-./docs/TV1_Edge_Network_Webhook_Security_WorkPlan.md
-./docs/TV2_Identity_Core_Application_WorkPlan.md
-./docs/TV3_DevSecOps_Observability_RedTeam_WorkPlan.md
-./docs/VẠN_Detailed_Assignment_After_Main_Merge.md
 ./fix-and-restart.sh
 ./frontend
 ./frontend/app.js
@@ -234,6 +246,7 @@ generated_at=2026-06-18T11:04:46Z
 ./gateway
 ./gateway/correlation-id.md
 ./gateway/.gitkeep
+./gateway/kong-mtls.yml
 ./gateway/kong.yml
 ./gateway/mtls.md
 ./gateway/plugins
@@ -261,18 +274,18 @@ generated_at=2026-06-18T11:04:46Z
 ./idp/realm-export
 ./idp/realm-export/topic10-realm.json
 ./infra
-./infra/certs
-./infra/certs/.gitkeep
-./infra/certs/README.md
-./infra/certs/webhook-ca.crt
-./infra/certs/webhook-client.crt
+./infra/docker-compose.mtls.yml
 ./infra/docker-compose.yml
 ./infra/.env
 ./infra/.env.example
 ./infra/.gitkeep
+./infra/nginx
+./infra/nginx/gateway-backend-mtls.conf.template
 ./infra/otel
 ./infra/otel/otel-collector.yml
 ./observability
+./observability/alertmanager
+./observability/alertmanager/alertmanager.yml
 ./observability/alerts
 ./observability/alerts/api-security-alerts.md
 ./observability/alerts/loki-alert-rules.yml
@@ -294,10 +307,13 @@ generated_at=2026-06-18T11:04:46Z
 ./README.md
 ./requirements.txt
 ./scripts
+./scripts/bootstrap-lab-env.sh
 ./scripts/branch-guard.sh
 ./scripts/ci
 ./scripts/ci/security-pipeline.sh
 ./scripts/generate-final-evidence.sh
+./scripts/metrics
+./scripts/metrics/latency-overhead-smoke.sh
 ./scripts/security
 ./scripts/security/cosign-sign.sh
 ./scripts/security/generate-sbom.sh
@@ -306,6 +322,8 @@ generated_at=2026-06-18T11:04:46Z
 ./services/admin/Dockerfile
 ./services/admin/.gitkeep
 ./services/admin/main.py
+./services/admin/__pycache__
+./services/admin/__pycache__/main.cpython-312.pyc
 ./services/admin/README.md
 ./services/admin/requirements.txt
 ./services/admin/ssrf-protection.md
@@ -313,6 +331,8 @@ generated_at=2026-06-18T11:04:46Z
 ./services/billing/Dockerfile
 ./services/billing/.gitkeep
 ./services/billing/main.py
+./services/billing/__pycache__
+./services/billing/__pycache__/main.cpython-312.pyc
 ./services/billing/README.md
 ./services/billing/requirements.txt
 ./services/.gitkeep
@@ -325,6 +345,8 @@ generated_at=2026-06-18T11:04:46Z
 ./services/order/.gitkeep
 ./services/order/main.py
 ./services/order/policy.md
+./services/order/__pycache__
+./services/order/__pycache__/auth.cpython-312.pyc
 ./services/order/README.md
 ./services/order/requirements.txt
 ./services/user
@@ -334,6 +356,8 @@ generated_at=2026-06-18T11:04:46Z
 ./services/user/.gitkeep
 ./services/user/main.py
 ./services/user/policy.md
+./services/user/__pycache__
+./services/user/__pycache__/auth.cpython-312.pyc
 ./services/user/README.md
 ./services/user/requirements.txt
 ./SUMMARY_OF_WORK.md
@@ -368,10 +392,13 @@ generated_at=2026-06-18T11:04:46Z
 ./tests/security/authz-logs-dto-tests.sh
 ./tests/security/authz-negative-tests.sh
 ./tests/security/client-credentials-tests.sh
+./tests/security/container-runtime-hardening-tests.sh
 ./tests/security/edge-hardening-tests.sh
 ./tests/security/fuzz-negative-tests.sh
+./tests/security/gateway-backend-mtls-tests.sh
 ./tests/security/network-egress-control-tests.sh
 ./tests/security/opa-authz-tests.sh
+./tests/security/openapi-contract-tests.sh
 ./tests/security/run-fuzzing.sh
 ./tests/security/s2s-ownership-tests.sh
 ./tests/security/token-introspection-enforcement-tests.py
@@ -379,8 +406,11 @@ generated_at=2026-06-18T11:04:46Z
 ./tests/security/tv1-edge-webhook-tests.sh
 ./tests/security/verify-no-tracked-secrets.sh
 ./tests/security/webhook_client.py
+./tests/security/webhook-nonce-persistence-tests.sh
 ./tests/security/webhook-tests.sh
 ./tests/security/zap-active-scan.sh
+./tests/security/zap-auth
+./tests/security/zap-auth/__pycache__
 ./tests/smoke
 ./tests/smoke/main-smoke.sh
 ./vault
