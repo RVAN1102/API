@@ -363,6 +363,29 @@ docker run --rm curlimages/curl:latest --insecure --include \
 
 ---
 
+## 16b. Gateway-to-Backend mTLS Default Runtime
+
+Default Compose now enforces Gateway-to-Backend mTLS through Nginx sidecars.
+Run the test with:
+
+```bash
+bash tests/security/gateway-backend-mtls-tests.sh
+```
+
+By default, transient runtime output is written to `.artifacts/test-runs/` so
+re-running tests does not dirty the committed official evidence. To intentionally
+refresh the official evidence snapshot, run:
+
+```bash
+UPDATE_OFFICIAL_EVIDENCE=1 bash tests/security/gateway-backend-mtls-tests.sh
+```
+
+Expected result: Kong-to-User/Order/Billing/Admin health routes return `200`;
+no-client and wrong-certificate probes are rejected; Kong's client certificate is
+accepted by each backend sidecar.
+
+---
+
 ## 17. Stop Stack
 
 ```bash

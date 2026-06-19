@@ -103,13 +103,26 @@ The backend services read the following claims:
 
 ## MFA / OTP Requirement
 
-OTP is **not enforced by default** in the dev realm to simplify demo automation.
-In a production deployment, the `CONFIGURE_TOTP` required action should be added
-to users who need MFA.
+MFA setup is enforced for the demo human users in the imported realm. The realm
+assigns the `CONFIGURE_TOTP` required action to `alice`, `bob`, and `admin01`,
+so an interactive password-only login is not considered sufficient for these
+accounts. CI/regression automation uses dedicated lab accounts/scripts so tests
+remain reproducible without weakening the human-user MFA requirement.
 
-To enable OTP for a user:
-1. Open Keycloak Admin UI → Users → alice → Required Actions → Add: `Configure OTP`.
-2. The user will be prompted to scan a TOTP QR code on next login.
+To verify runtime MFA status:
+
+```bash
+bash demo/auth/check-keycloak-mfa-status.sh
+```
+
+To re-apply MFA required actions after a fresh realm import:
+
+```bash
+bash demo/auth/enforce-keycloak-mfa.sh
+```
+
+Manual check: open Keycloak Admin UI → Users → alice/bob/admin01 → Required
+Actions and verify `Configure OTP` / `CONFIGURE_TOTP` is present.
 
 ---
 

@@ -10,8 +10,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BASE_COMPOSE="${REPO_ROOT}/infra/docker-compose.yml"
-EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1/gateway-backend-mtls"
-EVIDENCE_FILE="${EVIDENCE_DIR}/gateway-backend-mtls-runtime.txt"
+OFFICIAL_EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1/gateway-backend-mtls"
+OFFICIAL_EVIDENCE_FILE="${OFFICIAL_EVIDENCE_DIR}/gateway-backend-mtls-runtime.txt"
+ARTIFACT_DIR="${REPO_ROOT}/.artifacts/test-runs"
+RUN_ID="$(date -u +"%Y%m%dT%H%M%SZ")"
+
+if [ "${UPDATE_OFFICIAL_EVIDENCE:-0}" = "1" ]; then
+  EVIDENCE_DIR="${OFFICIAL_EVIDENCE_DIR}"
+  EVIDENCE_FILE="${OFFICIAL_EVIDENCE_FILE}"
+else
+  EVIDENCE_DIR="${ARTIFACT_DIR}"
+  EVIDENCE_FILE="${EVIDENCE_DIR}/gateway-backend-mtls-runtime-${RUN_ID}.txt"
+fi
 
 mkdir -p "${EVIDENCE_DIR}"
 exec > >(tee "${EVIDENCE_FILE}") 2>&1
@@ -162,6 +172,9 @@ echo "Gateway-to-Backend mTLS Runtime Evidence"
 echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 echo "Compose file: ${BASE_COMPOSE}"
 echo "Evidence file: ${EVIDENCE_FILE}"
+if [ "${UPDATE_OFFICIAL_EVIDENCE:-0}" != "1" ]; then
+  echo "Official evidence snapshot is not overwritten. Set UPDATE_OFFICIAL_EVIDENCE=1 to refresh it intentionally."
+fi
 echo "============================================================"
 echo
 

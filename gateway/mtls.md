@@ -1,32 +1,36 @@
-# Gateway-to-Backend mTLS Design And Runtime Profile
+# Gateway-to-Backend mTLS Design And Default Runtime
 
-The default Compose stack remains the stable final-regression baseline. It uses
-HTTP backends plus short-lived Keycloak Client Credentials for backend S2S
-authorization. To provide runtime evidence for the stricter Gateway-to-Backend
-mTLS requirement without breaking the default path, the repo includes an
-optional sidecar profile:
+The default Compose stack enforces Gateway-to-Backend mTLS for the four primary
+backend services. Kong no longer routes directly to the raw HTTP backends; it
+routes to Nginx mTLS sidecars that verify Kong's internal client certificate
+before forwarding requests to the local service container path.
+
+Default runtime command:
 
 ```bash
 bash demo/mtls/ensure-gateway-backend-certs.sh
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
+docker compose -f infra/docker-compose.yml up -d --build
 bash tests/security/gateway-backend-mtls-tests.sh
 ```
 
-## Runtime profile architecture
+`infra/docker-compose.mtls.yml` is retained only as a backward-compatible
+compatibility/legacy override path. The authoritative default runtime is now
+`infra/docker-compose.yml`.
+
+## Runtime architecture
 
 ```text
 Kong --HTTPS + Kong client cert--> Nginx mTLS sidecar --> HTTP loopback-style app path
 ```
 
-For each backend service, the mTLS profile adds an Nginx sidecar:
+For each backend service, the default runtime includes an Nginx sidecar:
 
 - `user-mtls-proxy` fronts `user-service`
 - `order-mtls-proxy` fronts `order-service`
 - `billing-mtls-proxy` fronts `billing-service`
 - `admin-mtls-proxy` fronts `admin-service`
 
-Kong routes use `gateway/kong-mtls.yml`, which points upstreams at the HTTPS
-sidecars instead of direct HTTP service URLs.
+Kong routes in `gateway/kong.yml` point upstreams at the HTTPS sidecars instead of direct HTTP service URLs. `gateway/kong-mtls.yml` is retained for compatibility with older profile-based evidence commands.
 
 ## Trust model
 
@@ -58,7 +62,19 @@ The test verifies:
 3. A self-signed rogue client certificate is rejected.
 4. Kong's valid client certificate is accepted by the sidecars.
 
-Evidence output is written to:
+Evidence output is written to ignored transient artifacts by default:
+
+```text
+.artifacts/test-runs/gateway-backend-mtls-runtime-<timestamp>.txt
+```
+
+To intentionally refresh the official evidence file, run:
+
+```bash
+UPDATE_OFFICIAL_EVIDENCE=1 bash tests/security/gateway-backend-mtls-tests.sh
+```
+
+Official evidence file:
 
 ```text
 docs/evidence/tv1/gateway-backend-mtls/gateway-backend-mtls-runtime.txt
