@@ -11,12 +11,7 @@
 ## 1. Start the Stack
 
 ```bash
-cp infra/.env.example infra/.env
-
-# Edit infra/.env and set at least:
-#   BILLING_SERVICE_CLIENT_SECRET
-#   ADMIN_SERVICE_CLIENT_SECRET
-#   WEBHOOK_SECRET
+bash scripts/bootstrap-lab-env.sh
 
 docker compose -f infra/docker-compose.yml up -d --build
 
@@ -236,6 +231,12 @@ bash vault/scripts/init-dev-vault.sh
 Access Vault UI: **http://localhost:8200**  
 Token: `dev-root-token` (dev mode only)
 
+For Topic 10 reporting, `infra/.env` is an ignored lab bootstrap artifact for
+Docker Compose. Vault OSS local demonstrates central secret management, but this
+prototype does not claim every runtime secret is fetched from Vault. Production
+should use Vault HA, cloud KMS, Secrets Manager, or equivalent managed secret
+storage. See `docs/evidence/tv2/vault-lab-secret-bootstrap.md`.
+
 ---
 
 ## 13. PKCE Flow Demo (TV2)
@@ -270,6 +271,10 @@ Run this before review or merge:
 ```bash
 bash tests/final/main-regression.sh
 ```
+
+If `infra/.env` is missing or still has placeholders, the regression preflight
+calls `bash scripts/bootstrap-lab-env.sh` and reloads the file without printing
+secret values.
 
 Expected result: `Suites passed: 9`, `Suites failed: 0`.
 

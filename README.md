@@ -76,13 +76,8 @@ Supporting Services:
 ## Quick Start
 
 ```bash
-# Create the local Compose environment file first.
-cp infra/.env.example infra/.env
-
-# Edit infra/.env and set at least:
-#   BILLING_SERVICE_CLIENT_SECRET
-#   ADMIN_SERVICE_CLIENT_SECRET
-#   WEBHOOK_SECRET
+# Create the ignored local Compose lab environment file.
+bash scripts/bootstrap-lab-env.sh
 
 # Start all services
 docker compose -f infra/docker-compose.yml up -d --build
@@ -191,9 +186,14 @@ Run the final regression gate before review or merge:
 bash tests/final/main-regression.sh
 ```
 
-The regression expects `infra/.env` or shell environment variables to provide
-`BILLING_SERVICE_CLIENT_SECRET`, `ADMIN_SERVICE_CLIENT_SECRET`, and
-`WEBHOOK_SECRET`.
+The regression preflight runs `scripts/bootstrap-lab-env.sh` when `infra/.env`
+is missing or still contains placeholders. This creates local lab-only values
+for Docker Compose and does not commit them.
+
+Secret-management alignment is documented in
+`docs/evidence/tv2/vault-lab-secret-bootstrap.md`: `infra/.env` is only a
+local compatibility/bootstrap artifact, while production should use Vault HA,
+cloud KMS, Secrets Manager, or an equivalent managed secret store.
 
 ## Final Evidence Before Packaging
 
@@ -258,5 +258,6 @@ docker compose -f infra/docker-compose.yml down
 - Do not commit real secrets, private keys, `.env`, `.pem`, or `.key` files.
 - Kong OSS is used for gateway-level filtering, not as a full enterprise WAF.
 - Keycloak runs in dev mode for this prototype.
-- Vault runs in dev mode for this prototype.
+- Vault runs in dev mode for this prototype; it demonstrates central secret
+  management, but `.env` remains the local Docker Compose bootstrap file.
 - For full testing guide see `TESTING_GUIDE.md`.

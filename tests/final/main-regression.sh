@@ -24,6 +24,15 @@ source "${SCRIPT_DIR}/../compat.sh"
 
 load_service_client_env() {
   local env_file="${PROJECT_ROOT}/infra/.env"
+  local bootstrap_script="${PROJECT_ROOT}/scripts/bootstrap-lab-env.sh"
+  local needs_bootstrap=0
+  local required_var
+  local value
+  local required_vars=(
+    BILLING_SERVICE_CLIENT_SECRET
+    ADMIN_SERVICE_CLIENT_SECRET
+    WEBHOOK_SECRET
+  )
 
   # Auto-source secrets so tests work in any shell (Git Bash, WSL, PowerShell).
   # Do not print secret values.
@@ -33,24 +42,56 @@ load_service_client_env() {
     source "${env_file}"
     set +a
     echo "[INFO] Loaded service-client environment from infra/.env"
+    for required_var in "${required_vars[@]}"; do
+      if ! grep -q "^${required_var}=" "${env_file}"; then
+        needs_bootstrap=1
+      fi
+    done
   else
-    echo "[INFO] infra/.env not found; using existing environment variables"
+    echo "[INFO] infra/.env not found; lab bootstrap is required"
+    needs_bootstrap=1
   fi
 
-  if [ -z "${BILLING_SERVICE_CLIENT_SECRET:-}" ]; then
-    echo "[ERROR] BILLING_SERVICE_CLIENT_SECRET is missing after loading infra/.env." >&2
-    echo "[ERROR] Final regression cannot acquire billing-service tokens without it." >&2
-    exit 1
+  for required_var in "${required_vars[@]}"; do
+    value="${!required_var:-}"
+    if [ -z "${value}" ] || [[ "${value}" == REPLACE_WITH_* ]]; then
+      needs_bootstrap=1
+    fi
+  done
+
+  if [ "${needs_bootstrap}" -eq 1 ]; then
+    if [ ! -f "${bootstrap_script}" ]; then
+      echo "[ERROR] Missing required lab secret bootstrap script." >&2
+      echo "[ERROR] Run: bash scripts/bootstrap-lab-env.sh" >&2
+      exit 1
+    fi
+
+    echo "[INFO] Running lab secret bootstrap"
+    if ! bash "${bootstrap_script}"; then
+      echo "[ERROR] Lab secret bootstrap failed." >&2
+      echo "[ERROR] Run: bash scripts/bootstrap-lab-env.sh" >&2
+      exit 1
+    fi
+
+    set -a
+    # shellcheck disable=SC1090
+    source "${env_file}"
+    set +a
+    echo "[INFO] Reloaded service-client environment from infra/.env"
   fi
 
-  if [ -z "${ADMIN_SERVICE_CLIENT_SECRET:-}" ]; then
-    echo "[ERROR] ADMIN_SERVICE_CLIENT_SECRET is missing after loading infra/.env." >&2
-    echo "[ERROR] Final regression cannot acquire admin-service tokens without it." >&2
-    exit 1
-  fi
+  for required_var in "${required_vars[@]}"; do
+    value="${!required_var:-}"
+    if [ -z "${value}" ] || [[ "${value}" == REPLACE_WITH_* ]]; then
+      echo "[ERROR] ${required_var} is missing or still a placeholder after loading infra/.env." >&2
+      echo "[ERROR] Run: bash scripts/bootstrap-lab-env.sh" >&2
+      exit 1
+    fi
+  done
 
   export BILLING_SERVICE_CLIENT_SECRET
   export ADMIN_SERVICE_CLIENT_SECRET
+  export WEBHOOK_SECRET
 }
 
 load_service_client_env
