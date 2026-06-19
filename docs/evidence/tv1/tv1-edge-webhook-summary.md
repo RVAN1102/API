@@ -146,7 +146,7 @@ Bảo vệ webhook hiện tại gồm:
 - Redis-backed nonce replay protection
 - Timestamp freshness check
 
-Gateway-to-backend mTLS is a separate control from webhook ingress mTLS. The repo now includes an optional runtime sidecar profile (`infra/docker-compose.mtls.yml`) that routes Kong to User/Order/Billing/Admin through HTTPS/mTLS Nginx sidecars. The default Docker Compose stack remains the stable regression baseline, while the mTLS profile provides runtime evidence that Kong presents an internal client certificate and callers without a valid client certificate are rejected. Internal S2S authorization is still implemented with short-lived Keycloak Client Credentials and least-privilege service roles, which satisfies the Topic 10 S2S option alongside the implemented webhook mTLS ingress.
+Gateway-to-backend mTLS is a separate control from webhook ingress mTLS. The default Docker Compose runtime now routes Kong to User/Order/Billing/Admin through HTTPS/mTLS Nginx sidecars. Runtime evidence proves that Kong presents an internal client certificate, callers without a valid client certificate are rejected, wrong/self-signed certificates are rejected, and the valid Kong client certificate is accepted. Internal Billing-to-Order authorization is still implemented with short-lived Keycloak Client Credentials and least-privilege service roles, while webhook ingress uses a separate mTLS channel plus HMAC/timestamp/nonce.
 
 Chi tiết: `p0-09-webhook-mtls-status.md`
 
@@ -156,7 +156,7 @@ Chi tiết: `p0-09-webhook-mtls-status.md`
 
 | # | Limitation | Hướng xử lý |
 |---|-----------|-------------|
-| L1 | Gateway-to-backend mTLS không bật trong default Compose | Dùng `infra/docker-compose.mtls.yml` để chạy runtime sidecar profile; production nên dùng service mesh/internal PKI tự động rotation |
+| L1 | Gateway-to-backend mTLS hiện đã bật trong default Compose nhưng vẫn là sidecar-based lab PKI, chưa phải full service mesh | Production nên dùng service mesh/internal PKI với tự động rotation, workload identity và policy enforcement toàn bộ east-west traffic |
 | L2 | Webhook nonce store dùng Redis TTL trong lab, không bảo vệ ngoài timestamp/TTL window | Production dùng managed Redis/DB TTL với monitoring |
 | L3 | Kong Admin API (port 8001) không nên expose public | Nên bind vào internal network only |
 | L4 | WAF module (ModSecurity/OWASP CRS) chưa tích hợp vào Kong | Kong hiện dùng pre-function plugin thủ công |
@@ -176,4 +176,4 @@ Chi tiết: `p0-09-webhook-mtls-status.md`
 | `p0-06-kong-request-size-limit.txt` | Request size 413 | Xem file |
 | `p0-07-webhook-hmac-replay.txt` | HMAC valid/invalid/replay | Xem file |
 | `p0-08-webhook-timestamp-freshness.txt` | Timestamp freshness | Xem file |
-| `p0-09-webhook-mtls-status.md` + `gateway-backend-mtls/` | Webhook mTLS implemented; Gateway-to-backend mTLS sidecar profile available | Implemented/profile split |
+| `p0-09-webhook-mtls-status.md` + `gateway-backend-mtls/` | Webhook mTLS implemented; Gateway-to-backend mTLS enforced by default through sidecars | Implemented/default runtime |
