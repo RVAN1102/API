@@ -24,6 +24,7 @@ This index points to the official, reviewable evidence set for the current harde
 - Webhook persistent nonce store: `docs/evidence/tv1/webhook-final/persistent-nonce-store.md`
 - Gateway route smoke: `docs/evidence/tv1/p0-01-kong-route-smoke.txt`
 - TLS 1.3 and HSTS: `docs/evidence/tv1/p0-02-kong-tls13-only.txt`, `docs/evidence/tv1/p0-03-kong-hsts.txt`
+- Gateway-to-backend mTLS runtime profile: `docs/evidence/tv1/gateway-backend-mtls/`
 
 ## SSRF And Network Egress
 
