@@ -8,6 +8,8 @@
 #
 # Usage:
 #   bash scripts/security/generate-sbom.sh
+#   SBOM_IMAGES="topic10/user-service:local topic10/order-service:local" \
+#     bash scripts/security/generate-sbom.sh
 #
 # Requirements:
 #   - trivy installed: https://aquasecurity.github.io/trivy/
@@ -16,11 +18,12 @@
 # Output:
 #   docs/evidence/tv3/supply-chain/sbom-cyclonedx.json
 #   docs/evidence/tv3/supply-chain/sbom-spdx.json
-#   docs/evidence/tv3/supply-chain/sbom-summary.md
+#   ${REPORT_DIR}/sbom-summary.md
 
 set -uo pipefail
 
-REPORT_DIR="docs/evidence/tv3/supply-chain"
+REPORT_DIR="${REPORT_DIR:-docs/evidence/tv3/supply-chain}"
+SBOM_IMAGES="${SBOM_IMAGES:-}"
 mkdir -p "${REPORT_DIR}"
 
 echo "=== SBOM Generation ==="
@@ -97,18 +100,49 @@ fi
 echo ""
 
 # --------------------------------------------------
-# Count components
+# --------------------------------------------------
+# 3. Optional Docker image SBOMs
+# --------------------------------------------------
+echo "--- [3/3] Optional Docker image SBOMs ---"
+if [ -n "${SBOM_IMAGES}" ]; then
+  if command -v trivy > /dev/null 2>&1; then
+    for image in ${SBOM_IMAGES}; do
+      safe_name="$(printf '%s' "${image}" | sed 's/[^A-Za-z0-9_.-]/_/g')"
+      output="${REPORT_DIR}/image-${safe_name}-cyclonedx.json"
+      trivy image \
+        --format cyclonedx \
+        --output "${output}" \
+        "${image}" 2>&1 || true
+      echo "[OK] Image CycloneDX SBOM: ${output}"
+    done
+  else
+    echo "[WARN] trivy not found; image SBOM generation skipped."
+  fi
+else
+  echo "[INFO] SBOM_IMAGES not set; skipping image SBOM generation."
+fi
+
+echo ""
+
+# --------------------------------------------------
+# Count components and write summary
 # --------------------------------------------------
 echo "--- SBOM Summary ---"
-python3 - <<'PY' 2>/dev/null || true
-import json, pathlib
+python3 - "${REPORT_DIR}" <<'PY' 2>/dev/null || true
+import json
+import pathlib
+import sys
 
-cdx_path = pathlib.Path("docs/evidence/tv3/supply-chain/sbom-cyclonedx.json")
+report_dir = pathlib.Path(sys.argv[1])
+summary_path = report_dir / "sbom-summary.md"
+cdx_path = report_dir / "sbom-cyclonedx.json"
+lines = ["# SBOM Summary", ""]
 if cdx_path.exists():
     try:
         data = json.loads(cdx_path.read_text())
         components = data.get("components", [])
         print(f"CycloneDX components: {len(components)}")
+        lines.append(f"- Filesystem CycloneDX components: {len(components)}")
         langs = set()
         for c in components:
             if "purl" in c:
@@ -118,10 +152,21 @@ if cdx_path.exists():
                 elif "golang" in purl: langs.add("Go")
         if langs:
             print(f"Languages detected: {', '.join(langs)}")
+            lines.append(f"- Languages detected: {', '.join(sorted(langs))}")
     except Exception as e:
         print(f"CycloneDX: parsing error: {e}")
+        lines.append(f"- Filesystem CycloneDX parse error: {e}")
 else:
     print("CycloneDX SBOM: not found")
+    lines.append("- Filesystem CycloneDX SBOM: not found")
+
+image_sboms = sorted(report_dir.glob("image-*-cyclonedx.json"))
+lines.append(f"- Image SBOM files: {len(image_sboms)}")
+for path in image_sboms:
+    lines.append(f"  - `{path.name}`")
+
+summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+print(f"Summary: {summary_path}")
 PY
 
 echo ""

@@ -301,6 +301,32 @@ Results saved to `docs/evidence/tv3/security-scan-local.txt`.
 
 ---
 
+## 14b. Production-Oriented Hardening Checks
+
+```bash
+bash tests/security/container-runtime-hardening-tests.sh
+bash tests/security/openapi-contract-tests.sh
+```
+
+Container hardening checks render `infra/docker-compose.yml` and verify the
+intended `no-new-privileges`, `cap_drop`, `read_only`, and `tmpfs` settings
+without writing tracked evidence files. The OpenAPI contract test reuses the
+existing `ci-alice` token helper and verifies selected Kong-routed responses do
+not expose sensitive or debug/internal fields.
+
+For image supply-chain evidence in CI, `.github/workflows/security-scan.yml`
+builds local service images, scans them with Trivy, emits CycloneDX image SBOM
+artifacts, and runs a Cosign keyless-signing dry-run. Local commands:
+
+```bash
+SBOM_IMAGES="topic10-user-service:local" bash scripts/security/generate-sbom.sh
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-placeholder
+```
+
+Evidence note: `docs/evidence/final/production-hardening-bundle-1.md`.
+
+---
+
 ## Final Regression Gate
 
 Run this before review or merge:
@@ -313,7 +339,7 @@ If `infra/.env` is missing or still has placeholders, the regression preflight
 calls `bash scripts/bootstrap-lab-env.sh` and reloads the file without printing
 secret values.
 
-Expected result: `Suites passed: 9`, `Suites failed: 0`.
+Expected result: `Suites passed: 11`, `Suites failed: 0`.
 
 ---
 
