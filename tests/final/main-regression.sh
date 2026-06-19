@@ -225,11 +225,25 @@ ensure_webhook_mtls_certs() {
   echo "[INFO] Before final security scan/package creation, remove runtime private artifacts: rm -f infra/certs/*.key infra/certs/*.p12"
 }
 
+ensure_gateway_backend_mtls_certs() {
+  local ensure_script="${PROJECT_ROOT}/demo/mtls/ensure-gateway-backend-certs.sh"
+
+  [ -x "${ensure_script}" ] || [ -f "${ensure_script}" ] \
+    || {
+      echo "[ERROR] Missing gateway-backend mTLS ensure script: ${ensure_script}" >&2
+      return 1
+    }
+
+  echo "[INFO] Ensuring local-only gateway-backend mTLS demo certs are present"
+  bash "${ensure_script}"
+}
+
 echo "=============================================="
 echo "  FINAL REGRESSION TEST"
 echo "  $(date)"
 echo "=============================================="
 
+ensure_gateway_backend_mtls_certs
 reset_kong_at_start
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
 run_suite "Client Credentials" "tests/security/client-credentials-tests.sh"

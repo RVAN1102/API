@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Generate short-lived internal CA and demo certificates for the optional
-# Gateway-to-Backend mTLS runtime profile.
+# Generate short-lived internal CA and demo certificates for the default
+# Gateway-to-Backend mTLS runtime.
 #
 # Output is intentionally written under infra/certs/gateway-backend/, which is
 # ignored by Git. Do not commit generated private keys or certificates.
@@ -120,4 +120,3 @@ find "${OUT_DIR}" -type f -name "*.key" -exec chmod 0644 {} \;
 chmod 0600 "${OUT_DIR}/ca.key"
 
 echo "[OK] Gateway-backend mTLS demo certificates are ready under infra/certs/gateway-backend"
-

@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-06-16
+**Last updated:** 2026-06-19
 
 ---
 
@@ -30,7 +30,7 @@
 
 - ⚠️ MFA: not implemented at runtime (Keycloak supports it, not configured for demo)
 - ✅ Webhook mTLS: implemented and evidenced at Kong (valid client cert accepted, missing cert rejected)
-- ✅ Gateway-to-backend mTLS: optional sidecar runtime profile available via `infra/docker-compose.mtls.yml`; default Compose remains stable; backend S2S uses short-lived Keycloak Client Credentials
+- ✅ Gateway-to-backend mTLS: enforced by default through Nginx sidecars; backend S2S ownership still uses short-lived Keycloak Client Credentials
 - ✅ OPA: policy decision point and backend enforcement evidenced for selected authorization paths
 - ⚠️ Keycloak runs in dev mode (not production-grade)
 - ⚠️ Vault runs in dev mode

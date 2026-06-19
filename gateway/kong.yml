@@ -1,6 +1,10 @@
 _format_version: "3.0"
 _transform: true
 
+# Default Gateway-to-Backend mTLS runtime configuration.
+# Kong presents its internal client certificate to backend Nginx sidecars,
+# and verifies sidecar server certificates using the internal demo CA.
+
 # ---------------------------------------------------------------------------
 # Services (upstream backends)
 # TV1 routes all traffic through Kong. Real services added by TV2/TV3.
@@ -8,7 +12,7 @@ _transform: true
 services:
   # TV2 – User Service (FastAPI)
   - name: user-service
-    url: http://user-service:8000
+    url: https://user-mtls-proxy:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -36,7 +40,7 @@ services:
 
   # TV2 – Order Service (FastAPI)
   - name: order-service
-    url: http://order-service:8000
+    url: https://order-mtls-proxy:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -54,7 +58,7 @@ services:
 
   # TV3 – Billing Service (FastAPI)
   - name: billing-service
-    url: http://billing-service:8000
+    url: https://billing-mtls-proxy:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -77,7 +81,7 @@ services:
 
   # TV3 – Admin Service (FastAPI)
   - name: admin-service
-    url: http://admin-service:8000
+    url: https://admin-mtls-proxy:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000

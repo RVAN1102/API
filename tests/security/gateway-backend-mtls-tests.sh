@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Runtime evidence for optional Gateway-to-Backend mTLS sidecar profile.
+# Runtime evidence for default Gateway-to-Backend mTLS sidecar enforcement.
 #
-# The test starts the compose stack with infra/docker-compose.mtls.yml, verifies
-# that normal Kong routes still work, and verifies that backend sidecar proxies
+# The test starts the default compose stack, verifies that normal Kong routes
+# work through the mTLS sidecars, and verifies that backend sidecar proxies
 # reject TLS callers that do not present Kong's client certificate.
 
 set -euo pipefail
@@ -10,12 +10,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BASE_COMPOSE="${REPO_ROOT}/infra/docker-compose.yml"
-MTLS_COMPOSE="${REPO_ROOT}/infra/docker-compose.mtls.yml"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1/gateway-backend-mtls"
 EVIDENCE_FILE="${EVIDENCE_DIR}/gateway-backend-mtls-runtime.txt"
 
 mkdir -p "${EVIDENCE_DIR}"
 exec > >(tee "${EVIDENCE_FILE}") 2>&1
+
+cleanup_evidence() {
+  if [ -f "${EVIDENCE_FILE}" ] && command -v sed >/dev/null 2>&1; then
+    sed -i 's/[[:space:]]\+$//' "${EVIDENCE_FILE}" || true
+  fi
+}
+trap cleanup_evidence EXIT
 
 if [ -x "${REPO_ROOT}/scripts/bootstrap-lab-env.sh" ]; then
   bash "${REPO_ROOT}/scripts/bootstrap-lab-env.sh"
@@ -29,7 +35,7 @@ if [ -f "${REPO_ROOT}/infra/.env" ]; then
 fi
 
 compose() {
-  docker compose -f "${BASE_COMPOSE}" -f "${MTLS_COMPOSE}" "$@"
+  docker compose -f "${BASE_COMPOSE}" "$@"
 }
 
 pass() { echo "[PASS] $*"; }
@@ -142,9 +148,11 @@ assert_proxy_accepts_kong_client_cert() {
   rc=$?
   set -e
   echo "${host} valid-cert probe: $(printf '%s' "${out}" | head -1)"
-  if [ "${rc}" -eq 0 ] && printf '%s' "${out}" | grep -q '200'; then
+  if printf '%s' "${out}" | grep -Eq 'HTTP/[0-9.]+ 200|\"status\":\"ok\"'; then
     pass "${host} accepts Kong client certificate and returns backend health"
   else
+    echo "--- valid certificate probe output (exit ${rc}) ---"
+    printf '%s\n' "${out}"
     fail "${host} did not accept Kong client certificate or did not return 200"
   fi
 }
@@ -152,9 +160,7 @@ assert_proxy_accepts_kong_client_cert() {
 echo "============================================================"
 echo "Gateway-to-Backend mTLS Runtime Evidence"
 echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-echo "Compose files:"
-echo "  - ${BASE_COMPOSE}"
-echo "  - ${MTLS_COMPOSE}"
+echo "Compose file: ${BASE_COMPOSE}"
 echo "Evidence file: ${EVIDENCE_FILE}"
 echo "============================================================"
 echo
@@ -183,6 +189,9 @@ assert_proxy_rejects_no_client_cert "billing-mtls-proxy"
 assert_proxy_rejects_no_client_cert "admin-mtls-proxy"
 
 assert_proxy_rejects_wrong_client_cert "user-mtls-proxy"
+assert_proxy_rejects_wrong_client_cert "order-mtls-proxy"
+assert_proxy_rejects_wrong_client_cert "billing-mtls-proxy"
+assert_proxy_rejects_wrong_client_cert "admin-mtls-proxy"
 
 assert_proxy_accepts_kong_client_cert "user-mtls-proxy" "/api/v1/users/health"
 assert_proxy_accepts_kong_client_cert "order-mtls-proxy" "/api/v1/orders/health"

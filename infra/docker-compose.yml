@@ -27,14 +27,14 @@ services:
   kong:
     image: kong:3.9
     depends_on:
-      user-service:
-        condition: service_healthy
-      order-service:
-        condition: service_healthy
-      billing-service:
-        condition: service_healthy
-      admin-service:
-        condition: service_healthy
+      user-mtls-proxy:
+        condition: service_started
+      order-mtls-proxy:
+        condition: service_started
+      billing-mtls-proxy:
+        condition: service_started
+      admin-mtls-proxy:
+        condition: service_started
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
@@ -47,9 +47,17 @@ services:
       KONG_NGINX_PROXY_SSL_PROTOCOLS: "TLSv1.3"
       KONG_NGINX_PROXY_SSL_CLIENT_CERTIFICATE: "/kong/certs/webhook-ca.crt"
       KONG_NGINX_PROXY_SSL_VERIFY_CLIENT: "optional"
+      KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE: /kong/gb-mtls/kong-client.crt
+      KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE_KEY: /kong/gb-mtls/kong-client.key
+      KONG_NGINX_PROXY_PROXY_SSL_TRUSTED_CERTIFICATE: /kong/gb-mtls/ca.crt
+      KONG_NGINX_PROXY_PROXY_SSL_VERIFY: "on"
+      KONG_NGINX_PROXY_PROXY_SSL_VERIFY_DEPTH: "2"
+      KONG_NGINX_PROXY_PROXY_SSL_SERVER_NAME: "on"
+      KONG_NGINX_PROXY_PROXY_SSL_PROTOCOLS: "TLSv1.3"
     volumes:
       - ../gateway/kong.yml:/kong/declarative/kong.yml:ro
       - ../infra/certs:/kong/certs:ro
+      - ../infra/certs/gateway-backend:/kong/gb-mtls:ro
     ports:
       - "8000:8000"
       - "8443:8443"
@@ -66,6 +74,73 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+
+  # ---------------------------------------------------------------------------
+  # TV1 – Gateway-to-Backend mTLS sidecars (default runtime)
+  # ---------------------------------------------------------------------------
+  user-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: user-mtls-proxy
+      UPSTREAM_HOST: user-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-user-internal
+    depends_on:
+      user-service:
+        condition: service_healthy
+
+  order-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: order-mtls-proxy
+      UPSTREAM_HOST: order-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-order-internal
+    depends_on:
+      order-service:
+        condition: service_healthy
+
+  billing-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: billing-mtls-proxy
+      UPSTREAM_HOST: billing-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-billing-internal
+    depends_on:
+      billing-service:
+        condition: service_healthy
+
+  admin-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: admin-mtls-proxy
+      UPSTREAM_HOST: admin-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-admin-internal
+    depends_on:
+      admin-service:
+        condition: service_healthy
 
   # ---------------------------------------------------------------------------
   # TV2 – User Service

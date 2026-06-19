@@ -4,18 +4,16 @@
 [OK] lab environment bootstrap complete
 ============================================================
 Gateway-to-Backend mTLS Runtime Evidence
-Date: 2026-06-19T09:32:59Z
-Compose files:
-  - /home/rvan1102/API/infra/docker-compose.yml
-  - /home/rvan1102/API/infra/docker-compose.mtls.yml
+Date: 2026-06-19T09:55:29Z
+Compose file: /home/rvan1102/API/infra/docker-compose.yml
 Evidence file: /home/rvan1102/API/docs/evidence/tv1/gateway-backend-mtls/gateway-backend-mtls-runtime.txt
 ============================================================
 
 [OK] Gateway-backend mTLS demo certificates are ready under infra/certs/gateway-backend
- Image infra-user-service Building 
- Image infra-billing-service Building 
- Image infra-order-service Building 
- Image infra-admin-service Building 
+ Image infra-order-service Building
+ Image infra-user-service Building
+ Image infra-billing-service Building
+ Image infra-admin-service Building
 #1 [internal] load local bake definitions
 #1 reading from stdin 1.91kB done
 #1 DONE 0.0s
@@ -24,286 +22,200 @@ Evidence file: /home/rvan1102/API/docs/evidence/tv1/gateway-backend-mtls/gateway
 #2 transferring dockerfile: 242B done
 #2 DONE 0.0s
 
-#3 [user-service internal] load build definition from Dockerfile
+#3 [admin-service internal] load build definition from Dockerfile
 #3 transferring dockerfile: 242B done
-#3 DONE 0.0s
+#3 DONE 0.1s
 
-#4 [admin-service internal] load build definition from Dockerfile
+#4 [order-service internal] load build definition from Dockerfile
 #4 transferring dockerfile: 242B done
 #4 DONE 0.1s
 
-#5 [order-service internal] load build definition from Dockerfile
+#5 [user-service internal] load build definition from Dockerfile
 #5 transferring dockerfile: 242B done
 #5 DONE 0.1s
 
-#6 [admin-service internal] load metadata for docker.io/library/python:3.13-slim
+#6 [order-service internal] load metadata for docker.io/library/python:3.13-slim
 #6 DONE 0.0s
 
 #7 [order-service internal] load .dockerignore
 #7 transferring context: 2B done
 #7 DONE 0.0s
 
-#8 [admin-service internal] load .dockerignore
+#8 [user-service internal] load .dockerignore
 #8 transferring context: 2B done
-#8 DONE 0.0s
+#8 DONE 0.1s
 
-#9 [user-service internal] load .dockerignore
+#9 [billing-service internal] load .dockerignore
 #9 transferring context: 2B done
-#9 DONE 0.0s
+#9 DONE 0.1s
 
-#10 [billing-service internal] load .dockerignore
+#10 [admin-service internal] load .dockerignore
 #10 transferring context: 2B done
-#10 DONE 0.0s
+#10 DONE 0.1s
 
-#11 [order-service 1/5] FROM docker.io/library/python:3.13-slim@sha256:c33f0bc4364a6881bed1ec0cc2665e6c53c87a43e774aaeab88e6f17af105e4f
+#11 [admin-service 1/5] FROM docker.io/library/python:3.13-slim@sha256:c33f0bc4364a6881bed1ec0cc2665e6c53c87a43e774aaeab88e6f17af105e4f
+#11 resolve docker.io/library/python:3.13-slim@sha256:c33f0bc4364a6881bed1ec0cc2665e6c53c87a43e774aaeab88e6f17af105e4f
 #11 resolve docker.io/library/python:3.13-slim@sha256:c33f0bc4364a6881bed1ec0cc2665e6c53c87a43e774aaeab88e6f17af105e4f 0.0s done
 #11 DONE 0.0s
 
 #12 [order-service internal] load build context
 #12 transferring context: 343B done
-#12 DONE 0.0s
+#12 DONE 0.1s
 
-#13 [admin-service internal] load build context
-#13 transferring context: 271B done
-#13 DONE 0.0s
+#13 [user-service internal] load build context
+#13 transferring context: 315B done
+#13 DONE 0.1s
 
 #14 [billing-service internal] load build context
 #14 transferring context: 233B done
-#14 DONE 0.0s
+#14 DONE 0.1s
 
-#15 [user-service internal] load build context
-#15 transferring context: 315B done
-#15 DONE 0.0s
+#15 [admin-service internal] load build context
+#15 transferring context: 271B done
+#15 DONE 0.1s
 
-#16 [order-service 3/5] COPY requirements.txt .
+#16 [order-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
 #16 CACHED
 
-#17 [order-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#17 [order-service 3/5] COPY requirements.txt .
 #17 CACHED
 
-#18 [order-service 5/5] COPY . .
+#18 [order-service 2/5] WORKDIR /app
 #18 CACHED
 
-#19 [user-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#19 [order-service 5/5] COPY . .
 #19 CACHED
 
-#20 [user-service 3/5] COPY requirements.txt .
+#20 [user-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
 #20 CACHED
 
-#21 [user-service 5/5] COPY . .
+#21 [user-service 3/5] COPY requirements.txt .
 #21 CACHED
 
-#22 [billing-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#22 [billing-service 3/5] COPY requirements.txt .
 #22 CACHED
 
-#23 [billing-service 3/5] COPY requirements.txt .
+#23 [billing-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
 #23 CACHED
 
-#24 [admin-service 2/5] WORKDIR /app
+#24 [user-service 5/5] COPY . .
 #24 CACHED
 
-#25 [admin-service 3/5] COPY requirements.txt .
+#25 [billing-service 5/5] COPY . .
 #25 CACHED
 
 #26 [admin-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
 #26 CACHED
 
-#27 [admin-service 5/5] COPY . .
+#27 [admin-service 3/5] COPY requirements.txt .
 #27 CACHED
 
-#28 [billing-service 5/5] COPY . .
+#18 [admin-service 2/5] WORKDIR /app
+#18 CACHED
+
+#28 [admin-service 5/5] COPY . .
 #28 CACHED
 
-#29 [user-service] exporting to image
+#29 [admin-service] exporting to image
 #29 exporting layers done
-#29 exporting manifest sha256:331094265b208e044f7656c5a418306da6a496ae202d4acf3549f5a0e5da1088 done
-#29 exporting config sha256:d22c3707f95f9bf69e11066d664a7646916e51867a86bdcea00329c2a40b709c
-#29 exporting config sha256:d22c3707f95f9bf69e11066d664a7646916e51867a86bdcea00329c2a40b709c done
-#29 exporting attestation manifest sha256:6d8a5c854c6af9d0c86641de29550dbac2e123b777f5f65f2269b2c018089e07
-#29 exporting attestation manifest sha256:6d8a5c854c6af9d0c86641de29550dbac2e123b777f5f65f2269b2c018089e07 0.2s done
-#29 exporting manifest list sha256:c78b5c8f2c5e8abd8358c6722d71334bb4a3b7c35d637b1c3b3fb217720d49e5
-#29 exporting manifest list sha256:c78b5c8f2c5e8abd8358c6722d71334bb4a3b7c35d637b1c3b3fb217720d49e5 0.1s done
-#29 naming to docker.io/library/infra-user-service:latest 0.0s done
-#29 unpacking to docker.io/library/infra-user-service:latest 0.0s done
-#29 DONE 0.4s
+#29 exporting manifest sha256:0a7415dad3f0ec5a93d446a06b4e7e94631b02c1ad67172547b53dadb15c8a6b 0.0s done
+#29 exporting config sha256:92bca093bfd0b3e4a5c6244fa19ac7ecec96bda2cf9ebe91bc37bd287845511d 0.0s done
+#29 exporting attestation manifest sha256:cfa8b51fc8ad676abf490eafe2a0468b2285ca68b4232813615e2fe92e83ae89
+#29 exporting attestation manifest sha256:cfa8b51fc8ad676abf490eafe2a0468b2285ca68b4232813615e2fe92e83ae89 0.3s done
+#29 exporting manifest list sha256:22cdab42838d9a6183f99cd6e381e2ce8b6462625708a97079c7958a50fb977f
+#29 exporting manifest list sha256:22cdab42838d9a6183f99cd6e381e2ce8b6462625708a97079c7958a50fb977f 0.2s done
+#29 naming to docker.io/library/infra-admin-service:latest
+#29 naming to docker.io/library/infra-admin-service:latest 0.0s done
+#29 unpacking to docker.io/library/infra-admin-service:latest 0.0s done
+#29 DONE 0.7s
 
-#30 [order-service] exporting to image
+#30 [user-service] exporting to image
 #30 exporting layers done
-#30 exporting manifest sha256:c6323b508ad08a335f8139bb9da69cf9f03ee487a7ba34d1c99408d9ac1f8e25 done
-#30 exporting config sha256:c534c9ab695d397df24006509fda1b219e1747c98ced089c8e0327961681fd8e done
-#30 exporting attestation manifest sha256:2e244526258b866c946e4a015b671f235c998ec3ecb7389f0037f1117bf02614 0.2s done
-#30 exporting manifest list sha256:2846825255288afff1253835e06f3bf212e03b4616dd15651e74cdefdcbc8f6d 0.1s done
-#30 naming to docker.io/library/infra-order-service:latest 0.0s done
-#30 unpacking to docker.io/library/infra-order-service:latest 0.0s done
-#30 DONE 0.4s
+#30 exporting manifest sha256:331094265b208e044f7656c5a418306da6a496ae202d4acf3549f5a0e5da1088 0.0s done
+#30 exporting config sha256:d22c3707f95f9bf69e11066d664a7646916e51867a86bdcea00329c2a40b709c 0.0s done
+#30 exporting attestation manifest sha256:225b6f469f8678c9f6f17c4bb90c86a86c6ceaa02aa76e5ac8e11b060b13559c 0.3s done
+#30 exporting manifest list sha256:2d21430764189ed0ba1179144610d3c3dae3a2f679729cb869ebe753a289990b 0.2s done
+#30 naming to docker.io/library/infra-user-service:latest 0.0s done
+#30 unpacking to docker.io/library/infra-user-service:latest 0.0s done
+#30 DONE 0.7s
 
-#31 [admin-service] exporting to image
+#31 [order-service] exporting to image
 #31 exporting layers done
-#31 exporting manifest sha256:0a7415dad3f0ec5a93d446a06b4e7e94631b02c1ad67172547b53dadb15c8a6b done
-#31 exporting config sha256:92bca093bfd0b3e4a5c6244fa19ac7ecec96bda2cf9ebe91bc37bd287845511d done
-#31 exporting attestation manifest sha256:176914f5ee61f2334a1e81e8a488295b6e4b8caa48ad7aaa03801bddcc15ff96 0.2s done
-#31 exporting manifest list sha256:121f6e550404a59b44a20820be53403463936e7d0736cdba1777209f1c756da5 0.1s done
-#31 naming to docker.io/library/infra-admin-service:latest 0.0s done
-#31 unpacking to docker.io/library/infra-admin-service:latest 0.0s done
-#31 DONE 0.4s
+#31 exporting manifest sha256:c6323b508ad08a335f8139bb9da69cf9f03ee487a7ba34d1c99408d9ac1f8e25 0.0s done
+#31 exporting config sha256:c534c9ab695d397df24006509fda1b219e1747c98ced089c8e0327961681fd8e 0.0s done
+#31 exporting attestation manifest sha256:d065b49551c3bbaa3bb6b36e6618a485058311d62bf05e4250659837a20a45bd 0.3s done
+#31 exporting manifest list sha256:7961cb3a65661f7c9e1637687e1d8c9829f43ce80574c66f1a8625e881589cc2 0.2s done
+#31 naming to docker.io/library/infra-order-service:latest 0.0s done
+#31 unpacking to docker.io/library/infra-order-service:latest 0.0s done
+#31 DONE 0.7s
 
 #32 [billing-service] exporting to image
 #32 exporting layers done
-#32 exporting manifest sha256:526f0e4585a87a752004e1e6cc45afa9f70406243513338421d5620a8492d117 done
+#32 exporting manifest sha256:526f0e4585a87a752004e1e6cc45afa9f70406243513338421d5620a8492d117 0.0s done
 #32 exporting config sha256:d471665dab21b13c110e5933fd09ef91d582309715c3de44689c32e920e2d4ad 0.0s done
-#32 exporting attestation manifest sha256:3df5ca805f27453397b5315efd8ca6b4b4fe9234ec8d4e79a205bd4cdba67213 0.2s done
-#32 exporting manifest list sha256:e3f0fed35f3eccd55442deb0d1755a772a0c3a88ec161507c8eccdedd9c73278 0.1s done
-#32 naming to docker.io/library/infra-billing-service:latest done
+#32 exporting attestation manifest sha256:798eb6a9d5c2c16f417128026f648530343074edfaca3cf9ac91ba2bc5fe94aa 0.3s done
+#32 exporting manifest list sha256:0363229b8d958fffad83989ed77f0ec1492c09c52ae3083f3f570287eea7becd 0.2s done
+#32 naming to docker.io/library/infra-billing-service:latest 0.0s done
 #32 unpacking to docker.io/library/infra-billing-service:latest 0.0s done
-#32 DONE 0.4s
+#32 DONE 0.7s
 
-#33 [order-service] resolving provenance for metadata file
+#33 [user-service] resolving provenance for metadata file
 #33 DONE 0.2s
 
-#34 [user-service] resolving provenance for metadata file
+#34 [billing-service] resolving provenance for metadata file
 #34 DONE 0.1s
 
 #35 [admin-service] resolving provenance for metadata file
-#35 DONE 0.1s
+#35 DONE 0.2s
 
-#36 [billing-service] resolving provenance for metadata file
+#36 [order-service] resolving provenance for metadata file
 #36 DONE 0.0s
- Image infra-user-service Built 
- Image infra-billing-service Built 
- Image infra-order-service Built 
- Image infra-admin-service Built 
- Network infra_admin-policy-internal Creating 
- Network infra_admin-policy-internal Created 
- Network infra_order-policy-internal Creating 
- Network infra_order-policy-internal Created 
- Network infra_billing-nonce-internal Creating 
- Network infra_billing-nonce-internal Created 
- Network infra_kong-billing-internal Creating 
- Network infra_kong-billing-internal Created 
- Network infra_kong-order-internal Creating 
- Network infra_kong-order-internal Created 
- Network infra_default Creating 
- Network infra_default Created 
- Network infra_billing-identity-internal Creating 
- Network infra_billing-identity-internal Created 
- Network infra_order-identity-internal Creating 
- Network infra_order-identity-internal Created 
- Network infra_billing-order-s2s-internal Creating 
- Network infra_billing-order-s2s-internal Created 
- Network infra_observability-internal Creating 
- Network infra_observability-internal Created 
- Network infra_user-identity-internal Creating 
- Network infra_user-identity-internal Created 
- Network infra_telemetry-internal Creating 
- Network infra_telemetry-internal Created 
- Network infra_billing-policy-internal Creating 
- Network infra_billing-policy-internal Created 
- Network infra_kong-user-internal Creating 
- Network infra_kong-user-internal Created 
- Network infra_admin-identity-internal Creating 
- Network infra_admin-identity-internal Created 
- Network infra_kong-webhook-internal Creating 
- Network infra_kong-webhook-internal Created 
- Network infra_kong-admin-internal Creating 
- Network infra_kong-admin-internal Created 
- Container infra-user-service-1 Creating 
- Container infra-keycloak-1 Creating 
- Container infra-jaeger-1 Creating 
- Container infra-alertmanager-1 Creating 
- Container infra-redis-1 Creating 
- Container infra-vault-1 Creating 
- Container infra-webhook-demo-1 Creating 
- Container infra-opa-1 Creating 
- Container infra-loki-1 Creating 
- Container infra-opa-1 Created 
- Container infra-admin-service-1 Creating 
- Container infra-order-service-1 Creating 
- Container infra-vault-1 Created 
- Container infra-alertmanager-1 Created 
- Container infra-keycloak-1 Created 
- Container infra-loki-1 Created 
- Container infra-grafana-1 Creating 
- Container infra-promtail-1 Creating 
- Container infra-user-service-1 Created 
- Container infra-user-mtls-proxy-1 Creating 
- Container infra-webhook-demo-1 Created 
- Container infra-jaeger-1 Created 
- Container infra-otel-collector-1 Creating 
- Container infra-redis-1 Created 
- Container infra-billing-service-1 Creating 
- Container infra-order-service-1 Created 
- Container infra-order-mtls-proxy-1 Creating 
- Container infra-admin-service-1 Created 
- Container infra-admin-mtls-proxy-1 Creating 
- Container infra-promtail-1 Created 
- Container infra-grafana-1 Created 
- Container infra-user-mtls-proxy-1 Created 
- Container infra-otel-collector-1 Created 
- Container infra-billing-service-1 Created 
- Container infra-billing-mtls-proxy-1 Creating 
- Container infra-order-mtls-proxy-1 Created 
- Container infra-admin-mtls-proxy-1 Created 
- Container infra-billing-mtls-proxy-1 Created 
- Container infra-kong-1 Creating 
- Container infra-kong-1 Created 
- Container infra-redis-1 Starting 
- Container infra-opa-1 Starting 
- Container infra-user-service-1 Starting 
- Container infra-loki-1 Starting 
- Container infra-keycloak-1 Starting 
- Container infra-webhook-demo-1 Starting 
- Container infra-alertmanager-1 Starting 
- Container infra-jaeger-1 Starting 
- Container infra-vault-1 Starting 
- Container infra-redis-1 Started 
- Container infra-alertmanager-1 Started 
- Container infra-vault-1 Started 
- Container infra-webhook-demo-1 Started 
- Container infra-jaeger-1 Started 
- Container infra-otel-collector-1 Starting 
- Container infra-user-service-1 Started 
- Container infra-user-service-1 Waiting 
- Container infra-loki-1 Started 
- Container infra-grafana-1 Starting 
- Container infra-promtail-1 Starting 
- Container infra-keycloak-1 Started 
- Container infra-opa-1 Started 
- Container infra-admin-service-1 Starting 
- Container infra-order-service-1 Starting 
- Container infra-redis-1 Waiting 
- Container infra-otel-collector-1 Started 
- Container infra-promtail-1 Started 
- Container infra-grafana-1 Started 
- Container infra-admin-service-1 Started 
- Container infra-admin-service-1 Waiting 
- Container infra-order-service-1 Started 
- Container infra-order-service-1 Waiting 
- Container infra-redis-1 Healthy 
- Container infra-billing-service-1 Starting 
- Container infra-billing-service-1 Started 
- Container infra-billing-service-1 Waiting 
- Container infra-user-service-1 Healthy 
- Container infra-user-mtls-proxy-1 Starting 
- Container infra-user-mtls-proxy-1 Started 
- Container infra-admin-service-1 Healthy 
- Container infra-admin-mtls-proxy-1 Starting 
- Container infra-order-service-1 Healthy 
- Container infra-order-mtls-proxy-1 Starting 
- Container infra-admin-mtls-proxy-1 Started 
- Container infra-order-mtls-proxy-1 Started 
- Container infra-billing-service-1 Healthy 
- Container infra-billing-mtls-proxy-1 Starting 
- Container infra-billing-mtls-proxy-1 Started 
- Container infra-billing-service-1 Waiting 
- Container infra-admin-service-1 Waiting 
- Container infra-order-service-1 Waiting 
- Container infra-user-service-1 Waiting 
- Container infra-user-service-1 Healthy 
- Container infra-admin-service-1 Healthy 
- Container infra-order-service-1 Healthy 
- Container infra-billing-service-1 Healthy 
- Container infra-kong-1 Starting 
- Container infra-kong-1 Started 
+ Image infra-order-service Built
+ Image infra-user-service Built
+ Image infra-billing-service Built
+ Image infra-admin-service Built
+ Container infra-opa-1 Running
+ Container infra-vault-1 Running
+ Container infra-webhook-demo-1 Running
+ Container infra-alertmanager-1 Running
+ Container infra-order-service-1 Recreate
+ Container infra-keycloak-1 Running
+ Container infra-loki-1 Running
+ Container infra-jaeger-1 Running
+ Container infra-redis-1 Running
+ Container infra-user-service-1 Recreate
+ Container infra-otel-collector-1 Running
+ Container infra-promtail-1 Running
+ Container infra-grafana-1 Running
+ Container infra-admin-service-1 Recreate
+ Container infra-billing-service-1 Recreate
+ Container infra-user-service-1 Recreated
+ Container infra-user-mtls-proxy-1 Running
+ Container infra-admin-service-1 Recreated
+ Container infra-admin-mtls-proxy-1 Running
+ Container infra-billing-service-1 Recreated
+ Container infra-billing-mtls-proxy-1 Running
+ Container infra-order-service-1 Recreated
+ Container infra-order-mtls-proxy-1 Running
+ Container infra-kong-1 Running
+ Container infra-user-service-1 Starting
+ Container infra-order-service-1 Starting
+ Container infra-admin-service-1 Starting
+ Container infra-redis-1 Waiting
+ Container infra-user-service-1 Started
+ Container infra-user-service-1 Waiting
+ Container infra-admin-service-1 Started
+ Container infra-admin-service-1 Waiting
+ Container infra-order-service-1 Started
+ Container infra-order-service-1 Waiting
+ Container infra-redis-1 Healthy
+ Container infra-billing-service-1 Starting
+ Container infra-billing-service-1 Started
+ Container infra-billing-service-1 Waiting
+ Container infra-user-service-1 Healthy
+ Container infra-admin-service-1 Healthy
+ Container infra-order-service-1 Healthy
+ Container infra-billing-service-1 Healthy
 [PASS] Kong -> user via mTLS sidecar returned 200
 [PASS] Kong -> order via mTLS sidecar returned 200
 [PASS] Kong -> billing via mTLS sidecar returned 200
@@ -314,6 +226,9 @@ Evidence file: /home/rvan1102/API/docs/evidence/tv1/gateway-backend-mtls/gateway
 [PASS] billing-mtls-proxy rejects HTTP caller without client certificate
 [PASS] admin-mtls-proxy rejects HTTP caller without client certificate
 [PASS] user-mtls-proxy rejects wrong/self-signed client certificate
+[PASS] order-mtls-proxy rejects wrong/self-signed client certificate
+[PASS] billing-mtls-proxy rejects wrong/self-signed client certificate
+[PASS] admin-mtls-proxy rejects wrong/self-signed client certificate
 user-mtls-proxy valid-cert probe: HTTP/1.1 200 OK
 [PASS] user-mtls-proxy accepts Kong client certificate and returns backend health
 order-mtls-proxy valid-cert probe: HTTP/1.1 200 OK
