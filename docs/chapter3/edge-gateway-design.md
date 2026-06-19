@@ -4,8 +4,10 @@
 
 The prototype places Kong OSS in DB-less mode at the only public API entry
 point. Stable `/api/v1/*` paths are routed to upstream services, while the
-Admin API is bound only to loopback. The baseline uses Prism generated from
-the OpenAPI contract until team-owned services are integrated.
+Admin API is bound only to loopback. The current baseline uses real User,
+Order, Billing, and Admin backend services behind Gateway-to-Backend mTLS
+sidecars. Earlier API mock notes are historical and are not the default runtime
+path.
 
 ## 3.2 TLS Termination and HSTS
 
@@ -42,9 +44,9 @@ encoding, and a maintained managed WAF or OWASP Core Rule Set deployment.
 
 The mTLS design uses an internal CA, a client certificate for Kong, and server
 certificates for backends. Both parties validate the peer certificate and
-service identity. Runtime mTLS remains disabled until backends expose TLS, so
-the default integration is not broken. Certificate-generation scripts and a
-stepwise integration note support the next phase.
+service identity. The default Docker Compose runtime enforces this through
+Nginx sidecars in front of the backend services. Certificate-generation scripts
+create local ignored lab certificates for reproducible testing.
 
 ## 3.7 Webhook HMAC and Replay Defense
 

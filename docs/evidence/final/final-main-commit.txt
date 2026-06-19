@@ -1,3 +1,3 @@
-generated_at=2026-06-18T11:04:46Z
-head_commit=234f2a95837e27c365458e238043af6e28d5561d
-branch=fix/gvhd-p0-security-evidence
+generated_at=2026-06-19T15:45:04Z
+head_commit=ac45a0049d85bc6f52b381f840027901e014da2c
+branch=chore/repo-doc-cleanup

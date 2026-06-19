@@ -12,11 +12,10 @@ docker compose -f infra/docker-compose.yml ps
 bash demo/curl/test-gateway-routes.sh
 ```
 
-The Compose baseline uses Prism to mock the non-webhook routes from
-`services/openapi.yaml`, because the real service implementations are owned by
-other team members. A separate webhook receiver PoC demonstrates HMAC and
-replay verification. Replace demo upstreams with real service hosts when they
-are available; keep the public paths unchanged.
+The Compose baseline routes to real User, Order, Billing, and Admin backend
+services. Gateway-to-Backend mTLS is enforced by local Nginx sidecars in the
+default runtime. The standalone webhook demo receiver remains only for focused
+HMAC/replay demonstrations.
 
 | Listener | Purpose |
 |---|---|
@@ -44,6 +43,6 @@ required authorization, correlation, and webhook headers.
 
 ## Integration
 
-Before replacing Prism, ensure each upstream exposes its route with the public
-path intact or update `strip_path` and upstream paths deliberately. Do not
-expose the Admin API outside loopback in the demo environment.
+Each upstream must expose its route with the public path intact, or `strip_path`
+and upstream paths must be updated deliberately. Do not expose the Admin API
+outside loopback in the demo environment.

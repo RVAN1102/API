@@ -1,8 +1,8 @@
-# Chapter 3: Architecture & Design (TV2 - Identity & Core Services)
+# Chapter 3: Architecture & Design – Identity and Core Services
 
 ## 3.1 Overview
 
-The TV2 responsibilities cover the core identity provider (IdP), centralized secret management, and the implementation of the primary backend services (User and Order). The design adheres to a decentralized authorization model where the API Gateway handles routing and edge filtering, but the actual backend services validate tokens and enforce Role-Based Access Control (RBAC).
+This section covers the core identity provider (IdP), centralized secret management, and the implementation of the primary backend services (User and Order). The design adheres to a decentralized authorization model where the API Gateway handles routing and edge filtering, but the actual backend services validate tokens and enforce Role-Based Access Control (RBAC).
 
 ## 3.2 Identity Provider (IdP) Design
 

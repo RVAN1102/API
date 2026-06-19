@@ -1,7 +1,7 @@
-# Runbook – Key Rotation (TV3 P1-04)
+# Runbook – Key Rotation
 
 **Version:** 1.0  
-**Owner:** TV3 (Huy)  
+**Maintainer:** Security/operations reviewer
 **Last updated:** 2026-06-17  
 **Purpose:** Step-by-step procedure for rotating secrets and cryptographic keys
 

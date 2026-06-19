@@ -1,8 +1,8 @@
-# Chapter 5: DevSecOps, Observability, and Red Team (TV3)
+# Chapter 5: DevSecOps, Observability, and Red Team
 
 ## 5.1 Overview
 
-TV3 focuses on embedding security into the operational lifecycle (DevSecOps), providing deep visibility into security events (Observability), and validating the defenses through offensive techniques (Red Team).
+This section focuses on embedding security into the operational lifecycle (DevSecOps), providing deep visibility into security events (Observability), and validating the defenses through offensive techniques (Red Team).
 
 ## 5.2 DevSecOps & Security Scanning
 

@@ -6,44 +6,36 @@ This project is a prototype for **Cloud API-Based Network Application Security
 for Small Company Services** (Topic 10). The goal is to design, implement, and
 evaluate a practical API security architecture suitable for a small company.
 
-## Team Members & Responsibilities
-
-| Member | Role | Branch |
-|--------|------|--------|
-| **TV1** | Edge, Network & Webhook Security Engineer | `feat/tv1-gateway-edge-security` |
-| **TV2** | Identity & Core Application Architect | `feat/tv2-idp-authz-core-services` |
-| **TV3** | DevSecOps, Observability & Red Team Analyst | `feat/tv3-devsecops-observability-redteam` |
-
 ## Architecture
 
 ```text
 Browser (Frontend UI) / Test Scripts
         │
         ▼
-Kong API Gateway (TV1)
+Kong API Gateway
   - Routing, CORS, Rate limiting
   - Edge filtering (SQLi/XSS)
   - HTTPS/HSTS, Correlation ID
   - Webhook HMAC header enforcement
         │
-        ├──▶ User Service    (TV2) – /api/v1/users/*
-        ├──▶ Order Service   (TV2) – /api/v1/orders/*
-        ├──▶ Billing Service (TV3) – /api/v1/billing/* (and /webhooks/payment)
-        ├──▶ Admin Service   (TV3) – /api/v1/admin/*
-        └──▶ Webhook Demo    (TV1) – /api/v1/webhooks/*
+        ├──▶ User Service    – /api/v1/users/*
+        ├──▶ Order Service   – /api/v1/orders/*
+        ├──▶ Billing Service – /api/v1/billing/* (and /webhooks/payment)
+        ├──▶ Admin Service   – /api/v1/admin/*
+        └──▶ Webhook Demo    – /api/v1/webhooks/*
 
 Supporting Services:
-  Keycloak   (TV2) – OAuth2/OIDC Identity Provider
-  Vault      (TV2) – Secret Management
-  Redis      (TV3) – Webhook replay nonce TTL store
-  Loki       (TV3) – Log Aggregation
-  Promtail   (TV3) – Log Collector
-  Grafana    (TV3) – Dashboards & Alerting
+  Keycloak   – OAuth2/OIDC Identity Provider
+  Vault      – Lab secret-management workflow evidence
+  Redis      – Webhook replay nonce TTL store
+  Loki       – Log aggregation
+  Promtail   – Log collector
+  Grafana    – Dashboards and alerting
 ```
 
 ## Security Features
 
-### TV1 – Gateway Edge Security
+### Edge Gateway And Webhook Ingress
 - Kong API Gateway routing
 - CORS policy (origins, methods, headers)
 - Rate limiting (60/min standard, 10/min sensitive routes)
@@ -57,7 +49,7 @@ Supporting Services:
 - Redis-backed webhook nonce TTL store for replay protection across restarts
 - Correlation ID propagation
 
-### TV2 – Identity & Authorization
+### Identity, Authorization, And Core Services
 - Keycloak OAuth2/OIDC realm (`topic10-sme-api`)
 - Authorization Code + PKCE for user login
 - Client Credentials for service-to-service
@@ -67,7 +59,7 @@ Supporting Services:
 - HashiCorp Vault dev-mode secret-path and rotation workflow evidence; local
   Docker Compose injects prototype runtime secrets from ignored `infra/.env`
 
-### TV3 – DevSecOps & Observability
+### Observability, Testing, And Supply Chain
 - Billing Service with HMAC webhook handling
 - Admin Service with SSRF vulnerable/fixed demo
 - Structured JSON logging (Promtail/Loki compatible)
@@ -245,7 +237,7 @@ bash scripts/generate-final-evidence.sh
 bash tests/metrics/measure-mttd-mttr.sh
 ```
 
-## TV1 Tests (Gateway Edge)
+## Gateway Edge Tests
 
 ```bash
 bash demo/curl/test-gateway-routes.sh
@@ -263,30 +255,27 @@ docker compose -f infra/docker-compose.yml down
 
 ## Project Structure
 
-| Path | Owner | Purpose |
-|------|-------|---------|
-| `gateway/` | TV1 | Kong configuration |
-| `infra/` | All | Docker Compose |
-| `idp/` | TV2 | Keycloak IDP docs & realm |
-| `vault/` | TV2 | Secret management |
-| `services/user/` | TV2 | User Service (FastAPI) |
-| `services/order/` | TV2 | Order Service (FastAPI) |
-| `services/billing/` | TV3 | Billing Service (FastAPI) |
-| `services/admin/` | TV3 | Admin Service (FastAPI) |
-| `observability/` | TV3 | Loki/Grafana configs |
-| `demo/auth/` | TV2 | Token demo scripts |
-| `demo/curl/` | TV1 | Gateway test scripts |
-| `demo/webhook/` | TV1 | Webhook HMAC scripts |
-| `frontend/` | All | Interactive Red Team Dashboard |
-| `tests/auth/` | TV2 | Auth test scripts |
-| `tests/attack/` | TV3 | Attack simulation |
-| `tests/zap/` | TV3 | ZAP scan |
-| `tests/restler/` | TV3 | API fuzzing |
-| `tests/metrics/` | TV3 | MTTD/MTTR |
-| `ci/` | TV3 | CI security scan |
-| `.github/workflows/` | TV3 | GitHub Actions |
-| `docs/` | All | Documentation |
-| `services/openapi.yaml` | TV2 | Shared API contract |
+| Path | Purpose |
+|------|---------|
+| `gateway/` | Kong DB-less gateway configuration |
+| `infra/` | Docker Compose lab runtime |
+| `idp/` | Keycloak realm and identity-flow docs |
+| `vault/` | Vault dev-mode secret-management workflow evidence |
+| `services/user/` | User Service (FastAPI) |
+| `services/order/` | Order Service (FastAPI) |
+| `services/billing/` | Billing Service (FastAPI) |
+| `services/admin/` | Admin Service (FastAPI) |
+| `observability/` | Loki/Promtail/Grafana configs |
+| `demo/auth/` | Token demo scripts |
+| `demo/curl/` | Gateway test scripts |
+| `demo/webhook/` | Webhook HMAC scripts |
+| `frontend/` | Interactive security dashboard |
+| `tests/security/` | Security regression suites |
+| `tests/metrics/` | MTTD/MTTR and latency metrics |
+| `ci/` | Local CI/security scan helpers |
+| `.github/workflows/` | GitHub Actions |
+| `docs/` | Documentation and evidence |
+| `services/openapi.yaml` | Shared API contract |
 
 ## Notes
 

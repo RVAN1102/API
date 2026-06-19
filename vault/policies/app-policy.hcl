@@ -1,9 +1,9 @@
 # vault/policies/app-policy.hcl
 #
-# Vault policy for API services (TV2).
+# Vault policy for API services.
 # Grants read-only access to the secret paths used by each service.
 
-# Webhook secret – read by billing-service and TV1 webhook demo
+# Webhook secret – read by billing-service and webhook demo
 path "secret/data/api/webhook" {
   capabilities = ["read"]
 }

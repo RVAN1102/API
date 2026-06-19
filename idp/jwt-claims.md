@@ -1,4 +1,4 @@
-# JWT Claims Contract (TV2)
+# JWT Claims Contract
 
 ## Overview
 

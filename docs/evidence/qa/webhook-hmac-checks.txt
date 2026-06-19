@@ -1,5 +1,0 @@
-===== webhook valid =====
-
-===== webhook invalid signature =====
-
-===== webhook replay =====

@@ -1,4 +1,4 @@
-# Client Credentials Flow (TV2)
+# Client Credentials Flow
 
 ## Overview
 
@@ -6,8 +6,10 @@ The Client Credentials flow is an OAuth2 flow for machine-to-machine (M2M)
 authentication. It allows backend services to obtain tokens without user interaction.
 
 Used in this prototype for:
-- Billing service authenticating as a service account
-- Internal service-to-service calls
+- Billing service authenticating as `billing-service-client` for
+  `order-ownership-read`
+- Admin service authenticating as `admin-service-client` for
+  `admin-maintenance`
 
 ---
 
@@ -18,7 +20,7 @@ Service / Script               Keycloak IdP
      |                              |
      |  POST /token                 |
      |  grant_type=client_credentials|
-     |  client_id=sme-service-client|
+     |  client_id=billing-service-client|
      |  client_secret=<redacted>  ──>|
      |                              |
      |  Receives: access_token  <───|
@@ -36,8 +38,8 @@ curl -s -X POST \
   http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=client_credentials" \
-  -d "client_id=sme-service-client" \
-  -d "client_secret=${SERVICE_CLIENT_SECRET}"
+  -d "client_id=billing-service-client" \
+  -d "client_secret=${BILLING_SERVICE_CLIENT_SECRET}"
 ```
 
 Response:
@@ -46,7 +48,7 @@ Response:
   "access_token": "eyJhbGciOi...<redacted>",
   "expires_in": 300,
   "token_type": "Bearer",
-  "scope": "billing-service internal-service"
+  "scope": "order-ownership-read"
 }
 ```
 
@@ -56,10 +58,10 @@ Response:
 
 | Parameter     | Value                     |
 |---------------|---------------------------|
-| `client_id`   | `sme-service-client`      |
+| `client_id`   | `billing-service-client` / `admin-service-client` |
 | `type`        | confidential              |
 | `flow`        | Client Credentials        |
-| `roles`       | billing-service, internal-service |
+| `roles`       | `order-ownership-read` / `admin-maintenance` |
 | `secret`      | Set in Keycloak Admin UI  |
 
 > **Never commit `client_secret` to git.** Store in environment variable or Vault:
@@ -72,11 +74,11 @@ Response:
 ```json
 {
   "sub": "<service-account-uuid>",
-  "azp": "sme-service-client",
+  "azp": "billing-service-client",
   "realm_access": {
-    "roles": ["billing-service", "internal-service"]
+    "roles": ["order-ownership-read"]
   },
-  "scope": "billing-service internal-service",
+  "scope": "order-ownership-read",
   "iss": "http://localhost:8080/realms/topic10-sme-api",
   "exp": 1718272800
 }

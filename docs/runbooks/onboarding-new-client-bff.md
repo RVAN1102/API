@@ -1,7 +1,7 @@
-# Runbook – Onboarding New Client / BFF Pattern (TV3 P1-04)
+# Runbook – Onboarding New Client / BFF Pattern
 
 **Version:** 1.0  
-**Owner:** TV3 (Huy)  
+**Maintainer:** Security/operations reviewer
 **Last updated:** 2026-06-17  
 **Purpose:** Step-by-step guide for onboarding a new API client or BFF (Backend-For-Frontend)
 
