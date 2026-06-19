@@ -188,6 +188,17 @@ reset_kong_before_opa() {
   fi
 }
 
+reset_kong_before_authz_negative() {
+  echo ""
+  echo "[INFO] Resetting Kong before authz negative test"
+  if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
+    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+    wait_for_kong
+  else
+    echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
+  fi
+}
+
 wait_for_kong() {
   local code
   local health_url="http://localhost:8000/api/v1/users/health"
@@ -245,10 +256,13 @@ echo "=============================================="
 
 ensure_gateway_backend_mtls_certs
 reset_kong_at_start
+run_suite "Container Runtime Hardening" "tests/security/container-runtime-hardening-tests.sh"
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
+run_suite "OpenAPI Contract" "tests/security/openapi-contract-tests.sh"
 run_suite "Client Credentials" "tests/security/client-credentials-tests.sh"
 run_suite "Token Lifecycle" "tests/security/token-lifecycle-tests.sh"
 run_suite "Real S2S Ownership" "tests/security/s2s-ownership-tests.sh"
+reset_kong_before_authz_negative
 run_suite "Authz Negative" "tests/security/authz-negative-tests.sh"
 reset_kong_before_opa
 run_suite "OPA Authz" "tests/security/opa-authz-tests.sh"

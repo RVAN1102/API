@@ -4,9 +4,10 @@ This index points to the official, reviewable evidence set for the current harde
 
 ## Final Regression
 
-- Final regression 9/9: `docs/evidence/final/main-regression-final.txt`
+- Historical final regression 9/9: `docs/evidence/final/main-regression-final.txt`
 - Post-hardening final regression: `docs/evidence/final/final-security-regression-after-all-hardening.txt`
 - Quality gate summary: `docs/evidence/final/final-quality-gate-summary.txt`
+- Production-oriented hardening bundle 1: `docs/evidence/final/production-hardening-bundle-1.md`
 
 ## Identity, Authorization, And Service-To-Service
 
@@ -46,6 +47,7 @@ This index points to the official, reviewable evidence set for the current harde
 - Structured fuzzing summary: `docs/evidence/tv3/fuzzing/fuzzing-summary.md`
 - Local security scan evidence: `docs/evidence/tv3/security-scan-local.txt`
 - Supply-chain evidence, SBOM, and signing summaries: `docs/evidence/tv3/supply-chain/`
+- CI image SBOM and Cosign dry-run path: `.github/workflows/security-scan.yml`, `scripts/security/generate-sbom.sh`, `scripts/security/cosign-sign.sh`
 
 ## Runtime Test Artifacts
 

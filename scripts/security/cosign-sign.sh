@@ -15,6 +15,9 @@
 # Usage (generate evidence only):
 #   bash scripts/security/cosign-sign.sh evidence
 #
+# Usage (CI dry-run/readiness, no signing):
+#   bash scripts/security/cosign-sign.sh dry-run <image>
+#
 # SECURITY NOTE:
 #   - Private key is NEVER committed to repo.
 #   - Only verify output is stored in evidence.
@@ -28,7 +31,7 @@ set -uo pipefail
 
 MODE="${1:-evidence}"
 IMAGE="${2:-}"
-REPORT_DIR="docs/evidence/tv3/supply-chain"
+REPORT_DIR="${REPORT_DIR:-docs/evidence/tv3/supply-chain}"
 KEY_DIR="${TMPDIR:-/tmp}/cosign-lab-keys"
 
 mkdir -p "${REPORT_DIR}"
@@ -98,6 +101,32 @@ case "${MODE}" in
     # Cleanup private key immediately
     rm -f "${KEY_FILE}"
     echo "[SECURITY] Private key deleted after use."
+    ;;
+
+  # --------------------------------------------------
+  # Dry-run / CI readiness check
+  # --------------------------------------------------
+  dry-run)
+    if [ -z "${IMAGE}" ]; then
+      IMAGE="ghcr.io/example/topic10-api:sha-placeholder"
+    fi
+    echo "--- Cosign dry-run for ${IMAGE} ---"
+    if command -v cosign > /dev/null 2>&1; then
+      cosign version 2>&1 | tee "${REPORT_DIR}/cosign-verify-output.txt"
+    else
+      echo "[WARN] cosign not installed; dry-run documents the expected CI command." \
+        | tee "${REPORT_DIR}/cosign-verify-output.txt"
+    fi
+    {
+      echo ""
+      echo "Expected keyless signing command for a published CI image:"
+      echo "  cosign sign --yes ${IMAGE}"
+      echo ""
+      echo "Expected keyless verification command:"
+      echo "  cosign verify --certificate-identity-regexp=.* --certificate-oidc-issuer=https://token.actions.githubusercontent.com ${IMAGE}"
+      echo ""
+      echo "No signature, key, or credential is generated in dry-run mode."
+    } | tee -a "${REPORT_DIR}/cosign-verify-output.txt"
     ;;
 
   # --------------------------------------------------

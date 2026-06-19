@@ -1,8 +1,22 @@
+x-readonly-runtime-hardening: &readonly_runtime_hardening
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+  tmpfs:
+    - /tmp
+
+x-no-new-privileges-runtime-hardening: &no_new_privileges_runtime_hardening
+  security_opt:
+    - no-new-privileges:true
+
 services:
   # ---------------------------------------------------------------------------
   # TV2 – OPA policy decision point
   # ---------------------------------------------------------------------------
   opa:
+    <<: *readonly_runtime_hardening
     image: openpolicyagent/opa:0.70.0
     command:
       - run
@@ -79,6 +93,7 @@ services:
   # TV1 – Gateway-to-Backend mTLS sidecars (default runtime)
   # ---------------------------------------------------------------------------
   user-mtls-proxy:
+    <<: *no_new_privileges_runtime_hardening
     image: nginx:1.27-alpine
     environment:
       MTLS_SERVER_NAME: user-mtls-proxy
@@ -95,6 +110,7 @@ services:
         condition: service_healthy
 
   order-mtls-proxy:
+    <<: *no_new_privileges_runtime_hardening
     image: nginx:1.27-alpine
     environment:
       MTLS_SERVER_NAME: order-mtls-proxy
@@ -111,6 +127,7 @@ services:
         condition: service_healthy
 
   billing-mtls-proxy:
+    <<: *no_new_privileges_runtime_hardening
     image: nginx:1.27-alpine
     environment:
       MTLS_SERVER_NAME: billing-mtls-proxy
@@ -127,6 +144,7 @@ services:
         condition: service_healthy
 
   admin-mtls-proxy:
+    <<: *no_new_privileges_runtime_hardening
     image: nginx:1.27-alpine
     environment:
       MTLS_SERVER_NAME: admin-mtls-proxy
@@ -146,6 +164,7 @@ services:
   # TV2 – User Service
   # ---------------------------------------------------------------------------
   user-service:
+    <<: *readonly_runtime_hardening
     build:
       context: ../services/user
       dockerfile: Dockerfile
@@ -169,6 +188,7 @@ services:
   # TV2 – Order Service
   # ---------------------------------------------------------------------------
   order-service:
+    <<: *readonly_runtime_hardening
     build:
       context: ../services/order
       dockerfile: Dockerfile
@@ -200,6 +220,7 @@ services:
   # TV3 – Billing Service
   # ---------------------------------------------------------------------------
   billing-service:
+    <<: *readonly_runtime_hardening
     build:
       context: ../services/billing
       dockerfile: Dockerfile
@@ -257,6 +278,7 @@ services:
   # TV3 – Admin Service
   # ---------------------------------------------------------------------------
   admin-service:
+    <<: *readonly_runtime_hardening
     build:
       context: ../services/admin
       dockerfile: Dockerfile
@@ -287,6 +309,7 @@ services:
   # TV2 – Webhook demo receiver (kept from TV1 for HMAC demo scripts)
   # ---------------------------------------------------------------------------
   webhook-demo:
+    <<: *readonly_runtime_hardening
     image: python:3.13-alpine
     command: python /app/receiver.py
     environment:
@@ -469,6 +492,7 @@ services:
   # TV3 – OpenTelemetry Collector
   # ---------------------------------------------------------------------------
   otel-collector:
+    <<: *readonly_runtime_hardening
     image: otel/opentelemetry-collector-contrib:0.104.0
     command: ["--config=/etc/otel/otel-collector.yml"]
     volumes:

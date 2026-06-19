@@ -11,6 +11,10 @@ on:
       - "setup/project-contracts"
       - "main"
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   bandit:
     name: Bandit – Python Static Analysis
@@ -87,4 +91,62 @@ jobs:
         with:
           name: trivy-report
           path: trivy-report.txt
+        if: always()
+
+  image-sbom-cosign:
+    name: Image SBOM + Cosign Readiness
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - user
+          - order
+          - billing
+          - admin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build local service image
+        run: |
+          docker build \
+            -t "topic10-${{ matrix.service }}-service:${{ github.sha }}" \
+            "services/${{ matrix.service }}"
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "topic10-${{ matrix.service }}-service:${{ github.sha }}"
+          format: table
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+          output: "trivy-image-${{ matrix.service }}.txt"
+
+      - name: Generate image CycloneDX SBOM
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: "topic10-${{ matrix.service }}-service:${{ github.sha }}"
+          format: cyclonedx
+          output: "image-sbom-${{ matrix.service }}.cdx.json"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Cosign keyless readiness dry-run
+        env:
+          REPORT_DIR: ".artifacts/supply-chain-${{ matrix.service }}"
+        run: |
+          bash scripts/security/cosign-sign.sh dry-run \
+            "ghcr.io/${{ github.repository }}/${{ matrix.service }}-service:${{ github.sha }}"
+
+      - name: Upload image supply-chain artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-supply-chain-${{ matrix.service }}
+          path: |
+            trivy-image-${{ matrix.service }}.txt
+            image-sbom-${{ matrix.service }}.cdx.json
+            .artifacts/supply-chain-${{ matrix.service }}/
         if: always()
