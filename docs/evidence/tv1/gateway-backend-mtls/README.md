@@ -1,9 +1,10 @@
-# Gateway-to-Backend mTLS Runtime Profile
+# Gateway-to-Backend mTLS Default Runtime
 
-This evidence directory is for the optional `infra/docker-compose.mtls.yml`
-profile. The default Compose stack remains stable for the existing final
-regression; the mTLS profile demonstrates runtime Gateway-to-Backend mutual TLS
-without rewriting backend application code.
+This evidence directory is for the default `infra/docker-compose.yml` runtime.
+Kong now calls User, Order, Billing, and Admin through Nginx sidecars that
+enforce Gateway-to-Backend mutual TLS without rewriting backend application
+code. The legacy `infra/docker-compose.mtls.yml` override remains only as a
+backward-compatible evidence path.
 
 ## Security model
 
@@ -19,7 +20,7 @@ without rewriting backend application code.
 
 ```bash
 bash demo/mtls/ensure-gateway-backend-certs.sh
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
+docker compose -f infra/docker-compose.yml up -d --build
 bash tests/security/gateway-backend-mtls-tests.sh
 ```
 

@@ -51,7 +51,8 @@ Supporting Services:
 - HTTPS/TLS termination + HSTS header
 - Webhook channel mTLS at Kong: valid client certificate accepted, missing
   client certificate rejected
-- Gateway-to-backend mTLS runtime profile via Nginx sidecars (`infra/docker-compose.mtls.yml`); default Compose remains stable and backend S2S still uses short-lived Keycloak Client Credentials
+- Gateway-to-backend mTLS enforced by default via Nginx sidecars; backend S2S
+  ownership still uses short-lived Keycloak Client Credentials
 - Webhook HMAC-SHA256 + nonce/timestamp enforcement
 - Redis-backed webhook nonce TTL store for replay protection across restarts
 - Correlation ID propagation
@@ -84,6 +85,9 @@ Supporting Services:
 # Create the ignored local Compose lab environment file.
 bash scripts/bootstrap-lab-env.sh
 
+# Create ignored local demo certificates for Gateway-to-Backend mTLS.
+bash demo/mtls/ensure-gateway-backend-certs.sh
+
 # Start all services
 docker compose -f infra/docker-compose.yml up -d --build
 
@@ -95,22 +99,22 @@ docker compose -f infra/docker-compose.yml ps
 ```
 
 
-### Optional Gateway-to-Backend mTLS Runtime Profile
+### Gateway-to-Backend mTLS Default Runtime
 
-The default Compose stack remains the stable regression baseline. To prove
-Gateway-to-Backend mTLS at runtime without breaking the default flow, run the
-sidecar profile:
+The default Compose stack routes Kong to backend Nginx sidecars over
+HTTPS/mTLS. The sidecars require Kong's internal client certificate and reject
+callers without a valid client certificate.
 
 ```bash
 bash demo/mtls/ensure-gateway-backend-certs.sh
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
+docker compose -f infra/docker-compose.yml up -d --build
 bash tests/security/gateway-backend-mtls-tests.sh
 ```
 
-This profile routes Kong to backend Nginx sidecars over HTTPS/mTLS. The sidecars
-require Kong's internal client certificate and reject callers without a valid
-client certificate. Generated certificate material stays under
-`infra/certs/gateway-backend/` and is ignored by Git.
+Generated certificate material stays under `infra/certs/gateway-backend/` and
+is ignored by Git. The legacy `infra/docker-compose.mtls.yml` override is kept
+only for backward-compatible evidence commands and should merge cleanly with the
+default compose file.
 
 ### Run the Frontend Security Dashboard
 ```bash
@@ -120,6 +124,10 @@ Open `http://localhost:3002` in your browser to interactively test BOLA, SSRF, a
 
 Expected services:
 - `infra-kong-1`
+- `infra-user-mtls-proxy-1`
+- `infra-order-mtls-proxy-1`
+- `infra-billing-mtls-proxy-1`
+- `infra-admin-mtls-proxy-1`
 - `infra-user-service-1`
 - `infra-order-service-1`
 - `infra-billing-service-1`

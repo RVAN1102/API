@@ -12,6 +12,7 @@
 
 ```bash
 bash scripts/bootstrap-lab-env.sh
+bash demo/mtls/ensure-gateway-backend-certs.sh
 
 docker compose -f infra/docker-compose.yml up -d --build
 
@@ -24,6 +25,10 @@ docker compose -f infra/docker-compose.yml ps
 Expected services (all must show `healthy` or `running`):
 ```
 infra-kong-1
+infra-user-mtls-proxy-1
+infra-order-mtls-proxy-1
+infra-billing-mtls-proxy-1
+infra-admin-mtls-proxy-1
 infra-user-service-1
 infra-order-service-1
 infra-billing-service-1
@@ -44,15 +49,15 @@ infra-webhook-demo-1
 ---
 
 
-## 1b. Optional Gateway-to-Backend mTLS Runtime Profile
+## 1b. Gateway-to-Backend mTLS Default Runtime
 
-The default Compose stack is the stable final-regression baseline. Use this
-optional profile when you need runtime evidence that Kong acts as a TLS client
-and backend sidecars require Kong's client certificate.
+The default Compose stack is the stable final-regression baseline and now
+enforces Gateway-to-Backend mTLS. Kong acts as a TLS client and backend
+sidecars require Kong's internal client certificate.
 
 ```bash
 bash demo/mtls/ensure-gateway-backend-certs.sh
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
+docker compose -f infra/docker-compose.yml up -d --build
 bash tests/security/gateway-backend-mtls-tests.sh
 ```
 
@@ -60,6 +65,8 @@ Expected result: Kong health routes return HTTP 200 through the mTLS sidecars;
 direct TLS probes without a client certificate and with a rogue client
 certificate fail. Evidence is written to
 `docs/evidence/tv1/gateway-backend-mtls/gateway-backend-mtls-runtime.txt`.
+The legacy `infra/docker-compose.mtls.yml` override remains available only for
+backward-compatible evidence commands.
 
 ---
 

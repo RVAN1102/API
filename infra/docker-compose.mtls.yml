@@ -1,11 +1,15 @@
-# Optional Gateway-to-Backend mTLS runtime profile.
+# Backward-compatible Gateway-to-Backend mTLS override.
 #
-# Run from the repository root after generating local demo certificates:
+# Gateway-to-Backend mTLS is now enabled by default in infra/docker-compose.yml.
+# This file remains for older documentation/scripts that still compose the mTLS
+# profile explicitly; it should merge cleanly with the default compose file.
+#
+# Legacy command from the repository root after generating local demo certificates:
 #   bash demo/mtls/ensure-gateway-backend-certs.sh
 #   docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
 #
-# This override keeps the default compose path stable while proving that Kong can
-# call backend services through TLS sidecars that require Kong's client cert.
+# The override points Kong at gateway/kong-mtls.yml, which carries the same mTLS
+# upstream model as the default gateway/kong.yml.
 
 services:
   kong:
