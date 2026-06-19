@@ -23,20 +23,28 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 import httpx
+import redis.asyncio as redis
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwk, jwt
 from pydantic import BaseModel
+from redis.exceptions import RedisError
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 WEBHOOK_SECRET: str = os.environ.get("WEBHOOK_SECRET", "dev-webhook-secret-change-me")
 WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
+WEBHOOK_NONCE_STORE: str = os.environ.get("WEBHOOK_NONCE_STORE", "redis").lower()
+WEBHOOK_NONCE_REDIS_URL: str = os.environ.get("WEBHOOK_NONCE_REDIS_URL", "redis://redis:6379/0")
+WEBHOOK_NONCE_TTL_SECONDS: int = max(
+    int(os.environ.get("WEBHOOK_NONCE_TTL_SECONDS", str(WEBHOOK_MAX_AGE_SECONDS))),
+    WEBHOOK_MAX_AGE_SECONDS,
+)
 
 # ---------------------------------------------------------------------------
 # mTLS configuration
@@ -109,8 +117,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Nonce replay store (in-memory; sufficient for demo)
-_used_nonces: Set[str] = set()
+# Nonce replay store.
+# Default lab/final-regression path is Redis-backed and multi-replica safe.
+# WEBHOOK_NONCE_STORE=memory is an explicit local-dev fallback only.
+_used_nonces: Dict[str, int] = {}
+_redis_client: Optional[redis.Redis] = None
+if WEBHOOK_NONCE_STORE == "redis":
+    _redis_client = redis.from_url(
+        WEBHOOK_NONCE_REDIS_URL,
+        decode_responses=True,
+        socket_connect_timeout=2,
+        socket_timeout=2,
+    )
 
 security = HTTPBearer(auto_error=True)
 _jwks_cache: Optional[Dict[str, Any]] = None
@@ -122,6 +140,86 @@ LAB_AUTOMATION_SUBJECTS: Dict[str, str] = {
     "ci-alice": "alice",
     "ci-bob": "bob",
 }
+
+
+def _webhook_nonce_key(nonce: str) -> str:
+    """Return a namespaced Redis key without storing raw body or secret material."""
+    nonce_digest = hashlib.sha256(nonce.encode("utf-8")).hexdigest()
+    return f"webhook:nonce:{nonce_digest}"
+
+
+def _nonce_log_fields(nonce: str) -> Dict[str, Any]:
+    return {"nonce_sha256": hashlib.sha256(nonce.encode("utf-8")).hexdigest()[:16]}
+
+
+async def reserve_webhook_nonce(nonce: str, client_ip: str, correlation_id: str) -> None:
+    """Atomically reserve a webhook nonce, failing closed on replay/store errors."""
+    now = int(time.time())
+
+    if WEBHOOK_NONCE_STORE == "memory":
+        expired = [key for key, expires_at in _used_nonces.items() if expires_at <= now]
+        for key in expired:
+            _used_nonces.pop(key, None)
+
+        if nonce in _used_nonces:
+            log_event("WARNING", "webhook_replay_detected", "POST",
+                      "/api/v1/webhooks/payment", 403, client_ip, correlation_id,
+                      "Replay nonce detected",
+                      {"security_event": True, "decision": "rejected", "reason": "replayed_nonce", **_nonce_log_fields(nonce)})
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"error": "replayed_nonce", "message": "This nonce has already been used"},
+            )
+
+        _used_nonces[nonce] = now + WEBHOOK_NONCE_TTL_SECONDS
+        return
+
+    if WEBHOOK_NONCE_STORE != "redis":
+        log_event("ERROR", "webhook_nonce_store_error", "POST",
+                  "/api/v1/webhooks/payment", 503, client_ip, correlation_id,
+                  "Unsupported webhook nonce store configured",
+                  {"security_event": True, "decision": "rejected", "reason": "unsupported_nonce_store"})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "nonce_store_unavailable", "message": "Webhook nonce store is unavailable"},
+        )
+
+    if _redis_client is None:
+        log_event("ERROR", "webhook_nonce_store_error", "POST",
+                  "/api/v1/webhooks/payment", 503, client_ip, correlation_id,
+                  "Redis nonce store client is not initialized",
+                  {"security_event": True, "decision": "rejected", "reason": "nonce_store_not_initialized"})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "nonce_store_unavailable", "message": "Webhook nonce store is unavailable"},
+        )
+
+    try:
+        reserved = await _redis_client.set(
+            _webhook_nonce_key(nonce),
+            "1",
+            nx=True,
+            ex=WEBHOOK_NONCE_TTL_SECONDS,
+        )
+    except RedisError as exc:
+        log_event("ERROR", "webhook_nonce_store_error", "POST",
+                  "/api/v1/webhooks/payment", 503, client_ip, correlation_id,
+                  "Redis nonce store unavailable; failing closed",
+                  {"security_event": True, "decision": "rejected", "reason": "nonce_store_unavailable", "error_type": type(exc).__name__})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "nonce_store_unavailable", "message": "Webhook nonce store is unavailable"},
+        ) from exc
+
+    if not reserved:
+        log_event("WARNING", "webhook_replay_detected", "POST",
+                  "/api/v1/webhooks/payment", 403, client_ip, correlation_id,
+                  "Replay nonce detected",
+                  {"security_event": True, "decision": "rejected", "reason": "replayed_nonce", **_nonce_log_fields(nonce)})
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": "replayed_nonce", "message": "This nonce has already been used"},
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -724,25 +822,14 @@ async def receive_payment_webhook(request: Request):
             detail={"error": "timestamp_expired", "message": f"Webhook timestamp is {age}s old (max {WEBHOOK_MAX_AGE_SECONDS}s)"},
         )
 
-    # --- Nonce replay check ---
-    if nonce in _used_nonces:
-        log_event("WARNING", "webhook_replay_detected", "POST",
-                  "/api/v1/webhooks/payment", 403, client_ip, correlation_id,
-                  f"Replay nonce detected: {nonce}",
-                  {"security_event": True, "decision": "rejected", "reason": "replayed_nonce", "nonce": nonce})
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"error": "replayed_nonce", "message": "This nonce has already been used"},
-        )
-
     # --- Read raw body ---
     raw_body = await request.body()
 
     # --- Compute expected HMAC ---
-    message = f"{timestamp_str}.{nonce}.{raw_body.decode('utf-8', errors='replace')}"
+    message = timestamp_str.encode("utf-8") + b"." + nonce.encode("utf-8") + b"." + raw_body
     expected_sig = hmac.new(
         WEBHOOK_SECRET.encode("utf-8"),
-        message.encode("utf-8"),
+        message,
         hashlib.sha256,
     ).hexdigest()
 
@@ -758,8 +845,8 @@ async def receive_payment_webhook(request: Request):
             detail={"error": "invalid_signature", "message": "HMAC-SHA256 signature verification failed"},
         )
 
-    # --- Accept nonce ---
-    _used_nonces.add(nonce)
+    # --- Atomically reserve nonce after HMAC/timestamp validation ---
+    await reserve_webhook_nonce(nonce, client_ip, correlation_id)
 
     # --- Parse body ---
     try:

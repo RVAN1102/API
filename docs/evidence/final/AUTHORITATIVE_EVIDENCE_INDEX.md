@@ -21,6 +21,7 @@ This index points to the official, reviewable evidence set for the current harde
 
 - Edge hardening: `docs/evidence/tv1/edge-final/`
 - Webhook security final cases: `docs/evidence/tv1/webhook-final/`
+- Webhook persistent nonce store: `docs/evidence/tv1/webhook-final/persistent-nonce-store.md`
 - Gateway route smoke: `docs/evidence/tv1/p0-01-kong-route-smoke.txt`
 - TLS 1.3 and HSTS: `docs/evidence/tv1/p0-02-kong-tls13-only.txt`, `docs/evidence/tv1/p0-03-kong-hsts.txt`
 

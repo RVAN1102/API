@@ -30,6 +30,7 @@ infra-billing-service-1
 infra-admin-service-1
 infra-keycloak-1
 infra-vault-1
+infra-redis-1
 infra-loki-1
 infra-promtail-1
 infra-grafana-1
@@ -193,13 +194,22 @@ bash tests/attack/token-replay.sh
 
 # Webhook forgery
 WEBHOOK_SECRET="dev-webhook-secret-change-me" bash tests/attack/webhook-forgery.sh
+
+# Redis-backed nonce persistence across billing-service restart
+bash tests/security/webhook-nonce-persistence-tests.sh
 ```
 
 Expected:
 - Wrong signature → **401**
 - Expired timestamp → **403**
 - Replayed nonce → **403**
+- Replayed nonce after Billing restart → **403** while within TTL
 - Valid webhook → **200**
+
+Lab Docker Compose uses Redis for webhook replay nonces:
+`WEBHOOK_NONCE_STORE=redis`, `WEBHOOK_NONCE_REDIS_URL=redis://redis:6379/0`,
+and `WEBHOOK_NONCE_TTL_SECONDS=300`. If Redis is unavailable, the webhook
+handler fails closed and does not accept otherwise valid webhooks.
 
 ---
 

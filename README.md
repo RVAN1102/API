@@ -35,6 +35,7 @@ Kong API Gateway (TV1)
 Supporting Services:
   Keycloak   (TV2) – OAuth2/OIDC Identity Provider
   Vault      (TV2) – Secret Management
+  Redis      (TV3) – Webhook replay nonce TTL store
   Loki       (TV3) – Log Aggregation
   Promtail   (TV3) – Log Collector
   Grafana    (TV3) – Dashboards & Alerting
@@ -50,6 +51,7 @@ Supporting Services:
 - HTTPS/TLS termination + HSTS header
 - mTLS design (documented)
 - Webhook HMAC-SHA256 + nonce/timestamp enforcement
+- Redis-backed webhook nonce TTL store for replay protection across restarts
 - Correlation ID propagation
 
 ### TV2 – Identity & Authorization
@@ -103,6 +105,7 @@ Expected services:
 - `infra-admin-service-1`
 - `infra-keycloak-1`
 - `infra-vault-1`
+- `infra-redis-1`
 - `infra-loki-1`
 - `infra-promtail-1`
 - `infra-grafana-1`
@@ -118,6 +121,8 @@ Expected services:
 | Keycloak    | http://localhost:8080               |
 | Vault       | http://localhost:8200               |
 | Grafana     | http://localhost:3001               |
+
+Redis is internal-only in Docker Compose and is not exposed on a host port.
 
 ## Health Checks
 
@@ -164,6 +169,7 @@ ACCESS_TOKEN=<token> bash tests/attack/ssrf-attack.sh
 ```bash
 bash tests/attack/token-replay.sh
 bash tests/attack/webhook-forgery.sh
+bash tests/security/webhook-nonce-persistence-tests.sh
 ```
 
 ## Test Rate Limiting
