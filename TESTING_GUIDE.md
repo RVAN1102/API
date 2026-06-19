@@ -282,8 +282,20 @@ ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/metrics/measure-mttd-mttr.sh
 ```
 
 Results saved to:
-- `docs/evidence/tv3/mttd-mttr-results.csv`
-- `docs/evidence/tv3/mttd-mttr-analysis.md`
+- `docs/evidence/tv3/metrics/mttd-mttr-alert-based-results.csv`
+- `docs/evidence/tv3/metrics/mttd-mttr-alert-based-analysis.md`
+- Authoritative summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
+
+## 15b. Latency And Cost Metrics (TV3)
+
+```bash
+BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
+
+# Optional HTTPS lab path:
+HTTPS_BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
+```
+
+Transient output is written to `.artifacts/test-runs/metrics/`. Read the p50/p95 method and SME cost/trade-off summary at `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`.
 
 ---
 

@@ -32,6 +32,9 @@ This index points to the official, reviewable evidence set for the current harde
 
 - Loki alert rules loaded at runtime: `docs/evidence/tv3/observability/loki-rules-runtime-loaded-after-p0-fix.yml`
 - Alert diagnostics and selected samples: `docs/evidence/tv3/metrics/`
+- Authoritative SecOps MTTD/MTTR summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
+- Latency, p50/p95 method, and SME cost trade-off summary: `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`
+- Latency smoke command: `BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh`
 
 ## DAST, Fuzzing, And Security Scans
 

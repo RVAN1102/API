@@ -99,6 +99,8 @@ See `red-team/ssrf-egress-defense.md` above.
 | `metrics/monthly-cost-estimate.md` | Lab $25/month, Production $100-150/month |
 | `metrics/mttd-mttr-alert-based-results.csv` | Alert-based MTTD/MTTR raw timing |
 | `metrics/mttd-mttr-alert-based-analysis.md` | MTTD/MTTR methodology and summary |
+| `secops-metrics/secops-mttd-mttr-summary.md` | Authoritative MTTD/MTTR scenario matrix for 401, 403/BOLA, 429, SSRF, and webhook signals |
+| `secops-metrics/latency-cost-tradeoff-summary.md` | p50/p95 latency measurement method and SME cost/trade-off analysis |
 
 ### P1-02: Pipeline
 
@@ -170,6 +172,7 @@ bash tests/final/main-regression.sh | tee docs/evidence/final/final-security-reg
 
 # P1-01: Metrics
 k6 run tests/performance/k6-latency-test.js
+BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
 
 # P1-02: Full Pipeline
 bash scripts/ci/security-pipeline.sh
