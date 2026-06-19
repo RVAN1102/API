@@ -15,6 +15,7 @@ This index points to the official, reviewable evidence set for the current harde
 - Real S2S ownership: `docs/evidence/tv2/real-s2s-billing-order-ownership.txt`
 - Authz negative regression: `docs/evidence/tv2/gvhd-authz-negative-after-client-credentials.txt`
 - OPA authz policy and backend enforcement: `docs/evidence/tv2/opa-policy-engine.txt`
+- Lab secret bootstrap and Vault/KMS production alignment: `docs/evidence/tv2/vault-lab-secret-bootstrap.md`
 
 ## Edge And Webhook Security
 

@@ -8,3 +8,7 @@ Topic 10 quantitative evidence is summarized in:
 
 - `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
 - `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`
+
+Lab secret bootstrap and Vault/KMS alignment are summarized in:
+
+- `docs/evidence/tv2/vault-lab-secret-bootstrap.md`
