@@ -1,0 +1,96 @@
+# Optional Gateway-to-Backend mTLS runtime profile.
+#
+# Run from the repository root after generating local demo certificates:
+#   bash demo/mtls/ensure-gateway-backend-certs.sh
+#   docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
+#
+# This override keeps the default compose path stable while proving that Kong can
+# call backend services through TLS sidecars that require Kong's client cert.
+
+services:
+  kong:
+    depends_on:
+      user-mtls-proxy:
+        condition: service_started
+      order-mtls-proxy:
+        condition: service_started
+      billing-mtls-proxy:
+        condition: service_started
+      admin-mtls-proxy:
+        condition: service_started
+    environment:
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong-mtls.yml
+      KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE: /kong/gb-mtls/kong-client.crt
+      KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE_KEY: /kong/gb-mtls/kong-client.key
+      KONG_NGINX_PROXY_PROXY_SSL_TRUSTED_CERTIFICATE: /kong/gb-mtls/ca.crt
+      KONG_NGINX_PROXY_PROXY_SSL_VERIFY: "on"
+      KONG_NGINX_PROXY_PROXY_SSL_VERIFY_DEPTH: "2"
+      KONG_NGINX_PROXY_PROXY_SSL_SERVER_NAME: "on"
+      KONG_NGINX_PROXY_PROXY_SSL_PROTOCOLS: "TLSv1.3"
+    volumes:
+      - ../gateway/kong-mtls.yml:/kong/declarative/kong-mtls.yml:ro
+      - ../infra/certs/gateway-backend:/kong/gb-mtls:ro
+
+  user-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: user-mtls-proxy
+      UPSTREAM_HOST: user-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-user-internal
+    depends_on:
+      user-service:
+        condition: service_healthy
+
+  order-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: order-mtls-proxy
+      UPSTREAM_HOST: order-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-order-internal
+    depends_on:
+      order-service:
+        condition: service_healthy
+
+  billing-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: billing-mtls-proxy
+      UPSTREAM_HOST: billing-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-billing-internal
+    depends_on:
+      billing-service:
+        condition: service_healthy
+
+  admin-mtls-proxy:
+    image: nginx:1.27-alpine
+    environment:
+      MTLS_SERVER_NAME: admin-mtls-proxy
+      UPSTREAM_HOST: admin-service
+    volumes:
+      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
+    expose:
+      - "8443"
+    networks:
+      - kong-admin-internal
+    depends_on:
+      admin-service:
+        condition: service_healthy

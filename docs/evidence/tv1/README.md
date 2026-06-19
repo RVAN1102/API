@@ -102,7 +102,4 @@ Hệ thống prototype hiện bảo vệ webhook channel bằng:
 - Redis-backed nonce replay protection
 - Timestamp freshness check (300s window)
 
-Gateway-to-backend mTLS is design-prepared but not enabled in the default
-Docker Compose runtime because backend services expose HTTP listeners. Internal
-S2S is protected with short-lived Keycloak Client Credentials and least-privilege
-service roles; webhook ingress uses mTLS separately from HMAC/timestamp/nonce.
+Gateway-to-backend mTLS is available as an optional runtime sidecar profile via `infra/docker-compose.mtls.yml`. The default Compose runtime remains the stable regression baseline; the mTLS profile proves Kong-to-backend HTTPS/mTLS with sidecars and writes evidence under `docs/evidence/tv1/gateway-backend-mtls/`. Internal S2S is still protected with short-lived Keycloak Client Credentials and least-privilege service roles; webhook ingress uses mTLS separately from HMAC/timestamp/nonce.

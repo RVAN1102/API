@@ -1,0 +1,289 @@
+# Gateway-to-Backend mTLS runtime profile configuration.
+# This DB-less Kong config is used only with infra/docker-compose.mtls.yml.
+# Kong presents an internal client certificate to the backend sidecar proxies,
+# and verifies backend proxy server certificates using the internal demo CA.
+
+_format_version: "3.0"
+_transform: true
+
+# ---------------------------------------------------------------------------
+# Services (upstream backends)
+# TV1 routes all traffic through Kong. Real services added by TV2/TV3.
+# ---------------------------------------------------------------------------
+services:
+  # TV2 – User Service (FastAPI)
+  - name: user-service
+    url: https://user-mtls-proxy:8443
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: users-health
+        paths: ["/api/v1/users/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: users-me
+        paths: ["/api/v1/users/me"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 90
+      - name: users-profile
+        paths: ["/api/v1/users/profile"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 90
+      - name: users-api
+        paths: ["/api/v1/users"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+
+  # TV2 – Order Service (FastAPI)
+  - name: order-service
+    url: https://order-mtls-proxy:8443
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: orders-health
+        paths: ["/api/v1/orders/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: orders-api
+        paths: ["/api/v1/orders"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+
+  # TV3 – Billing Service (FastAPI)
+  - name: billing-service
+    url: https://billing-mtls-proxy:8443
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: billing-health
+        paths: ["/api/v1/billing/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: billing-webhooks
+        paths: ["/api/v1/webhooks/payment"]
+        methods: ["POST", "OPTIONS"]
+        strip_path: false
+        regex_priority: 150
+      - name: billing-api
+        paths: ["/api/v1/billing"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+
+  # TV3 – Admin Service (FastAPI)
+  - name: admin-service
+    url: https://admin-mtls-proxy:8443
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: admin-health
+        paths: ["/api/v1/admin/health"]
+        methods: ["GET", "OPTIONS"]
+        strip_path: false
+        regex_priority: 100
+      - name: admin-api
+        paths: ["/api/v1/admin"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        strip_path: false
+
+  # TV1 – Webhook demo receiver (HMAC demo)
+  # Billing service also handles /api/v1/webhooks/payment directly,
+  # but the standalone webhook-demo container is kept for TV1 HMAC scripts.
+  - name: webhook-demo
+    url: http://webhook-demo:8080
+    connect_timeout: 3000
+    read_timeout: 10000
+    write_timeout: 10000
+    retries: 2
+    routes:
+      - name: webhooks-api
+        paths: ["/api/v1/webhooks"]
+        methods: ["POST", "OPTIONS"]
+        strip_path: false
+
+# ---------------------------------------------------------------------------
+# Plugins (global unless route/service specified)
+# TV1 owns all plugin config. TV2/TV3 must not modify without group agreement.
+# ---------------------------------------------------------------------------
+plugins:
+  - name: cors
+    config:
+      origins:
+        - http://localhost:3000
+        - http://localhost:3002
+        - http://localhost:5173
+        - https://app.localhost
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      headers:
+        - Accept
+        - Authorization
+        - Content-Type
+        - X-Correlation-ID
+        - X-Webhook-Signature
+        - X-Webhook-Timestamp
+        - X-Webhook-Nonce
+      exposed_headers:
+        - X-Correlation-ID
+        - X-RateLimit-Limit-Minute
+        - X-RateLimit-Remaining-Minute
+      credentials: false
+      max_age: 3600
+      preflight_continue: false
+
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 1
+      size_unit: megabytes
+      require_content_length: false
+
+  # Kong OSS does not include a full WAF. This edge filter blocks a small,
+  # documented set of obvious SQLi/XSS probes before proxying the request.
+  - name: pre-function
+    config:
+      access:
+        - |
+          local function reject(message)
+            return kong.response.exit(403, {
+              error = "edge_filter_rejected",
+              message = message,
+              correlation_id = kong.request.get_header("X-Correlation-ID")
+            })
+          end
+
+          local function suspicious(value)
+            if not value then return false end
+            local text = string.lower(tostring(value))
+            return string.find(text, "<script", 1, true)
+              or string.find(text, "javascript:", 1, true)
+              or string.find(text, "union select", 1, true)
+              or string.find(text, "' or 1=1", 1, true)
+          end
+
+          for _, value in pairs(kong.request.get_query()) do
+            if type(value) == "table" then
+              for _, item in ipairs(value) do
+                if suspicious(item) then return reject("Basic SQLi/XSS pattern detected") end
+              end
+            elseif suspicious(value) then
+              return reject("Basic SQLi/XSS pattern detected")
+            end
+          end
+
+          local content_type = kong.request.get_header("content-type") or ""
+          if string.find(content_type, "json", 1, true)
+              or string.find(content_type, "text/", 1, true) then
+            local ok, body = pcall(kong.request.get_raw_body)
+            if ok and suspicious(body) then
+              return reject("Basic SQLi/XSS pattern detected")
+            end
+          end
+
+          local path = kong.request.get_path()
+          if string.sub(path, 1, 16) == "/api/v1/webhooks" and kong.request.get_method() ~= "OPTIONS" then
+            local required = {
+              "X-Webhook-Timestamp",
+              "X-Webhook-Nonce",
+              "X-Webhook-Signature"
+            }
+            for _, header in ipairs(required) do
+              if not kong.request.get_header(header) then
+                return kong.response.exit(401, {
+                  error = "missing_webhook_header",
+                  message = header .. " is required"
+                })
+              end
+            end
+            
+            -- mTLS check: clear spoofed headers, check nginx var, and inject verification result
+            kong.service.request.clear_header("X-Mtls-Client-Verified")
+            local verify_result = ngx.var.ssl_client_verify
+            if verify_result == "SUCCESS" then
+              kong.service.request.set_header("X-Mtls-Client-Verified", "SUCCESS")
+            else
+              kong.service.request.set_header("X-Mtls-Client-Verified", "FAILED")
+            end
+          end
+
+  # HSTS is emitted only when the client-facing request uses HTTPS.
+  - name: post-function
+    config:
+      header_filter:
+        - |
+          kong.response.set_header("X-Content-Type-Options", "nosniff")
+          kong.response.set_header("Cross-Origin-Resource-Policy", "same-origin")
+          kong.response.set_header("Referrer-Policy", "no-referrer")
+          kong.response.set_header("X-Frame-Options", "DENY")
+          kong.response.set_header(
+            "Permissions-Policy",
+            "camera=(), microphone=(), geolocation=()"
+          )
+          if kong.request.get_scheme() == "https" then
+            kong.response.set_header(
+              "Strict-Transport-Security",
+              "max-age=31536000; includeSubDomains"
+            )
+          end
+
+  # Rate limiting – per route
+  - name: rate-limiting
+    route: users-health
+    config: &normal_rate_limit
+      minute: 60
+      policy: local
+      limit_by: ip
+      fault_tolerant: true
+      hide_client_headers: false
+  - name: rate-limiting
+    route: orders-health
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: billing-health
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: admin-health
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: billing-api
+    config: *normal_rate_limit
+  - name: rate-limiting
+    route: webhooks-api
+    config: *normal_rate_limit
+
+  - name: rate-limiting
+    route: users-api
+    config: &sensitive_rate_limit
+      minute: 10
+      policy: local
+      limit_by: ip
+      fault_tolerant: true
+      hide_client_headers: false
+  - name: rate-limiting
+    route: users-me
+    config: *sensitive_rate_limit
+  - name: rate-limiting
+    route: users-profile
+    config: *sensitive_rate_limit
+  - name: rate-limiting
+    route: orders-api
+    config: *sensitive_rate_limit
+  - name: rate-limiting
+    route: admin-api
+    config: *sensitive_rate_limit

@@ -1,4 +1,4 @@
-TV1 Gateway-to-backend mTLS status: DESIGN PREPARED, NOT ENABLED IN DEFAULT COMPOSE.
+TV1 Gateway-to-backend mTLS status: OPTIONAL RUNTIME PROFILE AVAILABLE; DEFAULT COMPOSE REMAINS STABLE.
 
 Webhook channel mTLS status: IMPLEMENTED AND EVIDENCED.
 Valid webhook client certificates are accepted, and requests without a client
@@ -6,16 +6,15 @@ certificate are rejected. This is separate from HMAC signature verification,
 timestamp freshness, and replay nonce checks.
 
 Reason:
-The team-owned backend services do not yet expose TLS listeners. Enabling mTLS
-for Gateway-to-backend traffic now would break the baseline. Backend S2S
-authorization is implemented with short-lived Keycloak Client Credentials and
-least-privilege service roles.
+The default Compose stack remains HTTP-backed for stable regression. The optional `infra/docker-compose.mtls.yml` profile fronts User/Order/Billing/Admin with Nginx mTLS sidecars, configures Kong to present an internal client certificate, and rejects direct callers without a valid client certificate. Backend S2S authorization is still implemented with short-lived Keycloak Client Credentials and least-privilege service roles.
 
 Prepared artifacts:
 - gateway/mtls.md
-- demo/mtls/generate-mtls-certs.sh
-- demo/mtls/README.md
+- gateway/kong-mtls.yml
+- infra/docker-compose.mtls.yml
+- infra/nginx/gateway-backend-mtls.conf.template
+- demo/mtls/ensure-gateway-backend-certs.sh
+- tests/security/gateway-backend-mtls-tests.sh
+- docs/evidence/tv1/gateway-backend-mtls/
 
-The design defines an internal demo CA, Kong client identity, backend server
-identity, mutual certificate verification, secret mounting, and rotation
-requirements.
+The runtime profile defines an internal demo CA, Kong client identity, backend sidecar server identities, mutual certificate verification, secret mounting, and rotation requirements. It is intentionally scoped as lab evidence rather than full service-mesh automation.

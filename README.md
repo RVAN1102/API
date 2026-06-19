@@ -51,8 +51,7 @@ Supporting Services:
 - HTTPS/TLS termination + HSTS header
 - Webhook channel mTLS at Kong: valid client certificate accepted, missing
   client certificate rejected
-- Gateway-to-backend mTLS design prepared; default Compose uses HTTP backends
-  plus short-lived Keycloak Client Credentials for S2S authorization
+- Gateway-to-backend mTLS runtime profile via Nginx sidecars (`infra/docker-compose.mtls.yml`); default Compose remains stable and backend S2S still uses short-lived Keycloak Client Credentials
 - Webhook HMAC-SHA256 + nonce/timestamp enforcement
 - Redis-backed webhook nonce TTL store for replay protection across restarts
 - Correlation ID propagation
@@ -94,6 +93,24 @@ bash fix-and-restart.sh
 # Check status
 docker compose -f infra/docker-compose.yml ps
 ```
+
+
+### Optional Gateway-to-Backend mTLS Runtime Profile
+
+The default Compose stack remains the stable regression baseline. To prove
+Gateway-to-Backend mTLS at runtime without breaking the default flow, run the
+sidecar profile:
+
+```bash
+bash demo/mtls/ensure-gateway-backend-certs.sh
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.mtls.yml up -d --build
+bash tests/security/gateway-backend-mtls-tests.sh
+```
+
+This profile routes Kong to backend Nginx sidecars over HTTPS/mTLS. The sidecars
+require Kong's internal client certificate and reject callers without a valid
+client certificate. Generated certificate material stays under
+`infra/certs/gateway-backend/` and is ignored by Git.
 
 ### Run the Frontend Security Dashboard
 ```bash
