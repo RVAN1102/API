@@ -50,7 +50,9 @@ def check_order_ownership(payload: Dict[str, Any], order_owner: str) -> None:
 
 ## 3.5 Secret Management
 
-**Component:** HashiCorp Vault
-**Role:** Centralized Secret Store
+**Component:** HashiCorp Vault / production secret manager
+**Role:** Centralized secret-management architecture
 
-Vault securely stores sensitive data (e.g., webhook HMAC keys, service client credentials) rather than hardcoding them in the source code or `.env` files. Services (or the infrastructure orchestrator) retrieve these secrets at runtime.
+In the lab prototype, `infra/.env` is a generated local compatibility file and Docker Compose injects runtime secrets into containers via environment variables. Vault OSS dev mode demonstrates the secret paths, policies, rotation workflow, and production architecture, but the prototype does **not** claim that every service fetches every runtime secret directly from Vault.
+
+For production, use Vault HA, cloud KMS plus a managed Secrets Manager, or an equivalent secret store. Runtime workloads should receive secrets through platform secret injection or fetch them with a least-privilege workload identity. Production evidence should include audit logs, rotation proof, policy review, and recovery testing.

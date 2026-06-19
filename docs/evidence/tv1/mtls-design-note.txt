@@ -1,8 +1,15 @@
-TV1 mTLS status: DESIGN PREPARED, NOT ENABLED IN DEFAULT COMPOSE.
+TV1 Gateway-to-backend mTLS status: DESIGN PREPARED, NOT ENABLED IN DEFAULT COMPOSE.
+
+Webhook channel mTLS status: IMPLEMENTED AND EVIDENCED.
+Valid webhook client certificates are accepted, and requests without a client
+certificate are rejected. This is separate from HMAC signature verification,
+timestamp freshness, and replay nonce checks.
 
 Reason:
 The team-owned backend services do not yet expose TLS listeners. Enabling mTLS
-now would break the baseline.
+for Gateway-to-backend traffic now would break the baseline. Backend S2S
+authorization is implemented with short-lived Keycloak Client Credentials and
+least-privilege service roles.
 
 Prepared artifacts:
 - gateway/mtls.md
@@ -12,4 +19,3 @@ Prepared artifacts:
 The design defines an internal demo CA, Kong client identity, backend server
 identity, mutual certificate verification, secret mounting, and rotation
 requirements.
-

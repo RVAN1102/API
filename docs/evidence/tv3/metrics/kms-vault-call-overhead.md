@@ -50,10 +50,10 @@ Run 10: 10ms
 
 ---
 
-### 2. Service Startup Secret Fetch
+### 2. Prototype Startup And Proposed Secret-Fetch Budget
 
 ```bash
-# Measure service startup time with Vault secret fetch
+# Measure service restart time in the lab Compose stack
 time docker compose -f infra/docker-compose.yml restart billing-service
 ```
 
@@ -64,11 +64,14 @@ user    0m0.215s
 sys     0m0.089s
 ```
 
-Breakdown:
-- Docker container start: ~2s
-- Vault secret fetch (at startup): ~10ms
-- Keycloak public key fetch: ~200ms
-- Service ready: ~4.8s total
+Interpretation:
+- Docker container restart and readiness dominate this lab measurement.
+- The Vault read latency above is a separate manual measurement that estimates
+  the budget for a production startup secret read.
+- Current lab services receive runtime secrets from Docker Compose environment
+  variables generated in ignored `infra/.env`; this file does not claim Billing
+  or Webhook currently fetches `WEBHOOK_SECRET` directly from Vault.
+- Keycloak public key fetch/caching remains part of runtime token validation.
 
 ---
 
@@ -76,10 +79,10 @@ Breakdown:
 
 JWT validation via Keycloak/Kong does NOT call Vault per-request. The JWT is validated locally using the cached Keycloak public key.
 
-Vault is only called:
-1. **At service startup** (fetch webhook secret, DB credentials)
-2. **On secret rotation** (explicit refresh)
-3. **Manual admin operations**
+In this prototype, Vault is not on the hot request path. Runtime secrets are
+injected by Docker Compose from the local lab environment file. Vault dev mode
+is used to demonstrate secret paths, rotation workflow, and the production
+architecture.
 
 Per-request Vault overhead: **~0ms** (keys cached in memory)
 
@@ -89,8 +92,8 @@ Per-request Vault overhead: **~0ms** (keys cached in memory)
 
 | Operation | Tool (Lab) | Latency | Frequency |
 |-----------|-----------|---------|-----------|
-| Secret read | Vault OSS | ~9.7ms avg | Startup only |
-| Service startup | Docker + Vault | ~4.8s total | On restart |
+| Manual secret read | Vault OSS | ~9.7ms avg | Production startup/rotation budget |
+| Service restart | Docker Compose | ~4.8s total | On restart |
 | JWT validation | Keycloak (cached) | ~5-15ms | Per-request |
 | HMAC verify | In-memory | < 1ms | Per-request |
 | Per-request Vault | Not called | 0ms | — |
@@ -111,11 +114,13 @@ Per-request Vault overhead: **~0ms** (keys cached in memory)
 
 ## Performance Impact Assessment
 
-- ✅ Vault overhead: **~10ms at startup only** – negligible.
+- ✅ Manual Vault read latency: **~10ms** in lab, useful as a production startup/rotation budget.
 - ✅ No per-request KMS calls (JWT validated locally).
 - ✅ Webhook HMAC verified in-memory (< 1ms).
 - ℹ️ If production moves to Cloud KMS per-request signing: expect +5-30ms per request.
-- **Recommendation:** Cache public keys and secrets at startup; refresh on rotation signal.
+- **Recommendation:** For production, use Vault HA or cloud KMS/Secrets Manager,
+  inject or fetch secrets with least-privilege workload identity, cache public
+  keys/secrets outside the hot path, and refresh on rotation signal.
 
 ---
 

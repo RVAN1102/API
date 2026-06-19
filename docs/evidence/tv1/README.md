@@ -97,9 +97,12 @@ bash demo/webhook/send-replay-webhook.sh || true
 
 ### mTLS (P0.9)
 Hệ thống prototype hiện bảo vệ webhook channel bằng:
+- Webhook channel mTLS at Kong (valid client cert accepted; missing cert rejected)
 - HMAC-SHA256 signature verification (tầng ứng dụng)
-- Nonce replay protection
+- Redis-backed nonce replay protection
 - Timestamp freshness check (300s window)
 
-**Chưa triển khai:** mTLS (mutual TLS client certificate) ở tầng transport.  
-Đây là hướng hardening tiếp theo nếu hệ thống cần triển khai production.
+Gateway-to-backend mTLS is design-prepared but not enabled in the default
+Docker Compose runtime because backend services expose HTTP listeners. Internal
+S2S is protected with short-lived Keycloak Client Credentials and least-privilege
+service roles; webhook ingress uses mTLS separately from HMAC/timestamp/nonce.

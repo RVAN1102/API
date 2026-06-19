@@ -133,14 +133,20 @@ Evidence: `p0-08-webhook-timestamp-freshness.txt`
 
 ## 10. mTLS Status
 
-**⚠️ LIMITATION:** Hệ thống hiện **chưa triển khai mTLS** (mutual TLS client certificate authentication) cho webhook channel.
+**Implemented for webhook ingress:** Webhook channel mTLS is enforced at Kong and verified by Billing through the gateway-injected `X-Mtls-Client-Verified: SUCCESS` signal.
 
-Bảo vệ hiện tại ở tầng ứng dụng:
+Evidence:
+- Valid webhook client certificate → accepted with HTTP 200.
+- Missing client certificate → rejected with HTTP 401.
+- mTLS is separate from the application-layer HMAC signature, timestamp freshness, and replay nonce controls.
+
+Bảo vệ webhook hiện tại gồm:
+- Kong-side webhook mTLS client certificate verification
 - HMAC-SHA256 signature verification
-- Nonce replay protection
+- Redis-backed nonce replay protection
 - Timestamp freshness check
 
-mTLS là cơ chế khác với HMAC — mTLS xác thực ở tầng TLS transport, HMAC xác thực ở tầng ứng dụng. Hai cơ chế này bổ sung cho nhau và không thay thế nhau.
+Gateway-to-backend mTLS is a separate design item. It is prepared but not enabled in the default Docker Compose stack because backend services expose HTTP listeners. Internal S2S authorization is implemented with short-lived Keycloak Client Credentials and least-privilege service roles, which satisfies the Topic 10 S2S option alongside the implemented webhook mTLS ingress.
 
 Chi tiết: `p0-09-webhook-mtls-status.md`
 
@@ -150,8 +156,8 @@ Chi tiết: `p0-09-webhook-mtls-status.md`
 
 | # | Limitation | Hướng xử lý |
 |---|-----------|-------------|
-| L1 | mTLS chưa triển khai cho webhook channel | Cần thêm client cert validation ở Kong hoặc service |
-| L2 | Nonce store là in-memory (mất khi restart) | Production cần Redis/DB persistent store |
+| L1 | Gateway-to-backend mTLS chưa bật trong default Compose | Cần backend TLS listeners và cấu hình upstream client certificate nếu bật |
+| L2 | Webhook nonce store dùng Redis TTL trong lab, không bảo vệ ngoài timestamp/TTL window | Production dùng managed Redis/DB TTL với monitoring |
 | L3 | Kong Admin API (port 8001) không nên expose public | Nên bind vào internal network only |
 | L4 | WAF module (ModSecurity/OWASP CRS) chưa tích hợp vào Kong | Kong hiện dùng pre-function plugin thủ công |
 | L5 | Rate limit per-IP, chưa per-user | Cần key-based rate limiting cho authenticated routes |
@@ -170,4 +176,4 @@ Chi tiết: `p0-09-webhook-mtls-status.md`
 | `p0-06-kong-request-size-limit.txt` | Request size 413 | Xem file |
 | `p0-07-webhook-hmac-replay.txt` | HMAC valid/invalid/replay | Xem file |
 | `p0-08-webhook-timestamp-freshness.txt` | Timestamp freshness | Xem file |
-| `p0-09-webhook-mtls-status.md` | mTLS limitation | Limitation |
+| `p0-09-webhook-mtls-status.md` | Webhook mTLS implemented; Gateway-to-backend mTLS design-only | Implemented/design split |

@@ -29,8 +29,9 @@
 ### Known Limitations:
 
 - ⚠️ MFA: not implemented at runtime (Keycloak supports it, not configured for demo)
-- ⚠️ mTLS: documented/designed, not fully deployed
-- ⚠️ OPA: not used (RBAC is handled by service-level code)
+- ✅ Webhook mTLS: implemented and evidenced at Kong (valid client cert accepted, missing cert rejected)
+- ⚠️ Gateway-to-backend mTLS: design prepared, not enabled in default Compose; backend S2S uses short-lived Keycloak Client Credentials
+- ✅ OPA: policy decision point and backend enforcement evidenced for selected authorization paths
 - ⚠️ Keycloak runs in dev mode (not production-grade)
 - ⚠️ Vault runs in dev mode
 
