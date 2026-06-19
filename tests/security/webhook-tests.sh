@@ -17,6 +17,14 @@ WEBHOOK_CA_KEY="${REPO_ROOT}/infra/certs/webhook-ca.key"
 WEBHOOK_CERT_DIR=""
 CERT_BACKUP_DIR=""
 
+if [ -f "${REPO_ROOT}/infra/.env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${REPO_ROOT}/infra/.env"
+  set +a
+  WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+fi
+
 # Git Bash / MSYS2: save original MSYS_NO_PATHCONV
 _ORIG_MSYS_NO_PATHCONV="${MSYS_NO_PATHCONV:-}"
 

@@ -140,19 +140,43 @@ services:
       ORDER_SERVICE_URL: "http://order-service:8000"
       OPA_URL: "http://opa:8181"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+      WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-redis}"
+      WEBHOOK_NONCE_REDIS_URL: "${WEBHOOK_NONCE_REDIS_URL:-redis://redis:6379/0}"
+      WEBHOOK_NONCE_TTL_SECONDS: "${WEBHOOK_NONCE_TTL_SECONDS:-300}"
     depends_on:
-      - opa
+      opa:
+        condition: service_started
+      redis:
+        condition: service_healthy
     networks:
       - kong-billing-internal
       - billing-identity-internal
       - billing-policy-internal
       - billing-order-s2s-internal
+      - billing-nonce-internal
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Webhook replay nonce store – Redis-backed TTL store for lab regression
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    expose:
+      - "6379"
+    networks:
+      - billing-nonce-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   # ---------------------------------------------------------------------------
   # TV3 – Admin Service
@@ -414,6 +438,8 @@ networks:
   admin-policy-internal:
     internal: true
   billing-order-s2s-internal:
+    internal: true
+  billing-nonce-internal:
     internal: true
   observability-internal:
     internal: true
