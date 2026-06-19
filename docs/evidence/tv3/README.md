@@ -95,7 +95,7 @@ See `red-team/ssrf-egress-defense.md` above.
 |------|--------|
 | `metrics/k6-gateway-waf-latency.md` | p50=28ms, p95=187ms – all thresholds met |
 | `metrics/k6-output.json` | k6 JSON output |
-| `metrics/kms-vault-call-overhead.md` | Vault overhead ~10ms at startup only |
+| `metrics/kms-vault-call-overhead.md` | Manual Vault read latency and production startup/rotation budget; lab runtime uses Compose env injection |
 | `metrics/monthly-cost-estimate.md` | Lab $25/month, Production $100-150/month |
 | `metrics/mttd-mttr-alert-based-results.csv` | Alert-based MTTD/MTTR raw timing |
 | `metrics/mttd-mttr-alert-based-analysis.md` | MTTD/MTTR methodology and summary |

@@ -49,7 +49,10 @@ Supporting Services:
 - Rate limiting (60/min standard, 10/min sensitive routes)
 - WAF/edge filter (SQLi/XSS patterns, payload size)
 - HTTPS/TLS termination + HSTS header
-- mTLS design (documented)
+- Webhook channel mTLS at Kong: valid client certificate accepted, missing
+  client certificate rejected
+- Gateway-to-backend mTLS design prepared; default Compose uses HTTP backends
+  plus short-lived Keycloak Client Credentials for S2S authorization
 - Webhook HMAC-SHA256 + nonce/timestamp enforcement
 - Redis-backed webhook nonce TTL store for replay protection across restarts
 - Correlation ID propagation
@@ -61,7 +64,8 @@ Supporting Services:
 - JWT validation with JWKS (RS256)
 - RBAC backend authorization (roles: user, admin, billing-service)
 - BOLA vulnerable/fixed demo (Order Service)
-- HashiCorp Vault secret management
+- HashiCorp Vault dev-mode secret-path and rotation workflow evidence; local
+  Docker Compose injects prototype runtime secrets from ignored `infra/.env`
 
 ### TV3 – DevSecOps & Observability
 - Billing Service with HMAC webhook handling
