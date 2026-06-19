@@ -1,3 +1,14 @@
+===== Historical / superseded evidence note =====
+This grep output is a pre-merge historical artifact. It captured the earlier
+dev-realm statement that OTP was not enforced by default. It is superseded by
+the current Keycloak realm and runtime evidence where CONFIGURE_TOTP required
+actions are present for human users.
+
+Current summary:
+- docs/evidence/tv2/p0-07-mfa-status.md
+- docs/evidence/tv2/p0-07-mfa-runtime-enforce-command.txt
+- docs/evidence/tv2/p0-07-mfa-runtime-status.txt
+
 ===== MFA status grep =====
 idp/README.md:104:## MFA / OTP Requirement
 idp/README.md:106:OTP is **not enforced by default** in the dev realm to simplify demo automation.

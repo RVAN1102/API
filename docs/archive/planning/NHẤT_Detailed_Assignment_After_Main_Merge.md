@@ -1,3 +1,10 @@
+# Historical Planning Notice
+
+This document is historical assignment material from an earlier post-merge
+phase. It is superseded by the current final evidence index, final regression
+11-suite result, and runtime documentation. TODO/limitation wording below is
+preserved as planning context, not as the current project status.
+
 # PHÂN CÔNG CÔNG VIỆC – THÀNH VIÊN SỐ 1  
 ## TV1 – Edge Gateway, Network Hardening & Webhook Security
 

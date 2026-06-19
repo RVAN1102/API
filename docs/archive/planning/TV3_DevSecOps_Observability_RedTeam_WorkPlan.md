@@ -1,3 +1,10 @@
+# Historical Planning Notice
+
+This document is historical planning material from an earlier implementation
+phase. It is superseded by the current final evidence index, final regression
+11-suite result, and runtime documentation. TODO/placeholder wording below is
+preserved as planning context, not as the current project status.
+
 # TV3 – DevSecOps, Observability & Red Team Analyst: Work Plan & Merge Contract
 
 **Dự án:** SME Cloud-Native Microservices API Security – Topic 10  
