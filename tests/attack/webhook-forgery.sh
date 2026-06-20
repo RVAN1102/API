@@ -16,7 +16,10 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
 WEBHOOK_URL="${BASE_URL}/api/v1/billing/webhooks/payment"
 # Try billing service webhook endpoint first, fall back to TV1 webhook demo

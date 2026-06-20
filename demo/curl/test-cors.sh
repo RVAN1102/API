@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 
 curl --silent --show-error --include --request OPTIONS \
   "${BASE_URL}/api/v1/users/profile" \

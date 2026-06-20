@@ -11,7 +11,7 @@
 #   bash tests/security/run-fuzzing.sh
 #
 # Environment variables:
-#   BASE_URL    – Target URL (default: http://localhost:8000)
+#   BASE_URL    – Target URL (default: https://localhost:8443)
 #   USER_TOKEN  – Bearer token for authenticated fuzz
 #
 # Output:
@@ -21,7 +21,10 @@
 
 set -uo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 KC_URL="${KC_URL:-http://localhost:8080}"
 REPORT_DIR="docs/evidence/tv3/fuzzing"
 LOG_FILE="${REPORT_DIR}/fuzzing-run.log"

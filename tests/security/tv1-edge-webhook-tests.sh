@@ -15,7 +15,10 @@ unset MSYS_NO_PATHCONV 2>/dev/null || true
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv1"
-GATEWAY_URL="${GATEWAY_URL:-http://localhost:8000}"
+GATEWAY_URL="${GATEWAY_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 ADMIN_URL="${ADMIN_URL:-http://localhost:8001}"
 HTTPS_HOST="${HTTPS_HOST:-localhost:8443}"
 

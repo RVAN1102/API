@@ -34,7 +34,7 @@ history -c
 ```bash
 # Show all services healthy
 docker compose -f infra/docker-compose.yml ps
-curl http://localhost:8000/api/v1/users/health | python3 -m json.tool
+curl https://localhost:8443/api/v1/users/health | python3 -m json.tool
 curl http://localhost:8001/api/v1/orders/health | python3 -m json.tool
 curl http://localhost:8002/api/v1/billing/health | python3 -m json.tool
 ```
@@ -59,7 +59,7 @@ echo "Token length: ${#ALICE_TOKEN} chars"
 # Do NOT show full token on screen
 
 # Use token
-curl -s http://localhost:8000/api/v1/users/me \
+curl -s https://localhost:8443/api/v1/users/me \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-auth-001" \
   | python3 -m json.tool
@@ -96,7 +96,7 @@ curl -s -X POST \
 
 ```bash
 # Alice owns ord-alice-5001 – checkout succeeds
-curl -v -X POST http://localhost:8000/api/v1/billing/checkout \
+curl -v -X POST https://localhost:8443/api/v1/billing/checkout \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-ownership-001" \
   -H "Content-Type: application/json" \
@@ -114,7 +114,7 @@ curl -v -X POST http://localhost:8000/api/v1/billing/checkout \
 ```bash
 # BOLA attempt: Alice tries Bob's order
 echo "--- BOLA Attack ---"
-curl -v http://localhost:8000/api/v1/orders/ord-bob-2001/fixed \
+curl -v https://localhost:8443/api/v1/orders/ord-bob-2001/fixed \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-bola-001"
 # Expected: 403 Forbidden
@@ -134,7 +134,7 @@ echo "--- Loki Query (403 logs) ---"
 
 ```bash
 # Bad HMAC
-curl -v -X POST http://localhost:8000/api/v1/auth/webhook \
+curl -v -X POST https://localhost:8443/api/v1/auth/webhook \
   -H "X-Webhook-Timestamp: $(date +%s)" \
   -H "X-Webhook-Signature: sha256=deadbeefdeadbeef" \
   -H "X-Webhook-Nonce: demo-bad-001" \
@@ -156,13 +156,13 @@ bash tests/attack/webhook-forgery.sh 2>&1 | tail -20
 
 ```bash
 # SSRF attempt – fixed endpoint
-curl -v "http://localhost:8000/api/v1/admin/metadata-fixed?url=http://169.254.169.254/latest/meta-data/" \
+curl -v "https://localhost:8443/api/v1/admin/metadata-fixed?url=http://169.254.169.254/latest/meta-data/" \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-ssrf-001"
 # Expected: 403
 
 # vs vulnerable endpoint (demo)
-curl -v "http://localhost:8000/api/v1/admin/metadata-vulnerable?url=http://169.254.169.254/" \
+curl -v "https://localhost:8443/api/v1/admin/metadata-vulnerable?url=http://169.254.169.254/" \
   -H "Authorization: Bearer $ALICE_TOKEN"
 # Shows attack risk on vulnerable endpoint
 ```
@@ -205,7 +205,7 @@ cat docs/evidence/tv3/fuzzing/fuzzing-summary.md
 ```bash
 # Trigger alerts live (optional)
 for i in $(seq 1 12); do
-  curl -s -o /dev/null http://localhost:8000/api/v1/users/me \
+  curl -s -o /dev/null https://localhost:8443/api/v1/users/me \
     -H "Authorization: Bearer fake.token.$i"
 done
 echo "Triggered 12x 401 – check Grafana for alert"

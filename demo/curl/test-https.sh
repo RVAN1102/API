@@ -2,6 +2,9 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 
 # -k is allowed only for the local Kong self-signed development certificate.
 if curl --silent --show-error --insecure --include \

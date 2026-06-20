@@ -2,6 +2,9 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 
 if ! headers="$(curl --silent --show-error --insecure --dump-header - \
     "${BASE_URL}/api/v1/users/health" --output /dev/null)"; then

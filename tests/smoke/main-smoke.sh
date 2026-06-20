@@ -8,13 +8,16 @@
 #   bash tests/smoke/main-smoke.sh
 #
 # Environment:
-#   BASE_URL      – default: http://localhost:8000
+#   BASE_URL      – default: https://localhost:8443
 #   KEYCLOAK_URL  – default: http://localhost:8080
 #   REALM         – default: topic10-sme-api
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 REALM="${REALM:-topic10-sme-api}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"

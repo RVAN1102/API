@@ -9,7 +9,10 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 LOKI_URL="${LOKI_URL:-http://localhost:3100}"
 REPORT_DIR="docs/evidence/tv3/metrics"
 CSV="${REPORT_DIR}/mttd-mttr-alert-based-results.csv"

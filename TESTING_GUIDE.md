@@ -72,11 +72,16 @@ backward-compatible evidence commands.
 
 ## 2. Health Checks
 
+The legacy plaintext gateway port is disabled and not exposed. The lab gateway
+certificate is local/self-signed, so use `-k` or `CURL_TLS_OPTS=--insecure`
+for local curl commands. Production should use CA-trusted certificates without
+disabling verification.
+
 ```bash
-curl http://localhost:8000/api/v1/users/health
-curl http://localhost:8000/api/v1/orders/health
-curl http://localhost:8000/api/v1/billing/health
-curl http://localhost:8000/api/v1/admin/health
+curl -k https://localhost:8443/api/v1/users/health
+curl -k https://localhost:8443/api/v1/orders/health
+curl -k https://localhost:8443/api/v1/billing/health
+curl -k https://localhost:8443/api/v1/admin/health
 ```
 
 Expected response for each:
@@ -120,15 +125,15 @@ ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/auth/test-user-profile.sh
 Manual tests:
 ```bash
 # Public endpoint
-curl http://localhost:8000/api/v1/users/health
+curl -k https://localhost:8443/api/v1/users/health
 
 # Protected /me (with token)
-curl http://localhost:8000/api/v1/users/me \
+curl -k https://localhost:8443/api/v1/users/me \
   -H "Authorization: Bearer ${ALICE_TOKEN}" \
   -H "X-Correlation-ID: test-me-001"
 
 # No token → 401
-curl http://localhost:8000/api/v1/users/me
+curl -k https://localhost:8443/api/v1/users/me
 ```
 
 ---
@@ -143,14 +148,14 @@ ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/auth/test-order-access.sh
 Manual tests:
 ```bash
 # Health
-curl http://localhost:8000/api/v1/orders/health
+curl -k https://localhost:8443/api/v1/orders/health
 
 # List orders (alice sees her orders)
-curl http://localhost:8000/api/v1/orders \
+curl -k https://localhost:8443/api/v1/orders \
   -H "Authorization: Bearer ${ALICE_TOKEN}"
 
 # Get alice's order
-curl "http://localhost:8000/api/v1/orders/ord-alice-1001" \
+curl "https://localhost:8443/api/v1/orders/ord-alice-1001" \
   -H "Authorization: Bearer ${ALICE_TOKEN}"
 ```
 
@@ -177,10 +182,10 @@ Expected results:
 
 ```bash
 # Health
-curl http://localhost:8000/api/v1/billing/health
+curl -k https://localhost:8443/api/v1/billing/health
 
 # Checkout
-curl -X POST http://localhost:8000/api/v1/billing/checkout \
+curl -X POST https://localhost:8443/api/v1/billing/checkout \
   -H "Authorization: Bearer ${ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -H "X-Correlation-ID: billing-test-001" \
@@ -199,13 +204,13 @@ ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/attack/ssrf-attack.sh
 Manual tests:
 ```bash
 # SSRF vulnerable → 200 (fetches anything)
-curl -X POST http://localhost:8000/api/v1/admin/metadata-fetch/vulnerable \
+curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/vulnerable \
   -H "Authorization: Bearer ${ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'
 
 # SSRF fixed → 403 (blocked)
-curl -X POST http://localhost:8000/api/v1/admin/metadata-fetch/fixed \
+curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/fixed \
   -H "Authorization: Bearer ${ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'
@@ -357,7 +362,7 @@ Results saved to:
 ## 15b. Latency And Cost Metrics
 
 ```bash
-BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
+BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
 
 # Optional HTTPS lab path:
 HTTPS_BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh

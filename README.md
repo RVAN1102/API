@@ -136,7 +136,6 @@ Expected services:
 
 | Service     | URL                                  |
 |-------------|--------------------------------------|
-| Kong HTTP   | http://localhost:8000               |
 | Kong HTTPS  | https://localhost:8443              |
 | Kong Admin  | http://127.0.0.1:8001              |
 | Keycloak    | http://localhost:8080               |
@@ -144,14 +143,17 @@ Expected services:
 | Grafana     | http://localhost:3001               |
 
 Redis is internal-only in Docker Compose and is not exposed on a host port.
+The legacy plaintext gateway port is disabled and not exposed.
+The lab gateway certificate is local/self-signed, so curl examples use `-k`.
+Production must use a CA-trusted certificate and normal certificate validation.
 
 ## Health Checks
 
 ```bash
-curl http://localhost:8000/api/v1/users/health
-curl http://localhost:8000/api/v1/orders/health
-curl http://localhost:8000/api/v1/billing/health
-curl http://localhost:8000/api/v1/admin/health
+curl -k https://localhost:8443/api/v1/users/health
+curl -k https://localhost:8443/api/v1/orders/health
+curl -k https://localhost:8443/api/v1/billing/health
+curl -k https://localhost:8443/api/v1/admin/health
 ```
 
 ## Get Tokens

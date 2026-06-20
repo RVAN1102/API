@@ -19,9 +19,10 @@ HMAC/replay demonstrations.
 
 | Listener | Purpose |
 |---|---|
-| `http://localhost:8000` | Local HTTP gateway testing |
-| `https://localhost:8443` | Local HTTPS termination using Kong's development certificate |
+| `https://localhost:8443` | Local HTTPS gateway using Kong's development certificate |
 | `http://127.0.0.1:8001` | Kong Admin API, bound to loopback only |
+
+The legacy plaintext gateway listener is disabled and not exposed.
 
 ## Public routes
 

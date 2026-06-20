@@ -19,7 +19,10 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 ALICE_TOKEN="${ALICE_TOKEN:-}"
 BOB_TOKEN="${BOB_TOKEN:-}"
 

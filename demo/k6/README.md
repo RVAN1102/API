@@ -11,7 +11,7 @@ docker run --rm --network host \
 On Docker Desktop where host networking is unavailable:
 
 ```bash
-docker run --rm -e BASE_URL=http://host.docker.internal:8000 \
+docker run --rm -e BASE_URL=https://host.docker.internal:8443 \
   -v "$PWD/demo/k6:/scripts:ro" \
   grafana/k6 run /scripts/gateway-latency.js
 ```

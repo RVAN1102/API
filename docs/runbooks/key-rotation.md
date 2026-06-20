@@ -31,7 +31,7 @@ This runbook covers rotation of:
 
 ```bash
 # Step 1: Verify current system is healthy
-curl -s http://localhost:8000/api/v1/users/health | python3 -c "import sys,json; print(json.load(sys.stdin))"
+curl -s https://localhost:8443/api/v1/users/health | python3 -c "import sys,json; print(json.load(sys.stdin))"
 # Expected: {"status": "ok"}
 
 # Step 2: Generate new HMAC secret (64 hex chars = 256-bit)
@@ -53,7 +53,7 @@ PAYLOAD='{"event":"test.rotation","order_id":"test-001"}'
 NEW_SIG=$(echo -n "${TIMESTAMP}.${PAYLOAD}" | openssl dgst -sha256 -hmac "${NEW_SECRET}" -hex | cut -d' ' -f2)
 
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-  -X POST http://localhost:8000/api/v1/auth/webhook \
+  -X POST https://localhost:8443/api/v1/auth/webhook \
   -H "Content-Type: application/json" \
   -H "X-Webhook-Timestamp: ${TIMESTAMP}" \
   -H "X-Webhook-Signature: sha256=${NEW_SIG}" \
@@ -74,7 +74,7 @@ echo "Secret cleared from memory."
 # Do NOT keep old secrets in environment
 
 # Run smoke test
-curl -s http://localhost:8000/api/v1/users/health
+curl -s https://localhost:8443/api/v1/users/health
 ```
 
 ### Rollback
@@ -131,7 +131,7 @@ curl -s -X POST \
 # Step 2: Wait for key propagation (Keycloak handles this automatically)
 
 # Step 3: Test JWT validation still works
-curl -s http://localhost:8000/api/v1/users/me \
+curl -s https://localhost:8443/api/v1/users/me \
   -H "Authorization: Bearer $NEW_TOKEN" | python3 -c "import sys,json; print('OK')"
 
 # Step 4: (Optional) Retire old key after TTL expires (> 300s)

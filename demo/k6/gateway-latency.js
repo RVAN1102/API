@@ -11,7 +11,7 @@ export const options = {
   },
 };
 
-const baseUrl = __ENV.BASE_URL || "http://localhost:8000";
+const baseUrl = __ENV.BASE_URL || "https://localhost:8443";
 const paths = [
   "/api/v1/users/health",
   "/api/v1/orders/health",

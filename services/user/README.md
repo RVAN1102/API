@@ -39,10 +39,10 @@ docker compose -f infra/docker-compose.yml up -d user-service
 
 ```bash
 # Health check (no token)
-curl http://localhost:8000/api/v1/users/health
+curl https://localhost:8443/api/v1/users/health
 
 # Protected (requires token)
-curl http://localhost:8000/api/v1/users/me \
+curl https://localhost:8443/api/v1/users/me \
   -H "Authorization: Bearer $(cat /tmp/user-token.txt)" \
   -H "X-Correlation-ID: test-001"
 ```

@@ -8,7 +8,10 @@ set -uo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${EVIDENCE_DIR:-${REPO_ROOT}/.artifacts/test-runs/tv1/edge-final}"
-GATEWAY_URL="${GATEWAY_URL:-http://localhost:8000}"
+GATEWAY_URL="${GATEWAY_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 HTTPS_HOST="${HTTPS_HOST:-localhost:8443}"
 
 mkdir -p "${EVIDENCE_DIR}"
