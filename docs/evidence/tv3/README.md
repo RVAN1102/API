@@ -172,7 +172,7 @@ bash tests/final/main-regression.sh | tee docs/evidence/final/final-security-reg
 
 # P1-01: Metrics
 k6 run tests/performance/k6-latency-test.js
-BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
+BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
 
 # P1-02: Full Pipeline
 bash scripts/ci/security-pipeline.sh

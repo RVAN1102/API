@@ -9,8 +9,21 @@ FastAPI-based Billing Service with checkout and webhook endpoints.
 | Method | Path                        | Auth Required | Description                     |
 |--------|-----------------------------|---------------|---------------------------------|
 | GET    | /api/v1/billing/health      | No            | Health check                    |
-| POST   | /api/v1/billing/checkout    | Yes (Bearer)  | Initiate checkout               |
+| POST   | /api/v1/billing/checkout    | Yes (Bearer)  | Initiate checkout using canonical Order data |
 | POST   | /api/v1/webhooks/payment    | HMAC          | Payment webhook callback        |
+
+## Checkout Security
+
+Billing verifies the caller's ownership of the order through the Order service
+before accepting checkout. The Order service response is the canonical source
+for amount and currency; client-supplied mismatches are rejected with `409`.
+
+`Idempotency-Key` is optional for compatibility, but should be sent by clients.
+When present, the key is scoped to caller and operation. The same caller, key,
+and payload is a safe retry; the same key with a different payload or a second
+checkout for the same caller/order with a different key returns `409`. The lab
+prototype stores these records in Redis when available and falls back to
+process memory only for local development.
 
 ## Webhook Security
 
@@ -49,6 +62,7 @@ curl https://localhost:8443/api/v1/billing/health
 curl -X POST https://localhost:8443/api/v1/billing/checkout \
   -H "Authorization: Bearer $(cat /tmp/user-token.txt)" \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: manual-alice-1001" \
   -H "X-Correlation-ID: billing-001" \
   -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}'
 ```

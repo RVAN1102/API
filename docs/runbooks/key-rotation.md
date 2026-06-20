@@ -169,7 +169,7 @@ curl -s https://localhost:8443/api/v1/users/me \
 
 ## Evidence Template
 
-After each rotation, record in `docs/evidence/tv3/resilience/key-rotation-output.txt`:
+After each rotation, record in `.artifacts/test-runs/tv3/key-rotation-output.txt`:
 
 ```
 Date: YYYY-MM-DDTHH:MM:SSZ

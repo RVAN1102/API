@@ -188,9 +188,16 @@ curl -k https://localhost:8443/api/v1/billing/health
 curl -X POST https://localhost:8443/api/v1/billing/checkout \
   -H "Authorization: Bearer ${ALICE_TOKEN}" \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: manual-alice-1001" \
   -H "X-Correlation-ID: billing-test-001" \
   -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}'
 ```
+
+Billing verifies ownership through the Order service and treats Order data as
+canonical. If the request amount or currency does not match the Order service,
+Billing returns `409`. Reusing the same `Idempotency-Key` with the same payload
+is a safe retry; reusing it with a different payload or using another key for
+the same caller/order after an idempotent checkout returns `409`.
 
 ---
 
@@ -222,10 +229,13 @@ curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/fixed \
 
 ```bash
 # Token replay and webhook forgery
+set -a
+source infra/.env
+set +a
 bash tests/attack/token-replay.sh
 
 # Webhook forgery
-WEBHOOK_SECRET="dev-webhook-secret-change-me" bash tests/attack/webhook-forgery.sh
+bash tests/attack/webhook-forgery.sh
 
 # Redis-backed nonce persistence across billing-service restart
 bash tests/security/webhook-nonce-persistence-tests.sh
@@ -355,8 +365,7 @@ ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/metrics/measure-mttd-mttr.sh
 ```
 
 Results saved to:
-- `docs/evidence/tv3/metrics/mttd-mttr-alert-based-results.csv`
-- `docs/evidence/tv3/metrics/mttd-mttr-alert-based-analysis.md`
+- `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
 - Authoritative summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
 
 ## 15b. Latency And Cost Metrics

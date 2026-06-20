@@ -22,6 +22,18 @@ curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 ADMIN_URL="${ADMIN_URL:-http://localhost:8001}"
 HTTPS_HOST="${HTTPS_HOST:-localhost:8443}"
 
+if [ -f "${REPO_ROOT}/infra/.env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${REPO_ROOT}/infra/.env"
+  set +a
+fi
+
+if [ -z "${WEBHOOK_SECRET:-}" ] || [[ "${WEBHOOK_SECRET:-}" == REPLACE_WITH_* ]]; then
+  echo "[ERROR] WEBHOOK_SECRET must be set from infra/.env or the shell environment." >&2
+  exit 1
+fi
+
 mkdir -p "${EVIDENCE_DIR}"
 
 # --- Portable HTTP status code helper ---

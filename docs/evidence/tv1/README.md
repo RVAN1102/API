@@ -41,21 +41,24 @@ Kết quả được lưu tự động vào `docs/evidence/tv1/*.txt`
 
 ### P0.1 – Kong Route Smoke
 ```bash
-curl -i http://localhost:8000/api/v1/users/health
-curl -i http://localhost:8000/api/v1/orders/health
-curl -i http://localhost:8000/api/v1/billing/health
-curl -i http://localhost:8000/api/v1/admin/health
+curl -k -i https://localhost:8443/api/v1/users/health
+curl -k -i https://localhost:8443/api/v1/orders/health
+curl -k -i https://localhost:8443/api/v1/billing/health
+curl -k -i https://localhost:8443/api/v1/admin/health
 ```
+
+The lab gateway uses a local/self-signed TLS certificate, so manual curl
+commands use `-k`. Production deployments must use a CA-trusted certificate.
 
 ### P0.4 – CORS
 ```bash
 # Allowed origin
-curl -i -X OPTIONS http://localhost:8000/api/v1/users/health \
+curl -k -i -X OPTIONS https://localhost:8443/api/v1/users/health \
   -H "Origin: http://localhost:3000" \
   -H "Access-Control-Request-Method: GET"
 
 # Evil origin
-curl -i -X OPTIONS http://localhost:8000/api/v1/users/health \
+curl -k -i -X OPTIONS https://localhost:8443/api/v1/users/health \
   -H "Origin: https://evil.example" \
   -H "Access-Control-Request-Method: GET"
 ```
@@ -64,7 +67,7 @@ curl -i -X OPTIONS http://localhost:8000/api/v1/users/health \
 ```bash
 for i in $(seq 1 15); do
   code=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X POST http://localhost:8000/api/v1/admin/maintenance \
+    -k -X POST https://localhost:8443/api/v1/admin/maintenance \
     -H "Authorization: Bearer fake.jwt.token" \
     -H "Content-Type: application/json" \
     -d '{"action":"health-check","reason":"rate-limit-test"}')

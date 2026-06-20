@@ -11,7 +11,10 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-SECRET = os.environ.get("WEBHOOK_SECRET", "dev-webhook-secret-change-me").encode()
+SECRET_VALUE = os.environ.get("WEBHOOK_SECRET", "")
+if not SECRET_VALUE or SECRET_VALUE.startswith("REPLACE_WITH_"):
+    raise RuntimeError("WEBHOOK_SECRET is required for the lab webhook receiver")
+SECRET = SECRET_VALUE.encode()
 MAX_AGE = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
 NONCES: dict[str, int] = {}
 NONCE_LOCK = threading.Lock()
@@ -88,4 +91,3 @@ class WebhookHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     ThreadingHTTPServer(("0.0.0.0", 8080), WebhookHandler).serve_forever()
-

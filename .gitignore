@@ -45,3 +45,7 @@ volume/
 db-data/
 loki-data/
 grafana-data/
+
+# Local review/package archives
+*.tgz
+phase1-review-pack.tgz

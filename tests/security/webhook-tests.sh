@@ -11,7 +11,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${EVIDENCE_DIR:-${REPO_ROOT}/.artifacts/test-runs/tv1/webhook-final}"
-WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+WEBHOOK_SECRET="${WEBHOOK_SECRET:-}"
 WEBHOOK_CA_CRT="${REPO_ROOT}/infra/certs/webhook-ca.crt"
 WEBHOOK_CA_KEY="${REPO_ROOT}/infra/certs/webhook-ca.key"
 WEBHOOK_CERT_DIR=""
@@ -22,7 +22,12 @@ if [ -f "${REPO_ROOT}/infra/.env" ]; then
   # shellcheck disable=SC1091
   source "${REPO_ROOT}/infra/.env"
   set +a
-  WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+  WEBHOOK_SECRET="${WEBHOOK_SECRET:-}"
+fi
+
+if [ -z "${WEBHOOK_SECRET}" ] || [[ "${WEBHOOK_SECRET}" == REPLACE_WITH_* ]]; then
+  echo "[ERROR] WEBHOOK_SECRET must be set from infra/.env or the shell environment." >&2
+  exit 1
 fi
 
 # Git Bash / MSYS2: save original MSYS_NO_PATHCONV

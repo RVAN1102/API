@@ -131,6 +131,14 @@ assert_status "Alice checkout Alice order accepted" 202 \
     -H "X-Correlation-ID: s2s-alice-owned" \
     -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
 
+assert_status "Alice checkout Alice order wrong amount blocked" 409 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -H "X-Correlation-ID: s2s-alice-wrong-amount" \
+    -d '{"order_id":"ord-alice-1001","amount":1,"currency":"VND"}')"
+
 assert_status "Alice checkout Bob order forbidden" 403 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${BASE_URL}/api/v1/billing/checkout" \
@@ -146,6 +154,45 @@ assert_status "Bob checkout Bob order accepted" 202 \
     -H "Content-Type: application/json" \
     -H "X-Correlation-ID: s2s-bob-owned" \
     -d '{"order_id":"ord-bob-2001","amount":80000,"currency":"VND"}')"
+
+IDEMPOTENCY_KEY="s2s-idem-alice-1002"
+IDEMPOTENCY_DUP_KEY="s2s-idem-alice-1002-duplicate"
+
+assert_status "Alice checkout idempotent first attempt accepted" 202 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -H "Idempotency-Key: ${IDEMPOTENCY_KEY}" \
+    -H "X-Correlation-ID: s2s-idem-first" \
+    -d '{"order_id":"ord-alice-1002","amount":250000,"currency":"VND"}')"
+
+assert_status "Alice checkout idempotent safe retry accepted" 202 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -H "Idempotency-Key: ${IDEMPOTENCY_KEY}" \
+    -H "X-Correlation-ID: s2s-idem-retry" \
+    -d '{"order_id":"ord-alice-1002","amount":250000,"currency":"VND"}')"
+
+assert_status "Alice checkout same idempotency key different payload blocked" 409 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -H "Idempotency-Key: ${IDEMPOTENCY_KEY}" \
+    -H "X-Correlation-ID: s2s-idem-conflict" \
+    -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}')"
+
+assert_status "Alice duplicate checkout different idempotency key blocked" 409 \
+  "$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${BASE_URL}/api/v1/billing/checkout" \
+    -H "$(bearer_header "${CI_ALICE_TOKEN}")" \
+    -H "Content-Type: application/json" \
+    -H "Idempotency-Key: ${IDEMPOTENCY_DUP_KEY}" \
+    -H "X-Correlation-ID: s2s-idem-duplicate" \
+    -d '{"order_id":"ord-alice-1002","amount":250000,"currency":"VND"}')"
 
 assert_status "Billing fake user token rejected" 401 \
   "$(curl -s -o /dev/null -w "%{http_code}" -X POST \

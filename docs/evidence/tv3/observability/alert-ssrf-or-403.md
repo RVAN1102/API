@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-18  
 **Source:** Grafana Loki Alert Rule + Red Team Script  
-**Link:** `docs/evidence/tv3/red-team/ssrf-egress-defense.md`
+**Historical red-team link:** `docs/evidence/archive/pre-8443-http8000/tv3/red-team/ssrf-egress-defense.md`
 
 ---
 

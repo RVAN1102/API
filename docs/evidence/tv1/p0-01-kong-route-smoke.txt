@@ -1,11 +1,11 @@
 ===== TV1 P0.1 Kong route smoke =====
-Wed, Jun 17, 2026  8:43:08 PM
-qa/tv1-edge-ssrf-egress-final
-d496461 qa: done everything
-364d6a1 qa: add tv1 edge ssrf egress final evidence"
-f641d8f chore(tv1): finalize edge hardening, webhook security and ssrf defense evidence
-16a6c1e Merge pull request #2 from RVAN1102/fix/tv2-token-introspection-authz-hardening
-b1276cd test: add token lifecycle introspection revocation checks
+Sun Jun 21 12:41:35 AM +07 2026
+fix/final-security-hardening-audit
+4fe6a2d Merge pull request #14 from RVAN1102/fix/final-regression-autogen-mtls-certs
+0bdb30d ci: run gitleaks via cli
+6c1b5be fix: generate local mtls certs before final regression
+ae02e55 Merge pull request #13 from RVAN1102/fix/remove-gateway-http-8000
+3596b95 fix: enforce https-only public gateway entrypoint
 
 ===== Health via Kong =====
 users/health -> 200

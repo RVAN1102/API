@@ -45,7 +45,7 @@ The Admin service demonstrates SSRF.
 ### 5.4.2 Webhook Forgery & Replay
 The Billing service implements HMAC-SHA256 signature verification.
 - **Attack Script:** `webhook-forgery.sh` attempts to send webhooks with missing or invalid signatures.
-- **Replay Defense:** The service enforces a max timestamp age (e.g., 5 minutes) and tracks nonces to prevent replay attacks.
+- **Replay Defense:** The service enforces a max timestamp age (e.g., 5 minutes) and uses Redis-backed TTL nonces in the default lab runtime. Redis outage fails closed for the webhook path.
 
 ### 5.4.3 API Fuzzing (RESTler) & OWASP ZAP Active Scan/API Scan
 - **ZAP:** OWASP ZAP Active Scan/API Scan runs against the OpenAPI definition through Kong and is the final DAST evidence. The retired passive-only workflow is not final DAST evidence.

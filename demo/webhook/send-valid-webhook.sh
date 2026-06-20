@@ -5,7 +5,10 @@ BASE_URL="${BASE_URL:-https://localhost:8443}"
 CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
 
 curl() { command curl ${CURL_TLS_OPTS} "$@"; }
-WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+if [ -z "${WEBHOOK_SECRET:-}" ] || [[ "${WEBHOOK_SECRET:-}" == REPLACE_WITH_* ]]; then
+  echo "[ERROR] WEBHOOK_SECRET must be set from infra/.env or the shell environment." >&2
+  exit 1
+fi
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 TIMESTAMP="$(date +%s)"
 NONCE="${NONCE:-$("${PYTHON_BIN}" -c 'import uuid; print(uuid.uuid4())')}"

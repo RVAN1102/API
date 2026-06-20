@@ -127,6 +127,10 @@ class OrderListResponse(BaseModel):
 class OwnershipVerificationResponse(BaseModel):
     order_id: str
     allowed: bool
+    owner_id: str
+    amount: float
+    currency: str
+    status: str
     correlation_id: str
 
 
@@ -385,6 +389,10 @@ async def verify_order_ownership(
     return {
         "order_id": body.order_id,
         "allowed": allowed,
+        "owner_id": order["owner_id"],
+        "amount": order["amount"],
+        "currency": order["currency"],
+        "status": order["status"],
         "correlation_id": correlation_id,
     }
 

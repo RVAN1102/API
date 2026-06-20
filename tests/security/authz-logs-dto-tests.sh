@@ -263,7 +263,7 @@ assert_status "billing service token users me forbidden" 403 \
     "${BASE_URL}/api/v1/users/me" \
     -H "$(bearer_header "${BILLING_TOKEN}")" \
     -H "X-Correlation-ID: ${CID_USER_REQUIRED}")"
-assert_auth_log_event "user-service" "${CID_USER_REQUIRED}" 403 "user_required"
+assert_auth_log_event "user-service" "${CID_USER_REQUIRED}" 403 "missing_role"
 assert_log_safe "user-service" "${CID_USER_REQUIRED}" "${BILLING_TOKEN}" "raw service token"
 
 CID_ORDER_SERVICE="tv2-order-service-client-$(date +%s)"
@@ -341,7 +341,7 @@ STATUS_CODE="$(curl -s -o "${BODY}" -w "%{http_code}" -X POST \
   -H "Content-Type: application/json" \
   -d '{"order_id":"ord-alice-1001","subject":"alice"}')"
 assert_status "order internal verify DTO status" 200 "${STATUS_CODE}"
-assert_json_keys "order internal verify" "${BODY}" order_id allowed correlation_id
+assert_json_keys "order internal verify" "${BODY}" order_id allowed owner_id amount status currency correlation_id
 
 BODY="$(tmp_file)"
 STATUS_CODE="$(curl -s -o "${BODY}" -w "%{http_code}" -X POST \

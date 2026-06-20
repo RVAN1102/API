@@ -73,7 +73,10 @@ echo "(First request should succeed, second should fail with 403 – replay dete
 TIMESTAMP=$(date +%s)
 NONCE="test-nonce-replay-$(date +%s)"
 BODY='{"event_id":"evt-replay-001","event_type":"payment.succeeded","checkout_id":"checkout-001"}'
-WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+if [ -z "${WEBHOOK_SECRET:-}" ] || [[ "${WEBHOOK_SECRET:-}" == REPLACE_WITH_* ]]; then
+  echo "[ERROR] WEBHOOK_SECRET must be set from infra/.env or the shell environment." >&2
+  exit 1
+fi
 MESSAGE="${TIMESTAMP}.${NONCE}.${BODY}"
 SIG=$(echo -n "${MESSAGE}" | python3 -c "
 import sys, hmac, hashlib

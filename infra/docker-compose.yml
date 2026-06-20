@@ -177,7 +177,7 @@ services:
     expose:
       - "8000"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/users/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/users/health')"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -209,7 +209,7 @@ services:
     expose:
       - "8000"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/orders/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/orders/health')"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -234,7 +234,7 @@ services:
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
       ORDER_SERVICE_URL: "http://order-service:8000"
       OPA_URL: "http://opa:8181"
-      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}"
       WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-redis}"
       WEBHOOK_NONCE_REDIS_URL: "${WEBHOOK_NONCE_REDIS_URL:-redis://redis:6379/0}"
       WEBHOOK_NONCE_TTL_SECONDS: "${WEBHOOK_NONCE_TTL_SECONDS:-300}"
@@ -250,7 +250,7 @@ services:
       - billing-order-s2s-internal
       - billing-nonce-internal
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/billing/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/billing/health')"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -298,7 +298,7 @@ services:
       - admin-identity-internal
       - admin-policy-internal
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/admin/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/admin/health')"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -312,7 +312,7 @@ services:
     image: python:3.13-alpine
     command: python /app/receiver.py
     environment:
-      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}"
       WEBHOOK_MAX_AGE_SECONDS: "300"
     volumes:
       - ../demo/webhook/receiver.py:/app/receiver.py:ro

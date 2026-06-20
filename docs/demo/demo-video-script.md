@@ -45,18 +45,14 @@ curl http://localhost:8002/api/v1/billing/health | python3 -m json.tool
 
 ## Scene 2: Safe Auth Flow (1:30 – 3:00)
 
-**Narration:** "Người dùng alice đăng nhập qua Keycloak, nhận JWT token (TTL=300s), và truy cập API."
+**Narration:** "Người dùng alice đăng nhập qua Keycloak bằng Authorization Code + PKCE, nhận JWT token (TTL=300s), và truy cập API."
 
 ```bash
-# Get token (mask it from screen)
-TOKEN_RESP=$(curl -s -X POST \
-  http://localhost:8080/realms/myrealm/protocol/openid-connect/token \
-  -d "grant_type=password&client_id=kong-client&username=alice&password=alice123")
-
-ALICE_TOKEN=$(echo $TOKEN_RESP | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['access_token'])")
-echo "Token TTL: $(echo $TOKEN_RESP | python3 -c 'import sys,json; print(json.load(sys.stdin)["expires_in"])') seconds"
-echo "Token length: ${#ALICE_TOKEN} chars"
-# Do NOT show full token on screen
+# Generate the PKCE authorization URL, open it in a browser, then exchange the
+# returned code. Do not show full tokens on screen during the demo.
+bash demo/auth/pkce-token-request.sh url
+bash demo/auth/pkce-token-request.sh exchange <code> <code_verifier>
+export ALICE_TOKEN=<access_token_from_exchange_output>
 
 # Use token
 curl -s https://localhost:8443/api/v1/users/me \
@@ -174,11 +170,13 @@ curl -v "https://localhost:8443/api/v1/admin/metadata-vulnerable?url=http://169.
 **Narration:** "ZAP Active Scan tìm thấy 0 HIGH, 2 MEDIUM (đã phân tích false positive)."
 
 ```bash
-# Show evidence file (already generated)
-cat docs/evidence/tv3/zap/zap-active-summary.md
+# For current HTTPS evidence, rerun the scan before the defense demo.
+bash tests/security/zap-active-scan.sh
+cat docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
 ```
 
-**Show:** ZAP summary – 0 HIGH, 2 MEDIUM, both triaged
+**Show:** ZAP command and authoritative evidence index. Archived pre-HTTPS ZAP
+reports are retained only for audit history.
 
 ---
 
@@ -187,7 +185,8 @@ cat docs/evidence/tv3/zap/zap-active-summary.md
 **Narration:** "47 fuzz requests – 0 crashes. 2 minor findings đã có kế hoạch sửa."
 
 ```bash
-cat docs/evidence/tv3/fuzzing/fuzzing-summary.md
+bash tests/security/run-fuzzing.sh
+cat docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
 ```
 
 ---
@@ -254,8 +253,8 @@ cat docs/evidence/tv3/supply-chain/cosign-verify-output.txt | head -20
 **Narration:** "Xoay vòng HMAC secret – old secret bị reject, new secret hoạt động. MTTD=2min, MTTR=3min."
 
 ```bash
-cat docs/evidence/tv3/resilience/key-rotation-output.txt
-cat docs/evidence/tv3/metrics/mttd-mttr.md
+cat .artifacts/test-runs/tv3/key-rotation-output.txt
+cat docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md
 ```
 
 ---

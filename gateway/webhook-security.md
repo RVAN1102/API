@@ -34,15 +34,15 @@ support overlap during rotation.
 
 ## Responsibility boundary
 
-Kong checks required header presence and limits/filter requests. The local
-Compose stack routes webhooks to `demo/webhook/receiver.py`, a stateful PoC
-that verifies HMAC, timestamp age, event schema, and nonce replay protection.
-It proves the contract without changing the Billing/Admin services owned by
-other team members.
+Kong checks required header presence, enforces the webhook mTLS channel, and
+limits/filters requests. The default Compose stack routes the production-shaped
+lab path to Billing's `/api/v1/webhooks/payment` receiver, which verifies HMAC,
+timestamp age, event schema, and Redis-backed nonce replay protection.
 
-For team integration and production, the same verification belongs in the
-real Billing/Admin receiver with shared nonce state such as Redis. The PoC's
-in-memory nonce cache is intentionally single-instance and non-persistent.
+The `demo/webhook/receiver.py` service remains a small standalone PoC for local
+experiments, not the authoritative final regression path. Production should use
+a managed/shared TTL store such as Redis/ElastiCache/Cloud Memorystore or a
+database table with TTL semantics.
 
 ```bash
 bash demo/webhook/send-valid-webhook.sh
@@ -50,5 +50,6 @@ bash demo/webhook/send-invalid-signature.sh
 bash demo/webhook/send-replay-webhook.sh
 ```
 
-`WEBHOOK_SECRET` defaults to an explicit local demo value in the sender
-scripts. Never reuse it outside the local demo.
+Load `WEBHOOK_SECRET` from the ignored lab `infra/.env` or from a real secret
+manager before running valid webhook sender scripts. The sender scripts do not
+embed a usable shared secret.
