@@ -228,12 +228,15 @@ ensure_webhook_mtls_certs() {
 
   [ -x "${ensure_script}" ] || [ -f "${ensure_script}" ] \
     || {
-      echo "[ERROR] Missing webhook mTLS ensure script: ${ensure_script}" >&2
+      echo "[FAIL] Missing webhook mTLS ensure script: ${ensure_script}" >&2
       return 1
     }
 
   echo "[INFO] Ensuring local-only webhook mTLS demo certs are present and consistent"
-  bash "${ensure_script}"
+  if ! bash "${ensure_script}"; then
+    echo "[FAIL] Webhook mTLS cert generation failed: ${ensure_script}" >&2
+    return 1
+  fi
   echo "[INFO] Before final security scan/package creation, remove runtime private artifacts: rm -f infra/certs/*.key infra/certs/*.p12"
 }
 
@@ -250,12 +253,28 @@ ensure_gateway_backend_mtls_certs() {
   bash "${ensure_script}"
 }
 
+restart_gateway_backend_mtls_proxies() {
+  echo ""
+  echo "[INFO] Restarting gateway-backend mTLS sidecars after cert generation"
+  if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
+    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart \
+      user-mtls-proxy \
+      order-mtls-proxy \
+      billing-mtls-proxy \
+      admin-mtls-proxy)
+  else
+    echo "[INFO] infra/docker-compose.yml not available; skipping mTLS sidecar restart"
+  fi
+}
+
 echo "=============================================="
 echo "  FINAL REGRESSION TEST"
 echo "  $(date)"
 echo "=============================================="
 
+ensure_webhook_mtls_certs
 ensure_gateway_backend_mtls_certs
+restart_gateway_backend_mtls_proxies
 reset_kong_at_start
 run_suite "Container Runtime Hardening" "tests/security/container-runtime-hardening-tests.sh"
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
