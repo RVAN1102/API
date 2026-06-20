@@ -10,9 +10,12 @@ This document defines the shared API contract between the gateway layer and back
 
 | Protocol | URL                         |
 |----------|-----------------------------|
-| HTTP     | `http://localhost:8000`     |
 | HTTPS    | `https://localhost:8443`    |
 | Admin    | `http://127.0.0.1:8001`     |
+
+The legacy plaintext gateway port is disabled and not exposed. Local lab
+certificates are self-signed, so command-line examples may use `-k` or
+`--insecure`; production should use CA-trusted certificates.
 
 ---
 

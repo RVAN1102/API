@@ -53,7 +53,8 @@ fail() { echo "[FAIL] $*"; exit 1; }
 
 http_code() {
   local code
-  code="$(curl -s -o /tmp/gw-backend-mtls-body.$$ -w '%{http_code}' "$@" 2>/dev/null || true)"
+  local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
+  code="$(curl ${curl_tls_opts} -s -o /tmp/gw-backend-mtls-body.$$ -w '%{http_code}' "$@" 2>/dev/null || true)"
   rm -f /tmp/gw-backend-mtls-body.$$
   [ -n "${code}" ] || code="000"
   echo "${code: -3}"
@@ -189,10 +190,10 @@ bash "${REPO_ROOT}/demo/mtls/ensure-gateway-backend-certs.sh"
 
 compose up -d --build
 
-wait_http_200 "http://localhost:8000/api/v1/users/health" "Kong -> user via mTLS sidecar"
-wait_http_200 "http://localhost:8000/api/v1/orders/health" "Kong -> order via mTLS sidecar"
-wait_http_200 "http://localhost:8000/api/v1/billing/health" "Kong -> billing via mTLS sidecar"
-wait_http_200 "http://localhost:8000/api/v1/admin/health" "Kong -> admin via mTLS sidecar"
+wait_http_200 "https://localhost:8443/api/v1/users/health" "Kong -> user via mTLS sidecar"
+wait_http_200 "https://localhost:8443/api/v1/orders/health" "Kong -> order via mTLS sidecar"
+wait_http_200 "https://localhost:8443/api/v1/billing/health" "Kong -> billing via mTLS sidecar"
+wait_http_200 "https://localhost:8443/api/v1/admin/health" "Kong -> admin via mTLS sidecar"
 
 assert_kong_has_openssl
 

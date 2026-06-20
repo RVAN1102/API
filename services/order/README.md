@@ -27,10 +27,10 @@ FastAPI-based Order Service with BOLA demo endpoints.
 
 ```bash
 # BOLA Vulnerable: Alice reads Bob's order → 200 (flaw)
-curl http://localhost:8000/api/v1/orders/ord-bob-2001/vulnerable \
+curl https://localhost:8443/api/v1/orders/ord-bob-2001/vulnerable \
   -H "Authorization: Bearer ${ALICE_TOKEN}"
 
 # BOLA Fixed: Alice reads Bob's order → 403 (protected)
-curl http://localhost:8000/api/v1/orders/ord-bob-2001/fixed \
+curl https://localhost:8443/api/v1/orders/ord-bob-2001/fixed \
   -H "Authorization: Bearer ${ALICE_TOKEN}"
 ```

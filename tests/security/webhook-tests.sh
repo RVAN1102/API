@@ -92,10 +92,11 @@ restore_runtime_cert_artifacts() {
 
 wait_for_kong() {
   local code
-  local health_url="http://localhost:8000/api/v1/users/health"
+  local health_url="https://localhost:8443/api/v1/users/health"
+  local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
 
   for attempt in $(seq 1 30); do
-    if code="$(curl -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
+    if code="$(curl ${curl_tls_opts} -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
       :
     else
       code="000"

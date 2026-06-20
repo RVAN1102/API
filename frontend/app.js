@@ -1,5 +1,5 @@
 // Configuration
-const GATEWAY_URL = 'http://localhost:8000';
+const GATEWAY_URL = 'https://localhost:8443';
 const KEYCLOAK_URL = 'http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/token';
 
 let tokens = { alice: null, bob: null, admin01: null };

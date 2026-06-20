@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 TIMESTAMP="$(date +%s)"
 NONCE="$("${PYTHON_BIN}" -c 'import uuid; print(uuid.uuid4())')"

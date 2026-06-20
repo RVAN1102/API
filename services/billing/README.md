@@ -43,10 +43,10 @@ regression.
 
 ```bash
 # Health
-curl http://localhost:8000/api/v1/billing/health
+curl https://localhost:8443/api/v1/billing/health
 
 # Checkout
-curl -X POST http://localhost:8000/api/v1/billing/checkout \
+curl -X POST https://localhost:8443/api/v1/billing/checkout \
   -H "Authorization: Bearer $(cat /tmp/user-token.txt)" \
   -H "Content-Type: application/json" \
   -H "X-Correlation-ID: billing-001" \

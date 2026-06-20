@@ -10,7 +10,7 @@
 //
 // Requirements:
 //   - k6 installed: https://k6.io/docs/getting-started/installation/
-//   - Kong Gateway running at http://localhost:8000
+//   - Kong Gateway running at https://localhost:8443
 //   - USER_TOKEN env var: k6 run -e USER_TOKEN=<token> ...
 
 import http from 'k6/http';
@@ -38,7 +38,7 @@ export const options = {
   },
 };
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8000';
+const BASE_URL = __ENV.BASE_URL || 'https://localhost:8443';
 const USER_TOKEN = __ENV.USER_TOKEN || '';
 
 const HEADERS = {

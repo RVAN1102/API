@@ -1,5 +1,5 @@
 {
-  "TargetEndpoint": "http://localhost:8000",
+  "TargetEndpoint": "https://localhost:8443",
   "MaxDurationSeconds": 300,
   "MaxRequestExecutionTime": 30,
   "MaxCombinations": 20,
@@ -12,7 +12,7 @@
   "EngineSettingsFilePath": "tests/restler/engine_settings.json",
   "HostEndpoints": {
     "Host": "localhost",
-    "Port": 8000
+    "Port": 8443
   },
   "ApiSpecFilePath": "services/openapi.yaml",
   "CheckerSettings": {

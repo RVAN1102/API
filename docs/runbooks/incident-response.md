@@ -103,7 +103,7 @@ bash scripts/security/cosign-sign.sh evidence
 
 # Verify legitimate users still work:
 curl -s -o /dev/null -w "%{http_code}\n" \
-  http://localhost:8000/api/v1/users/me \
+  https://localhost:8443/api/v1/users/me \
   -H "Authorization: Bearer $LEGIT_USER_TOKEN"
 # Expected: 200
 ```

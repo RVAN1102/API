@@ -9,7 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-TARGET_URL="${TARGET_URL:-${BASE_URL:-http://localhost:8000}}"
+TARGET_URL="${TARGET_URL:-${BASE_URL:-https://localhost:8443}}"
 OPENAPI_SPEC="${OPENAPI_SPEC:-${REPO_ROOT}/services/openapi.yaml}"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv3/restler"
 mkdir -p "${EVIDENCE_DIR}"
@@ -190,8 +190,8 @@ DICT_FILE="$(find_first "dict.json")"
 ENGINE_SETTINGS="$(find_first "engine_settings.json")"
 [ -f "${GRAMMAR_FILE}" ] || die "RESTler compile did not produce grammar.py"
 
-TEST_ARGS=(test --grammar_file "${GRAMMAR_FILE}" --target_ip 127.0.0.1 --target_port 8000 --no_ssl --host localhost)
-FUZZ_ARGS=(fuzz-lean --grammar_file "${GRAMMAR_FILE}" --target_ip 127.0.0.1 --target_port 8000 --no_ssl --host localhost)
+TEST_ARGS=(test --grammar_file "${GRAMMAR_FILE}" --target_ip 127.0.0.1 --target_port 8443 --host localhost)
+FUZZ_ARGS=(fuzz-lean --grammar_file "${GRAMMAR_FILE}" --target_ip 127.0.0.1 --target_port 8443 --host localhost)
 [ -f "${DICT_FILE}" ] && TEST_ARGS+=(--dictionary_file "${DICT_FILE}") && FUZZ_ARGS+=(--dictionary_file "${DICT_FILE}")
 [ -f "${ENGINE_SETTINGS}" ] && TEST_ARGS+=(--settings "${ENGINE_SETTINGS}") && FUZZ_ARGS+=(--settings "${ENGINE_SETTINGS}")
 

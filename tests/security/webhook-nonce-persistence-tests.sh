@@ -50,8 +50,9 @@ random_nonce() {
 
 wait_for_billing() {
   local code
+  local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
   for attempt in $(seq 1 30); do
-    code="$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/billing/health 2>/dev/null || echo "000")"
+    code="$(curl ${curl_tls_opts} -sS -o /dev/null -w "%{http_code}" https://localhost:8443/api/v1/billing/health 2>/dev/null || echo "000")"
     echo "[INFO] billing readiness attempt ${attempt}/30: HTTP ${code}"
     [ "${code}" = "200" ] && return 0
     sleep 2

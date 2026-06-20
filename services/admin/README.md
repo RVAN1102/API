@@ -17,13 +17,13 @@ FastAPI-based Admin Service with maintenance and SSRF demo endpoints.
 
 ```bash
 # SSRF Vulnerable: fetches any URL
-curl -X POST http://localhost:8000/api/v1/admin/metadata-fetch/vulnerable \
+curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/vulnerable \
   -H "Authorization: Bearer $(cat /tmp/user-token.txt)" \
   -H "Content-Type: application/json" \
   -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'
 
 # SSRF Fixed: blocked by URL validation
-curl -X POST http://localhost:8000/api/v1/admin/metadata-fetch/fixed \
+curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/fixed \
   -H "Authorization: Bearer $(cat /tmp/user-token.txt)" \
   -H "Content-Type: application/json" \
   -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'

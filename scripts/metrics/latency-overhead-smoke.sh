@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -u
 
-BASE_URL="${BASE_URL:-http://localhost:8000}"
+BASE_URL="${BASE_URL:-https://localhost:8443}"
+CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
+
+curl() { command curl ${CURL_TLS_OPTS} "$@"; }
 HTTPS_BASE_URL="${HTTPS_BASE_URL:-}"
 DIRECT_BASE_URL="${DIRECT_BASE_URL:-}"
 REQUESTS="${REQUESTS:-5}"
