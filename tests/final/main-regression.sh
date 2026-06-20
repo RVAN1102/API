@@ -291,6 +291,7 @@ snapshot_webhook_cert_artifacts
 ensure_webhook_mtls_certs
 reset_kong_after_edge
 run_suite "Webhook Security" "tests/security/webhook-tests.sh"
+run_suite "Webhook Nonce Persistence" "tests/security/webhook-nonce-persistence-tests.sh"
 restore_webhook_cert_artifacts
 run_suite "Fuzz/Negative" "tests/security/fuzz-negative-tests.sh"
 

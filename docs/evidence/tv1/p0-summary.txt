@@ -33,5 +33,5 @@ FAIL items:
 
 LIMITATION items:
 
-Evidence saved to: /c/Users/duynh/Documents/Code/Matma/Project/API-tv1-edge-final/docs/evidence/tv1/
+Evidence saved to: /home/rvan1102/API/docs/evidence/tv1/
 ========================================

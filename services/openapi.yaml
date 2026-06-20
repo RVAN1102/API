@@ -8,8 +8,6 @@ info:
 servers:
   - url: https://localhost:8443
     description: Kong API Gateway HTTPS endpoint
-  - url: https://localhost:8443
-    description: Kong API Gateway HTTP endpoint for local testing
 
 tags:
   - name: Users
@@ -261,9 +259,17 @@ paths:
         - Billing
       operationId: createCheckoutSession
       summary: Create a checkout request and trigger payment processing
-      description: Requires a valid user/admin JWT and verifies order ownership through the Order service before accepting checkout. The backend validates the JWT signature and issuer first. When `TOKEN_INTROSPECTION_ENABLED=true`, the backend then calls Keycloak token introspection and rejects inactive tokens or introspection failures with 401.
+      description: Requires a valid user/admin JWT, verifies order ownership through the Order service, rejects client-supplied amount/currency mismatches, and records idempotent checkout attempts when `Idempotency-Key` is supplied. The backend validates the JWT signature and issuer first. When `TOKEN_INTROSPECTION_ENABLED=true`, the backend then calls Keycloak token introspection and rejects inactive tokens or introspection failures with 401.
       security:
         - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Optional caller-scoped idempotency key. Reusing the same key with the same payload is a safe retry; reusing it with a different payload returns 409.
+          schema:
+            type: string
+            example: "checkout-alice-1001-001"
       requestBody:
         required: true
         content:
@@ -281,6 +287,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Checkout conflict, such as amount/currency mismatch, idempotency-key conflict, or duplicate checkout for the same caller/order.
 
   /api/v1/admin/health:
     get:
@@ -602,6 +610,7 @@ components:
       required:
         - order_id
         - amount
+        - currency
       properties:
         order_id:
           type: string
@@ -610,9 +619,11 @@ components:
           type: number
           format: float
           example: 150000
+          description: Client-supplied value must match the canonical amount returned by the Order service.
         currency:
           type: string
           example: "VND"
+          description: Client-supplied value must match the canonical currency returned by the Order service.
 
     OwnershipVerificationRequest:
       type: object
@@ -632,6 +643,10 @@ components:
       required:
         - order_id
         - allowed
+        - owner_id
+        - amount
+        - currency
+        - status
         - correlation_id
       properties:
         order_id:
@@ -640,6 +655,19 @@ components:
         allowed:
           type: boolean
           example: true
+        owner_id:
+          type: string
+          example: "alice"
+        amount:
+          type: number
+          format: float
+          example: 150000
+        currency:
+          type: string
+          example: "VND"
+        status:
+          type: string
+          example: "created"
         correlation_id:
           type: string
           example: "req-123456"

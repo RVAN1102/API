@@ -56,6 +56,9 @@ Supporting Services:
 - JWT validation with JWKS (RS256)
 - RBAC backend authorization (roles: user, admin, billing-service)
 - BOLA vulnerable/fixed demo (Order Service)
+- Billing checkout verifies Order ownership through the Order service, rejects
+  client amount/currency mismatches, and supports caller-scoped idempotency
+  keys for safe retries and duplicate-checkout detection in the lab prototype
 - HashiCorp Vault dev-mode secret-path and rotation workflow evidence; local
   Docker Compose injects prototype runtime secrets from ignored `infra/.env`
 
@@ -112,7 +115,10 @@ default compose file.
 ```bash
 python frontend/serve.py
 ```
-Open `http://localhost:3002` in your browser to interactively test BOLA, SSRF, and Webhooks.
+Open `http://localhost:3002` in your browser to interactively test BOLA, SSRF,
+and webhook rejection paths. The dashboard does not request user passwords or
+generate valid webhook signatures in browser JavaScript; obtain lab tokens with
+the PKCE/helper scripts and run valid webhook signing from `demo/webhook/`.
 
 Expected services:
 - `infra-kong-1`
@@ -190,6 +196,9 @@ ACCESS_TOKEN=<token> bash tests/attack/ssrf-attack.sh
 ## Test Webhook Security
 
 ```bash
+set -a
+source infra/.env
+set +a
 bash tests/attack/token-replay.sh
 bash tests/attack/webhook-forgery.sh
 bash tests/security/webhook-nonce-persistence-tests.sh

@@ -28,7 +28,7 @@ from urllib.parse import urlparse
 
 import httpx
 import redis.asyncio as redis
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwk, jwt
 from pydantic import BaseModel
@@ -37,7 +37,7 @@ from redis.exceptions import RedisError
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-WEBHOOK_SECRET: str = os.environ.get("WEBHOOK_SECRET", "dev-webhook-secret-change-me")
+WEBHOOK_SECRET: str = os.environ.get("WEBHOOK_SECRET", "")
 WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
 WEBHOOK_NONCE_STORE: str = os.environ.get("WEBHOOK_NONCE_STORE", "redis").lower()
 WEBHOOK_NONCE_REDIS_URL: str = os.environ.get("WEBHOOK_NONCE_REDIS_URL", "redis://redis:6379/0")
@@ -121,6 +121,8 @@ app = FastAPI(
 # Default lab/final-regression path is Redis-backed and multi-replica safe.
 # WEBHOOK_NONCE_STORE=memory is an explicit local-dev fallback only.
 _used_nonces: Dict[str, int] = {}
+_checkout_idempotency_records: Dict[str, Dict[str, Any]] = {}
+_checkout_order_records: Dict[str, Dict[str, Any]] = {}
 _redis_client: Optional[redis.Redis] = None
 if WEBHOOK_NONCE_STORE == "redis":
     _redis_client = redis.from_url(
@@ -530,7 +532,7 @@ async def verify_order_ownership_with_order_service(
     order_id: str,
     subject: str,
     correlation_id: str,
-) -> bool:
+) -> Optional[Dict[str, Any]]:
     service_token = await obtain_billing_service_token()
     verify_url = f"{ORDER_SERVICE_URL}/api/v1/orders/internal/verify-ownership"
 
@@ -556,12 +558,15 @@ async def verify_order_ownership_with_order_service(
 
     if response.status_code == 200:
         try:
-            return bool(response.json().get("allowed"))
+            data = response.json()
         except ValueError:
-            return False
+            return None
+        if bool(data.get("allowed")):
+            return data
+        return None
 
     if response.status_code in (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND):
-        return False
+        return None
 
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -577,10 +582,11 @@ async def require_order_owner_via_order_service(
     order_id: str,
     correlation_id: str,
     request: Request,
-) -> str:
+) -> Dict[str, Any]:
     subject = get_effective_subject(payload)
-    if subject and await verify_order_ownership_with_order_service(order_id, subject, correlation_id):
-        return subject
+    order_data = await verify_order_ownership_with_order_service(order_id, subject, correlation_id) if subject else None
+    if order_data:
+        return {**order_data, "subject": subject}
 
     log_event(
         level="WARNING",
@@ -647,6 +653,48 @@ class PaymentWebhookPayload(BaseModel):
     amount: Optional[float] = None
 
 
+def _checkout_idempotency_key(subject: str, idempotency_key: str) -> str:
+    digest = hashlib.sha256(f"{subject}:{idempotency_key}".encode("utf-8")).hexdigest()
+    return f"checkout:idempotency:{digest}"
+
+
+def _checkout_order_key(subject: str, order_id: str) -> str:
+    digest = hashlib.sha256(f"{subject}:{order_id}".encode("utf-8")).hexdigest()
+    return f"checkout:order:{digest}"
+
+
+def _checkout_request_fingerprint(body: CheckoutRequest) -> str:
+    canonical = {
+        "order_id": body.order_id,
+        "amount": body.amount,
+        "currency": body.currency,
+    }
+    return hashlib.sha256(json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+async def _checkout_record_get(key: str) -> Optional[Dict[str, Any]]:
+    if _redis_client is not None:
+        try:
+            raw = await _redis_client.get(key)
+            return json.loads(raw) if raw else None
+        except (RedisError, ValueError):
+            return None
+    return _checkout_idempotency_records.get(key) or _checkout_order_records.get(key)
+
+
+async def _checkout_record_set(key: str, record: Dict[str, Any]) -> None:
+    if _redis_client is not None:
+        try:
+            await _redis_client.set(key, json.dumps(record), ex=86400)
+            return
+        except RedisError:
+            pass
+    if key.startswith("checkout:idempotency:"):
+        _checkout_idempotency_records[key] = record
+    else:
+        _checkout_order_records[key] = record
+
+
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
@@ -662,6 +710,7 @@ async def create_checkout(
     body: CheckoutRequest,
     request: Request,
     payload: Dict[str, Any] = Depends(require_checkout_access),
+    idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
 ):
     """
     Initiate a checkout/payment session.
@@ -673,7 +722,20 @@ async def create_checkout(
     Requires order ownership unless the caller has role 'admin'.
     """
     correlation_id = request.headers.get("X-Correlation-ID", "")
-    subject = await require_order_owner_via_order_service(payload, body.order_id, correlation_id, request)
+    order_data = await require_order_owner_via_order_service(payload, body.order_id, correlation_id, request)
+    subject = _claim_as_string(order_data.get("subject"))
+
+    canonical_amount = float(order_data["amount"])
+    canonical_currency = _claim_as_string(order_data.get("currency"))
+    if float(body.amount) != canonical_amount or body.currency != canonical_currency:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "checkout_amount_mismatch",
+                "message": "Checkout amount/currency must match canonical Order service data",
+            },
+        )
+
     await require_opa_allow(
         {
             "action": "billing_checkout",
@@ -693,7 +755,53 @@ async def create_checkout(
     )
 
     import uuid
+    request_fingerprint = _checkout_request_fingerprint(body)
+
+    if idempotency_key:
+        idem_key = _checkout_idempotency_key(subject, idempotency_key)
+        order_key = _checkout_order_key(subject, body.order_id)
+
+        existing_idempotency = await _checkout_record_get(idem_key)
+        if existing_idempotency:
+            if existing_idempotency.get("request_fingerprint") == request_fingerprint:
+                return existing_idempotency["response"]
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "idempotency_key_conflict",
+                    "message": "Idempotency-Key was already used with a different checkout payload",
+                },
+            )
+
+        existing_order_checkout = await _checkout_record_get(order_key)
+        if existing_order_checkout and existing_order_checkout.get("idempotency_key") != idempotency_key:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "duplicate_checkout",
+                    "message": "This order already has a checkout for this caller",
+                },
+            )
+
     payment_id = f"pay-{uuid.uuid4().hex[:8]}"
+
+    response_body = {
+        "payment_id": payment_id,
+        "order_id": body.order_id,
+        "status": "accepted",
+        "amount": canonical_amount,
+        "currency": canonical_currency,
+        "correlation_id": correlation_id,
+    }
+
+    if idempotency_key:
+        record = {
+            "idempotency_key": idempotency_key,
+            "request_fingerprint": request_fingerprint,
+            "response": response_body,
+        }
+        await _checkout_record_set(_checkout_idempotency_key(subject, idempotency_key), record)
+        await _checkout_record_set(_checkout_order_key(subject, body.order_id), record)
 
     log_event(
         level="INFO",
@@ -704,17 +812,10 @@ async def create_checkout(
         client_ip=request.client.host if request.client else "unknown",
         correlation_id=correlation_id,
         message=f"Checkout accepted for order {body.order_id}",
-        extra={"order_id": body.order_id, "amount": body.amount, "currency": body.currency},
+        extra={"order_id": body.order_id, "amount": canonical_amount, "currency": canonical_currency},
     )
 
-    return {
-        "payment_id": payment_id,
-        "order_id": body.order_id,
-        "status": "accepted",
-        "amount": body.amount,
-        "currency": body.currency,
-        "correlation_id": correlation_id,
-    }
+    return response_body
 
 
 @app.post("/api/v1/webhooks/payment", tags=["Webhooks"])
@@ -824,6 +925,16 @@ async def receive_payment_webhook(request: Request):
 
     # --- Read raw body ---
     raw_body = await request.body()
+
+    if not WEBHOOK_SECRET or WEBHOOK_SECRET.startswith("REPLACE_WITH_"):
+        log_event("ERROR", "webhook_secret_missing", "POST",
+                  "/api/v1/webhooks/payment", 503, client_ip, correlation_id,
+                  "Webhook HMAC secret is not configured",
+                  {"security_event": True, "decision": "rejected", "reason": "webhook_secret_missing"})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "webhook_secret_missing", "message": "Webhook HMAC secret is not configured"},
+        )
 
     # --- Compute expected HMAC ---
     message = timestamp_str.encode("utf-8") + b"." + nonce.encode("utf-8") + b"." + raw_body

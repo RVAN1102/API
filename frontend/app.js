@@ -1,6 +1,5 @@
 // Configuration
 const GATEWAY_URL = 'https://localhost:8443';
-const KEYCLOAK_URL = 'http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/token';
 
 let tokens = { alice: null, bob: null, admin01: null };
 
@@ -39,50 +38,32 @@ btnClear.addEventListener('click', () => {
   consoleBody.innerHTML = '<div class="log-entry system">Console cleared.</div>';
 });
 
-// --- Authentication (Keycloak Direct Grant) ---
-async function fetchToken(username, password) {
-  logToConsole('info', `Fetching token for ${username}...`);
-  try {
-    const response = await fetch(KEYCLOAK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: 'sme-web-client',
-        grant_type: 'password',
-        username: username,
-        password: password
-      })
-    });
-    
-    const data = await response.json();
-    if (response.ok && data.access_token) {
-      tokens[username] = data.access_token;
-      
-      // Update badge
-      let badge = badgeAlice;
-      if (username === 'bob') badge = badgeBob;
-      if (username === 'admin01') badge = badgeAdmin;
-      badge.className = 'badge badge-success';
-      badge.textContent = `${username}: Ready`;
-      
-      logToConsole('pass', `Token retrieved for ${username}`, {
-        token_preview: data.access_token.substring(0, 30) + '...'
-      }, 200);
-    } else {
-      logToConsole('fail', `Failed to get token for ${username}`, data, response.status);
-    }
-  } catch (err) {
-    let msg = err.message;
-    if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-      msg = "Keycloak server is unreachable (down or starting up). Please run fix-and-restart.sh";
-    }
-    logToConsole('fail', `Network error while fetching token`, msg);
-  }
+// --- Authentication ---
+// Browser demo intentionally does not request or store lab passwords. Obtain a
+// lab token with demo/auth/pkce-token-request.sh or an automation helper, then
+// paste only the access token for interactive testing.
+function updateTokenBadge(username) {
+  let badge = badgeAlice;
+  if (username === 'bob') badge = badgeBob;
+  if (username === 'admin01') badge = badgeAdmin;
+  badge.className = 'badge badge-success';
+  badge.textContent = `${username}: Ready`;
 }
 
-document.getElementById('btnGetAlice').addEventListener('click', () => fetchToken('alice', 'alice-password-123'));
-document.getElementById('btnGetBob').addEventListener('click', () => fetchToken('bob', 'bob-password-123'));
-document.getElementById('btnGetAdmin').addEventListener('click', () => fetchToken('admin01', 'admin-password-123'));
+function setTokenFromPrompt(username) {
+  const value = window.prompt(`Paste access token for ${username}. It is kept only in memory for this page session.`);
+  if (!value) {
+    logToConsole('info', `No token pasted for ${username}. Use demo/auth/pkce-token-request.sh to obtain one.`);
+    return;
+  }
+  tokens[username] = value.replace(/^Bearer\s+/i, '').trim();
+  updateTokenBadge(username);
+  logToConsole('pass', `Access token loaded for ${username}`, 'Token value hidden in UI memory only.');
+}
+
+document.getElementById('btnGetAlice').addEventListener('click', () => setTokenFromPrompt('alice'));
+document.getElementById('btnGetBob').addEventListener('click', () => setTokenFromPrompt('bob'));
+document.getElementById('btnGetAdmin').addEventListener('click', () => setTokenFromPrompt('admin01'));
 
 // --- Helper: API Fetch ---
 async function apiFetch(method, path, user, bodyObj = null, headersObj = {}) {
@@ -160,21 +141,12 @@ document.getElementById('btnSsrfFixed').addEventListener('click', () => {
   apiFetch('POST', '/api/v1/admin/metadata-fetch/fixed', 'admin01', ssrfPayload);
 });
 
-// --- Test: Webhook Forgery (use Web Crypto API to sign real HMAC-SHA256) ---
-// The WEBHOOK_SECRET in billing-service defaults to "dev-webhook-secret-change-me"
-const WEBHOOK_SECRET = 'dev-webhook-secret-change-me';
-
-async function computeHmac(secret, message) {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-  );
-  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
-  return 'sha256=' + Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function testWebhook(isValid) {
-  logToConsole('info', `Testing Webhook: ${isValid ? 'Valid' : 'Invalid'} Signature`);
+// --- Test: Webhook Forgery ---
+// Valid HMAC generation is server/CLI-side only. The browser can safely show
+// rejection behavior for invalid or missing signatures without knowing the
+// shared webhook secret.
+async function testInvalidWebhook() {
+  logToConsole('info', 'Testing Webhook: Invalid Signature');
 
   const payload = {
     event_id: "evt-test-" + Date.now(),
@@ -184,12 +156,7 @@ async function testWebhook(isValid) {
   const rawBody = JSON.stringify(payload);
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const nonce = "ui-nonce-" + Date.now();
-
-  // Build the HMAC message the same way billing-service does:
-  // message = timestamp + "." + nonce + "." + raw_body
-  const message = timestamp + '.' + nonce + '.' + rawBody;
-  const realSig = await computeHmac(WEBHOOK_SECRET, message);
-  const signature = isValid ? realSig : 'sha256=badhash000000000000000000000000000000000000000000000000000000000';
+  const signature = 'sha256=badhash000000000000000000000000000000000000000000000000000000000';
 
   const headers = {
     'Content-Type': 'application/json',
@@ -208,11 +175,7 @@ async function testWebhook(isValid) {
     let data;
     try { data = await res.json(); } catch { data = await res.text(); }
 
-    let type = 'info';
-    if (isValid && res.status === 200) type = 'pass';
-    if (!isValid && res.status === 401) type = 'pass';
-    if (isValid && res.status !== 200) type = 'fail';
-    if (!isValid && res.status === 200) type = 'fail';
+    let type = res.status === 401 ? 'pass' : 'fail';
 
     logToConsole(type, `Webhook Defense Result`, data, res.status);
   } catch (err) {
@@ -224,8 +187,11 @@ async function testWebhook(isValid) {
   }
 }
 
-document.getElementById('btnWebhookValid').addEventListener('click', () => testWebhook(true));
-document.getElementById('btnWebhookInvalid').addEventListener('click', () => testWebhook(false));
+document.getElementById('btnWebhookValid').addEventListener('click', () => {
+  logToConsole('info', 'Valid webhook signing is not available in browser JavaScript.',
+    'Run demo/webhook/send-valid-webhook.sh after loading the lab HMAC value from infra/.env for the valid path.');
+});
+document.getElementById('btnWebhookInvalid').addEventListener('click', () => testInvalidWebhook());
 
 // --- TV1: Rate Limiting Test ---
 document.getElementById('btnRateLimit').addEventListener('click', async () => {
@@ -333,5 +299,11 @@ document.getElementById('btnRbacTest').addEventListener('click', () => {
 // --- TV3: Billing Checkout Test ---
 document.getElementById('btnBillingCheckout').addEventListener('click', () => {
   logToConsole('info', 'Executing Checkout in Billing Service...');
-  apiFetch('POST', '/api/v1/billing/checkout', 'alice', { order_id: "ord-test-01", amount: 50000 });
+  apiFetch(
+    'POST',
+    '/api/v1/billing/checkout',
+    'alice',
+    { order_id: "ord-alice-1001", amount: 150000, currency: "VND" },
+    { 'Idempotency-Key': `ui-checkout-${Date.now()}` }
+  );
 });

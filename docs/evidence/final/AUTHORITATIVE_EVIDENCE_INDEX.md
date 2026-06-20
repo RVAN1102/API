@@ -39,13 +39,13 @@ This index points to the official, reviewable evidence set for the current harde
 - Alert diagnostics and selected samples: `docs/evidence/tv3/metrics/`
 - Authoritative SecOps MTTD/MTTR summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
 - Latency, p50/p95 method, and SME cost trade-off summary: `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`
-- Latency smoke command: `BASE_URL=http://localhost:8000 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh`
+- Latency smoke command: `BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh`
 
 ## DAST, Fuzzing, And Security Scans
 
-- ZAP Active Scan report and summary: `docs/evidence/tv3/zap/zap-active-summary.md`, `docs/evidence/tv3/zap/zap-active-report.json`
-- RESTler execution summary: `docs/evidence/tv3/restler/restler-summary.md`
-- Structured fuzzing summary: `docs/evidence/tv3/fuzzing/fuzzing-summary.md`
+- ZAP Active Scan: rerun `bash tests/security/zap-active-scan.sh` against the current HTTPS gateway before making current DAST claims. Pre-HTTPS reports are archived under `docs/evidence/archive/pre-8443-http8000/tv3/zap/`.
+- RESTler execution: rerun `bash tests/restler/run-restler-check.sh` against the current HTTPS gateway before making current RESTler claims. Pre-HTTPS summary is archived under `docs/evidence/archive/pre-8443-http8000/tv3/restler/`.
+- Structured fuzzing: rerun `bash tests/security/run-fuzzing.sh` against the current HTTPS gateway before making current fuzzing claims. Pre-HTTPS summary is archived under `docs/evidence/archive/pre-8443-http8000/tv3/fuzzing/`.
 - Local security scan evidence: `docs/evidence/tv3/security-scan-local.txt`
 - Supply-chain evidence, SBOM, and signing summaries: `docs/evidence/tv3/supply-chain/`
 - CI image SBOM and Cosign dry-run path: `.github/workflows/security-scan.yml`, `scripts/security/generate-sbom.sh`, `scripts/security/cosign-sign.sh`

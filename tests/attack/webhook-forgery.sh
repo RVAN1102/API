@@ -20,7 +20,10 @@ BASE_URL="${BASE_URL:-https://localhost:8443}"
 CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
 
 curl() { command curl ${CURL_TLS_OPTS} "$@"; }
-WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-webhook-secret-change-me}"
+if [ -z "${WEBHOOK_SECRET:-}" ] || [[ "${WEBHOOK_SECRET:-}" == REPLACE_WITH_* ]]; then
+  echo "[ERROR] WEBHOOK_SECRET must be set from infra/.env or the shell environment." >&2
+  exit 1
+fi
 WEBHOOK_URL="${BASE_URL}/api/v1/billing/webhooks/payment"
 # Try billing service webhook endpoint first, fall back to TV1 webhook demo
 BILLING_WEBHOOK="${BASE_URL}/api/v1/billing/webhooks/payment"
@@ -58,7 +61,7 @@ print('sha256=' + hmac.new(secret, msg, hashlib.sha256).hexdigest())
 
 echo "=== Webhook Forgery Attack Simulation ==="
 echo "Base URL: ${BASE_URL}"
-echo "Webhook Secret: (dev-webhook-secret-change-me)"
+echo "Webhook Secret: (loaded from environment; value hidden)"
 echo ""
 
 BODY='{"event_id":"evt-forgery-001","event_type":"payment.succeeded","checkout_id":"checkout-001","amount":150000}'
