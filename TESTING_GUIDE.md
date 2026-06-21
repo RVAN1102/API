@@ -1,5 +1,10 @@
 # Testing Guide – Capstone API Security (Topic 10)
 
+Canonical URL/security scope: `docs/runbooks/url-and-security-scope.md`.
+The public application API endpoint is `https://localhost:8443`; HTTP URLs for
+Kong Admin, Keycloak, Vault, and Grafana are lab-local control-plane or
+observability endpoints only.
+
 ## Prerequisites
 
 1. **Docker Desktop** running
@@ -339,16 +344,22 @@ not expose sensitive or debug/internal fields.
 For image supply-chain evidence in CI, `.github/workflows/security-scan.yml`
 builds local service images, scans them with Trivy, emits CycloneDX image SBOM
 artifacts, and runs a Cosign keyless-signing readiness dry-run. Dry-run mode
-does not create a signature; real production signing should use a published
-image digest and GitHub Actions OIDC identity pinned during verification. Local
-commands:
+does not create a signature; do not claim CI signing succeeded unless a reviewed
+workflow artifact contains signing and verification evidence for a real image
+digest. Real production signing should use GitHub Actions OIDC identity pinned
+during verification. Local commands:
 
 ```bash
 SBOM_IMAGES="topic10-user-service:local" bash scripts/security/generate-sbom.sh
-bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-placeholder
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:phase3-dry-run
 ```
 
 Evidence note: `docs/evidence/final/production-hardening-bundle-1.md`.
+Downloaded workflow artifacts can be summarized with:
+
+```bash
+bash scripts/ci/summarize-github-actions-evidence.sh <artifact-dir>
+```
 
 ---
 
@@ -360,7 +371,7 @@ Run this before review or merge:
 bash tests/final/main-regression.sh
 ```
 
-If `infra/.env` is missing or still has placeholders, the regression preflight
+If `infra/.env` is missing or still has template defaults, the regression preflight
 calls `bash scripts/bootstrap-lab-env.sh` and reloads the file without printing
 secret values.
 
@@ -387,9 +398,13 @@ BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead
 
 # Optional HTTPS lab path:
 HTTPS_BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
+
+# Phase 3 k6 public gateway path:
+k6 run tests/performance/k6-phase3.js
 ```
 
 Transient output is written to `.artifacts/test-runs/metrics/`. Read the p50/p95 method and SME cost/trade-off summary at `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`.
+The k6 Phase 3 template is documented in `docs/evidence/tv3/performance/README.md`.
 
 ---
 

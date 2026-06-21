@@ -2,7 +2,10 @@
 
 This directory contains all QA/regression/security evidence produced by TV3 (Huy).
 
-**Last updated:** 2026-06-18
+**Last updated:** 2026-06-21
+
+Canonical URL/security scope: `docs/runbooks/url-and-security-scope.md`.
+The public application API is `https://localhost:8443`.
 
 ---
 
@@ -81,7 +84,7 @@ See `red-team/ssrf-egress-defense.md` above.
 | `resilience/key-rotation-output.txt` | Rotation output log |
 | `resilience/token-revocation-drill.md` | Token revocation via Keycloak |
 | `resilience/token-revocation-output.txt` | Revocation output log |
-| `resilience/incident-response-drill.md` | Incident response: MTTD=2min, MTTR=3min |
+| `resilience/incident-response-drill.md` | Incident response drill evidence; use timestamped measurement files for current MTTD/MTTR values |
 
 ---
 
@@ -99,6 +102,8 @@ See `red-team/ssrf-egress-defense.md` above.
 | `metrics/mttd-mttr-alert-based-analysis.md` | MTTD/MTTR methodology and summary |
 | `secops-metrics/secops-mttd-mttr-summary.md` | Authoritative MTTD/MTTR scenario matrix for 401, 403/BOLA, 429, SSRF, and webhook signals |
 | `secops-metrics/latency-cost-tradeoff-summary.md` | p50/p95 latency measurement method and SME cost/trade-off analysis |
+| `secops-metrics/phase3/mttd-mttr-phase3-summary.md` | Phase 3 MTTD/MTTR timestamp template for BOLA/403, SSRF, WAF, and rate-limit events |
+| `performance/README.md` | Phase 3 k6 performance evidence template |
 
 ### P1-02: Pipeline
 
@@ -108,20 +113,28 @@ See `red-team/ssrf-egress-defense.md` above.
 | `pipeline/local-pipeline-output.txt` | Local CI run output |
 | `../../.github/workflows/security-scan.yml` | GitHub Actions: Bandit, Gitleaks, Trivy |
 | `../../scripts/ci/security-pipeline.sh` | Full local CI equivalent |
+| `../../scripts/ci/summarize-github-actions-evidence.sh` | Downloaded GitHub Actions artifact summarizer |
 
-### P1-03: Evidence Index
+### P1-03: OpenAPI/Negative Fuzzing
+
+| File | Proves |
+|------|--------|
+| `fuzzing/phase3-openapi-fuzzing-summary.md` | Deterministic OpenAPI/negative fuzzing scope; RESTler/Fuzzapi are optional extensions unless fresh evidence exists |
+
+### P1-04: Evidence Index
 
 This file.
 
-### P1-04: Runbooks
+### P1-05: Runbooks
 
 | File | Contents |
 |------|----------|
 | `../../docs/runbooks/incident-response.md` | Incident response procedure |
 | `../../docs/runbooks/key-rotation.md` | Key rotation procedure |
 | `../../docs/runbooks/onboarding-new-client-bff.md` | New client onboarding |
+| `../../docs/runbooks/url-and-security-scope.md` | Canonical URL and security-scope model |
 
-### P1-05: Demo
+### P1-06: Demo
 
 | File | Contents |
 |------|----------|
@@ -169,9 +182,12 @@ bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-pla
 bash tests/final/main-regression.sh
 
 # P1-01: Metrics
-k6 run tests/performance/k6-latency-test.js
+k6 run tests/performance/k6-phase3.js
 BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
 
 # P1-02: Full Pipeline
 bash scripts/ci/security-pipeline.sh
+
+# Optional: summarize downloaded GitHub Actions artifacts
+bash scripts/ci/summarize-github-actions-evidence.sh <artifact-dir>
 ```

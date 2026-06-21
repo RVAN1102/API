@@ -5,6 +5,11 @@ backend services. Kong no longer routes directly to the raw HTTP backends; it
 routes to Nginx mTLS sidecars that verify Kong's internal client certificate
 before forwarding requests to the local service container path.
 
+Canonical URL/security scope is maintained in
+`docs/runbooks/url-and-security-scope.md`. This document covers the
+gateway-to-backend sidecar scope only; it does not claim all internal traffic is
+mTLS.
+
 Default runtime command:
 
 ```bash

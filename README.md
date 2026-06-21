@@ -70,7 +70,7 @@ Supporting Services:
 - Security alert rules (BOLA, SSRF, webhook, rate-limit)
 - Attack simulation scripts (SSRF, token replay, webhook forgery, BOLA, rate-limit)
 - OWASP ZAP Active Scan
-- RESTler API fuzzing plan
+- Deterministic OpenAPI/negative fuzzing; RESTler remains an optional extension
 - CI security scan (Bandit, Gitleaks, Trivy)
 - CycloneDX SBOM generation and Cosign keyless-signing readiness path
 - MTTD/MTTR measurement
@@ -141,9 +141,12 @@ Expected services:
 
 ## Service URLs
 
+Canonical URL/security scope is maintained in
+`docs/runbooks/url-and-security-scope.md`.
+
 | Service     | URL                                  |
 |-------------|--------------------------------------|
-| Kong HTTPS  | https://localhost:8443              |
+| Public API  | https://localhost:8443              |
 | Kong Admin  | http://127.0.0.1:8001              |
 | Keycloak    | http://localhost:8080               |
 | Vault       | http://localhost:8200               |
@@ -153,6 +156,8 @@ Redis is internal-only in Docker Compose and is not exposed on a host port.
 The legacy plaintext gateway port is disabled and not exposed.
 The lab gateway certificate is local/self-signed, so curl examples use `-k`.
 Production must use a CA-trusted certificate and normal certificate validation.
+Kong Admin, Keycloak, Vault, and Grafana are lab-local control-plane or
+observability endpoints, not public application API endpoints.
 
 ## Health Checks
 
@@ -228,7 +233,7 @@ bash tests/final/main-regression.sh
 Expected current result: 12 suites passed, 0 failed.
 
 The regression preflight runs `scripts/bootstrap-lab-env.sh` when `infra/.env`
-is missing or still contains placeholders. This creates local lab-only values
+is missing or still contains template defaults. This creates local lab-only values
 for Docker Compose and does not commit them.
 
 Secret-management alignment is documented in
@@ -250,6 +255,14 @@ bash scripts/generate-final-evidence.sh
 ```bash
 bash tests/metrics/measure-mttd-mttr.sh
 ```
+
+Phase 3 performance, fuzzing, CI, and SecOps evidence templates:
+
+- `docs/evidence/tv3/performance/README.md`
+- `docs/evidence/tv3/fuzzing/phase3-openapi-fuzzing-summary.md`
+- `docs/evidence/tv3/secops-metrics/phase3/mttd-mttr-phase3-summary.md`
+- `scripts/ci/summarize-github-actions-evidence.sh`
+- `scripts/audit/repo-consistency-audit.sh`
 
 ## Gateway Edge Tests
 

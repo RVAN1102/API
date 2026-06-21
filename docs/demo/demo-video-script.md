@@ -4,6 +4,10 @@
 **File:** `docs/demo/demo-video-script.md`  
 **Presenter:** Project team
 
+Canonical URL/security scope: `docs/runbooks/url-and-security-scope.md`.
+Do not show JWTs, refresh tokens, client secrets, webhook secrets, private keys,
+or generated certificate material during recording.
+
 ---
 
 ## Setup Before Recording
@@ -171,7 +175,7 @@ curl -k -v -X POST "https://localhost:8443/api/v1/admin/metadata-fetch/vulnerabl
 
 ## Scene 8: ZAP Active Scan Result (10:00 – 11:00)
 
-**Narration:** "ZAP Active Scan tìm thấy 0 HIGH, 2 MEDIUM (đã phân tích false positive)."
+**Narration:** "ZAP Active Scan được chạy lại qua HTTPS gateway; kết quả hiện tại nằm trong artifact của lần chạy và evidence index."
 
 ```bash
 # For current HTTPS evidence, rerun the scan before the defense demo.
@@ -186,11 +190,12 @@ written under `.artifacts/test-runs/tv3/zap/`.
 
 ## Scene 9: API Fuzzing Result (11:00 – 11:45)
 
-**Narration:** "47 fuzz requests – 0 crashes. 2 minor findings đã có kế hoạch sửa."
+**Narration:** "Deterministic OpenAPI/negative fuzzing được chạy qua HTTPS gateway; expected 4xx là fail-closed, unexpected 5xx là finding."
 
 ```bash
 bash tests/security/run-fuzzing.sh
 cat docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
+cat docs/evidence/tv3/fuzzing/phase3-openapi-fuzzing-summary.md
 ```
 
 ---
@@ -247,18 +252,19 @@ print(f'Format: {d.get(\"bomFormat\")}')
 "
 
 # Cosign readiness / signing path
-bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-placeholder
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:phase3-dry-run
 ```
 
 ---
 
 ## Scene 13: Key Rotation / Token Revocation Drill (15:00 – 16:30)
 
-**Narration:** "Xoay vòng HMAC secret – old secret bị reject, new secret hoạt động. MTTD=2min, MTTR=3min."
+**Narration:** "Xoay vòng HMAC secret và MTTD/MTTR được trình bày bằng evidence hiện có; chỉ đọc số đo nếu file có timestamped measurement."
 
 ```bash
 cat .artifacts/test-runs/tv3/key-rotation-output.txt
 cat docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md
+cat docs/evidence/tv3/secops-metrics/phase3/mttd-mttr-phase3-summary.md
 ```
 
 ---
@@ -283,7 +289,7 @@ bash tests/final/main-regression.sh
 ## Checklist Before Recording
 
 - [ ] Stack fully running (`docker ps` shows all healthy)
-- [ ] Grafana accessible at localhost:3000
+- [ ] Grafana accessible at localhost:3001
 - [ ] Jaeger accessible at localhost:16686
 - [ ] Terminal history cleared
 - [ ] Tokens will be masked from screen (only length shown)

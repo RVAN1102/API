@@ -2,6 +2,11 @@
 
 This index points to the official, reviewable evidence set for the current hardening baseline. The evidence supports the statement that known P0 findings were addressed and validated by regression; it does not claim that the system has no remaining vulnerabilities.
 
+Canonical URL/security scope: `docs/runbooks/url-and-security-scope.md`.
+The public application API is `https://localhost:8443`. HTTP URLs for Kong
+Admin, Keycloak, Vault, and Grafana are lab-local control-plane/observability
+endpoints, not public API endpoints.
+
 ## Final Regression
 
 - Current final regression gate: `bash tests/final/main-regression.sh` (12 suites expected)
@@ -38,17 +43,21 @@ This index points to the official, reviewable evidence set for the current harde
 - Loki alert rules loaded at runtime: `docs/evidence/tv3/observability/loki-rules-runtime-loaded-after-p0-fix.yml`
 - Alert diagnostics and selected samples: `docs/evidence/tv3/metrics/`
 - Authoritative SecOps MTTD/MTTR summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
+- Phase 3 MTTD/MTTR evidence template: `docs/evidence/tv3/secops-metrics/phase3/mttd-mttr-phase3-summary.md`
 - Latency, p50/p95 method, and SME cost trade-off summary: `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`
 - Latency smoke command: `BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh`
+- Phase 3 k6 performance support: `tests/performance/k6-phase3.js`, `docs/evidence/tv3/performance/README.md`
 
 ## DAST, Fuzzing, And Security Scans
 
 - ZAP Active Scan: rerun `bash tests/security/zap-active-scan.sh` against the current HTTPS gateway; runtime output is written to `.artifacts/test-runs/tv3/zap/`.
-- RESTler execution: rerun `bash tests/restler/run-restler-check.sh` against the current HTTPS gateway before making current RESTler claims.
-- Structured fuzzing: rerun `bash tests/security/run-fuzzing.sh` against the current HTTPS gateway; runtime output is written to `.artifacts/test-runs/tv3/fuzzing/`.
+- RESTler execution: optional extension; rerun `bash tests/restler/run-restler-check.sh` against the current HTTPS gateway before making current RESTler claims.
+- Deterministic OpenAPI/negative fuzzing: rerun `bash tests/security/run-fuzzing.sh` against the current HTTPS gateway; runtime output is written to `.artifacts/test-runs/tv3/fuzzing/`.
+- Phase 3 OpenAPI/fuzzing scope summary: `docs/evidence/tv3/fuzzing/phase3-openapi-fuzzing-summary.md`
 - Local security scan evidence: `docs/evidence/tv3/security-scan-local.txt`
 - Supply-chain evidence and SBOM summaries: `docs/evidence/tv3/supply-chain/`
 - CI image SBOM and Cosign keyless-readiness path: `.github/workflows/security-scan.yml`, `scripts/security/generate-sbom.sh`, `scripts/security/cosign-sign.sh`
+- GitHub Actions artifact summarizer: `bash scripts/ci/summarize-github-actions-evidence.sh <artifact-dir>`
 
 ## Runtime Test Artifacts
 
