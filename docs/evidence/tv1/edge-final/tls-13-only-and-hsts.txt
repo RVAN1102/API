@@ -1,7 +1,0 @@
-===== TLS Test =====
---- TLS 1.3 should succeed ---
-[0;32m[PASS][0m TLS 1.3 handshake succeeded
---- TLS 1.2 should fail ---
-[0;32m[PASS][0m TLS 1.2 correctly rejected
-===== HSTS Test =====
-[0;32m[PASS][0m HSTS header present

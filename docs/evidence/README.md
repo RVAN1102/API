@@ -1,26 +1,22 @@
-# Evidence Directory
+# Evidence
 
-Tracked files in this directory are the official report evidence. New local test runs should write transient output to `.artifacts/test-runs/` unless a maintainer intentionally refreshes official evidence.
+This directory contains curated evidence summaries only. Each result file states
+the requirement, source command or evidence source, observed result, and scope.
+Raw logs, generated secrets, token values, private keys, and bulky tool outputs
+are not included.
 
-Start with `docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md` for the current review set. The index summarizes the evidence for known P0 findings addressed and validated by regression.
+| Requirement | Result file |
+|---|---|
+| Compose and documentation consistency | `results/compose-and-repo-consistency.md` |
+| Edge security | `results/edge-security.md` |
+| Identity, authorization, and S2S | `results/identity-authorization-s2s.md` |
+| mTLS and webhook security | `results/mtls-and-webhook-security.md` |
+| SSRF and egress control | `results/ssrf-egress-control.md` |
+| Testing and fuzzing | `results/testing-and-fuzzing.md` |
+| ZAP active scan | `results/zap-active-scan.md` |
+| CI and supply chain | `results/ci-supply-chain.md` |
+| Performance and SecOps | `results/performance-and-secops.md` |
 
-Canonical URL/security scope is defined in
-`docs/runbooks/url-and-security-scope.md`. The public application API endpoint
-is `https://localhost:8443`; HTTP Kong Admin, Keycloak, Vault, and Grafana URLs
-are lab-local control-plane or observability endpoints.
-
-Historical evidence that captured superseded gateway behavior is kept under
-`docs/evidence/archive/` for audit history only and is not current HTTPS
-evidence.
-
-Topic 10 quantitative evidence is summarized in:
-
-- `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
-- `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`
-- `docs/evidence/tv3/secops-metrics/phase3/mttd-mttr-phase3-summary.md`
-- `docs/evidence/tv3/performance/README.md`
-- `docs/evidence/tv3/fuzzing/phase3-openapi-fuzzing-summary.md`
-
-Lab secret bootstrap and Vault/KMS alignment are summarized in:
-
-- `docs/evidence/tv2/vault-lab-secret-bootstrap.md`
+All public API evidence targets `https://localhost:8443`. Kong Admin,
+Keycloak, Vault, and Grafana URLs are lab-local control-plane or observability
+surfaces.

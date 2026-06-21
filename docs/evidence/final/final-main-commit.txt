@@ -1,3 +1,0 @@
-generated_at=2026-06-19T15:45:04Z
-head_commit=ac45a0049d85bc6f52b381f840027901e014da2c
-branch=chore/repo-doc-cleanup

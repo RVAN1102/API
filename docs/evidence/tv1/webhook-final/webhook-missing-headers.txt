@@ -1,1 +1,0 @@
-[0;32m[PASS][0m Missing headers correctly rejected by Gateway WAF (401)

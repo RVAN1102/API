@@ -1,3 +1,0 @@
-username=alice requiredActions=['CONFIGURE_TOTP'] mfa_runtime_required=True
-username=bob requiredActions=['CONFIGURE_TOTP'] mfa_runtime_required=True
-username=admin01 requiredActions=['CONFIGURE_TOTP'] mfa_runtime_required=True
