@@ -1,16 +1,16 @@
 ============================================================
 Docker Network Egress Control Runtime Evidence
-Date: 2026-06-21T09:06:05Z
+Date: 2026-06-21T18:33:50Z
 Compose file: /home/rvan1102/API/infra/docker-compose.yml
 Evidence file: /home/rvan1102/API/docs/evidence/tv1/ssrf-egress/network-egress-control-runtime-after-fix.txt
 ============================================================
 
-[PASS] kong container is running (550b159fcc1495ad2f9582ab70ab57431b5d8d0ad99d7b656b82799f7c8f7a43)
-[PASS] user-service container is running (fe3a76c57e825c6821bdc93cc168d5d2439b1dd064e574b5f7a65225b0a01dd4)
-[PASS] order-service container is running (a41e8d7f85946c5b3c6d71d33efa9f6682b04d4be7bd8f31d893ff15671e942c)
-[PASS] order-mtls-proxy container is running (8b490594a904c2e204d7552cefec4fc0cff99f2d103c70f78135d44056bee1ba)
-[PASS] billing-service container is running (58bcf9ded02716ecbfc2bab7dd19987e33f25d618be3db09c32e511aac22bb52)
-[PASS] admin-service container is running (42802aa73d84f6ddfb09ec25ccc8be224f52f3d4f60c13a88ca15bdbfc14eb3f)
+[PASS] kong container is running (4abde650470032a6139bd61aec3003a8ee1209877bd8a4913eeeb246d6e967bc)
+[PASS] user-service container is running (84be003c16c536da2f60e45f257f1c65329ce0bb8781284f7a1d03a3aa4687ae)
+[PASS] order-service container is running (601c4bdff3d0c4e3eb9d0ba351d31fa38ba091439dfd58aa1e410b48e1363639)
+[PASS] order-mtls-proxy container is running (0189f315d8bb0091625a1f097822cedc5d132c5ef7c4b7e3625a67a85e65909c)
+[PASS] billing-service container is running (cc2548c2029ceb69b8c06031884f4ce59a5950c4e56f0b12da469c0189126160)
+[PASS] admin-service container is running (2dc8c396096f5a0f21be71301852411c1aedef9615b3bdff33390440a767ef66)
 [PASS] keycloak container is running (bb41cc5c7824c299d1b4acfa9ddd94059fdda6288ac22d0fe4eaec0bba16614a)
 [PASS] opa container is running (502dcb585473434e176bc0cdffedd738a1a5bcbec8bf63f3709de0ca90bdf313)
 

@@ -1,7 +1,0 @@
-generated_at=2026-06-19T15:45:04Z
-repo_root=/home/rvan1102/API-cleanup
-branch=chore/repo-doc-cleanup
-head_commit=ac45a0049d85bc6f52b381f840027901e014da2c
-git_user_name=RVAN1102
-git_user_email=24162144@student.hcmute.edu.vn
-git_remote_origin=https://github.com/RVAN1102/API.git

@@ -1,5 +1,0 @@
-generated_at=2026-06-19T15:45:04Z
-## chore/repo-doc-cleanup...origin/chore/repo-doc-cleanup
- M docs/evidence/final/final-git-identity.txt
- M docs/evidence/final/final-git-status.txt
- M docs/evidence/final/final-main-commit.txt

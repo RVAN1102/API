@@ -1,89 +1,55 @@
-# Testing Guide – Capstone API Security (Topic 10)
+# Testing Guide
 
-Canonical URL/security scope: `docs/runbooks/url-and-security-scope.md`.
-The public application API endpoint is `https://localhost:8443`; HTTP URLs for
-Kong Admin, Keycloak, Vault, and Grafana are lab-local control-plane or
-observability endpoints only.
+This guide lists current runnable commands for the local repository. Public API
+checks use only:
+
+```text
+https://localhost:8443
+```
+
+HTTP URLs for Kong Admin, Keycloak, Vault, and Grafana are local
+control-plane or observability surfaces only.
 
 ## Prerequisites
 
-1. **Docker Desktop** running
-2. **Git Bash** (for running `.sh` scripts on Windows)
-3. Project cloned from GitHub
+- Docker with Compose support.
+- Bash.
+- `curl`.
+- Python available as `python3` or through the repository compatibility shim.
+- Optional tools for selected checks: `k6`, ZAP Docker image, Trivy, Gitleaks,
+  Bandit, Cosign.
 
----
+## 1. Validate Compose
 
-## 1. Start the Stack
+```bash
+docker compose -f infra/docker-compose.yml config --quiet
+```
+
+Expected result: exit `0`.
+
+To list services:
+
+```bash
+docker compose -f infra/docker-compose.yml config --services
+```
+
+Expected result: includes Kong, Keycloak, Vault, Redis, Loki, Promtail,
+Grafana, Jaeger, OTel collector, OPA, four application services, and four mTLS
+sidecars.
+
+## 2. Start The Stack
 
 ```bash
 bash scripts/bootstrap-lab-env.sh
 bash demo/mtls/ensure-gateway-backend-certs.sh
-
 docker compose -f infra/docker-compose.yml up -d --build
-
-# If Keycloak fails or you encounter Network Errors, use the clean restart script:
-# bash fix-and-restart.sh
-
 docker compose -f infra/docker-compose.yml ps
 ```
 
-Expected services (all must show `healthy` or `running`):
-```
-infra-kong-1
-infra-user-mtls-proxy-1
-infra-order-mtls-proxy-1
-infra-billing-mtls-proxy-1
-infra-admin-mtls-proxy-1
-infra-user-service-1
-infra-order-service-1
-infra-billing-service-1
-infra-admin-service-1
-infra-keycloak-1
-infra-vault-1
-infra-redis-1
-infra-loki-1
-infra-promtail-1
-infra-grafana-1
-infra-webhook-demo-1
-```
+Expected result: services are running, with health checks becoming healthy after
+startup. Keycloak may take about a minute to become ready.
 
-> [!NOTE]
-> Keycloak takes ~60 seconds to start. Kong waits for real services to be healthy before starting.
-> If Kong fails to start, wait 30 seconds and run `docker compose -f infra/docker-compose.yml restart kong`.
-
----
-
-
-## 1b. Gateway-to-Backend mTLS Default Runtime
-
-The default Compose stack is the stable final-regression baseline and now
-enforces Gateway-to-Backend mTLS. Kong acts as a TLS client and backend
-sidecars require Kong's internal client certificate.
-Billing-to-Order ownership verification also uses the Order mTLS sidecar with a
-Billing client certificate, plus the short-lived `billing-service-client` token
-for application authorization.
-
-```bash
-bash demo/mtls/ensure-gateway-backend-certs.sh
-docker compose -f infra/docker-compose.yml up -d --build
-bash tests/security/gateway-backend-mtls-tests.sh
-```
-
-Expected result: Kong health routes return HTTP 200 through the mTLS sidecars;
-direct TLS probes without a client certificate and with a rogue client
-certificate fail. Evidence is written to
-`docs/evidence/tv1/gateway-backend-mtls/gateway-backend-mtls-runtime.txt`.
-Billing-to-Order ownership verification uses `https://order-mtls-proxy:8443`
-with lab CA verification and a Billing client certificate by default.
-
----
-
-## 2. Health Checks
-
-The legacy plaintext gateway port is disabled and not exposed. The lab gateway
-certificate is local/self-signed, so use `-k` or `CURL_TLS_OPTS=--insecure`
-for local curl commands. Production should use CA-trusted certificates without
-disabling verification.
+## 3. Public Gateway Health Checks
 
 ```bash
 curl -k https://localhost:8443/api/v1/users/health
@@ -92,399 +58,198 @@ curl -k https://localhost:8443/api/v1/billing/health
 curl -k https://localhost:8443/api/v1/admin/health
 ```
 
-Expected response for each:
-```json
-{"status": "ok", "service": "<service-name>"}
-```
+Expected result: each command returns HTTP `200` and a JSON health response.
 
----
-
-## 3. Get Access Tokens
-
-> [!IMPORTANT]
-> Wait for Keycloak to be fully up (`http://localhost:8080` accessible) before running these.
+## 4. Auth Token Helpers
 
 ```bash
-# Get Alice token (role: user)
-bash demo/auth/get-user-token.sh alice
-ALICE_TOKEN=$(cat /tmp/user-token.txt)
+bash demo/auth/get-user-token.sh ci-alice
+ALICE_TOKEN="$(cat /tmp/user-token.txt)"
 
-# Get Bob token (role: user)
-bash demo/auth/get-user-token.sh bob
-BOB_TOKEN=$(cat /tmp/user-token.txt)
-
-# Get Admin token (role: user + admin)
-bash demo/auth/get-user-token.sh admin01
-ADMIN_TOKEN=$(cat /tmp/user-token.txt)
+bash demo/auth/get-user-token.sh ci-bob
+BOB_TOKEN="$(cat /tmp/user-token.txt)"
 ```
 
----
+Expected result: helper scripts exit `0` and write an access token to
+`/tmp/user-token.txt`. Do not print or commit token values.
 
-## 4. Test User API
+## 5. Smoke And Main Regression
 
 ```bash
-# Run automated tests
-bash tests/auth/test-user-profile.sh
-
-# With token
-ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/auth/test-user-profile.sh
+bash tests/smoke/main-smoke.sh
 ```
 
-Manual tests:
-```bash
-# Public endpoint
-curl -k https://localhost:8443/api/v1/users/health
-
-# Protected /me (with token)
-curl -k https://localhost:8443/api/v1/users/me \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
-  -H "X-Correlation-ID: test-me-001"
-
-# No token → 401
-curl -k https://localhost:8443/api/v1/users/me
-```
-
----
-
-## 5. Test Order API
-
-```bash
-# Run automated tests
-ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/auth/test-order-access.sh
-```
-
-Manual tests:
-```bash
-# Health
-curl -k https://localhost:8443/api/v1/orders/health
-
-# List orders (alice sees her orders)
-curl -k https://localhost:8443/api/v1/orders \
-  -H "Authorization: Bearer ${ALICE_TOKEN}"
-
-# Get alice's order
-curl "https://localhost:8443/api/v1/orders/ord-alice-1001" \
-  -H "Authorization: Bearer ${ALICE_TOKEN}"
-```
-
----
-
-## 6. Test BOLA Demo
-
-```bash
-# Run BOLA attack simulation
-ALICE_TOKEN="${ALICE_TOKEN}" BOB_TOKEN="${BOB_TOKEN}" bash tests/attack/bola-object-access.sh
-```
-
-Expected results:
-| Test | Expected |
-|------|----------|
-| Alice → Bob's order `/vulnerable` | **200** (BOLA flaw) |
-| Alice → Bob's order `/fixed` | **403** (blocked) |
-| Bob → Bob's order `/fixed` | **200** (owner allowed) |
-| No token → `/fixed` | **401** |
-
----
-
-## 7. Test Billing Service
-
-```bash
-# Health
-curl -k https://localhost:8443/api/v1/billing/health
-
-# Checkout
-curl -X POST https://localhost:8443/api/v1/billing/checkout \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -H "Idempotency-Key: manual-alice-1001" \
-  -H "X-Correlation-ID: billing-test-001" \
-  -d '{"order_id":"ord-alice-1001","amount":150000,"currency":"VND"}'
-```
-
-Billing verifies ownership through the Order service and treats Order data as
-canonical. If the request amount or currency does not match the Order service,
-Billing returns `409`. Reusing the same `Idempotency-Key` with the same payload
-is a safe retry; reusing it with a different payload or using another key for
-the same caller/order after an idempotent checkout returns `409`.
-
-Billing-to-Order ownership verification uses both controls: mTLS transport to
-`order-mtls-proxy:8443` with the local lab CA/client certificate, and the
-least-privilege `billing-service-client` token for Order authorization.
-
----
-
-## 8. Test Admin Service + SSRF
-
-```bash
-# Run SSRF attack simulation
-ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/attack/ssrf-attack.sh
-```
-
-Manual tests:
-```bash
-# SSRF vulnerable → 200 (fetches anything)
-curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/vulnerable \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'
-
-# SSRF fixed → 403 (blocked)
-curl -X POST https://localhost:8443/api/v1/admin/metadata-fetch/fixed \
-  -H "Authorization: Bearer ${ALICE_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'
-```
-
----
-
-## 9. Test Webhook Security
-
-```bash
-# Token replay and webhook forgery
-set -a
-source infra/.env
-set +a
-bash tests/attack/token-replay.sh
-
-# Webhook forgery
-bash tests/attack/webhook-forgery.sh
-
-# Redis-backed nonce persistence across billing-service restart
-bash tests/security/webhook-nonce-persistence-tests.sh
-```
-
-Expected:
-- Wrong signature → **401**
-- Expired timestamp → **403**
-- Replayed nonce → **403**
-- Replayed nonce after Billing restart → **403** while within TTL
-- Valid webhook → **200**
-
-Lab Docker Compose uses Redis for webhook replay nonces:
-`WEBHOOK_NONCE_STORE=redis`, `WEBHOOK_NONCE_REDIS_URL=redis://redis:6379/0`,
-and `WEBHOOK_NONCE_TTL_SECONDS=300`. If Redis is unavailable, the webhook
-handler fails closed and does not accept otherwise valid webhooks.
-
----
-
-## 10. Test Rate Limiting
-
-```bash
-bash tests/attack/rate-limit-trigger.sh
-```
-
-Expected: HTTP **429** after 10+ requests to `/api/v1/users`.
-
----
-
-## 11. View Grafana Dashboard
-
-1. Open **http://localhost:3001**
-2. Login: `admin` / `admin`
-3. Navigate: **Dashboards → API Security → API Security Overview**
-4. Run attack scripts and watch security events appear in real time
-
----
-
-## 12. Initialize Vault
-
-```bash
-bash vault/scripts/init-dev-vault.sh
-```
-
-Access Vault UI: **http://localhost:8200**  
-Token: `dev-root-token` (dev mode only)
-
-For Topic 10 reporting, `infra/.env` is an ignored lab bootstrap artifact for
-Docker Compose. Vault OSS local demonstrates central secret management, but this
-prototype does not claim every runtime secret is fetched from Vault. Production
-should use Vault HA, cloud KMS, Secrets Manager, or equivalent managed secret
-storage. See `docs/evidence/tv2/vault-lab-secret-bootstrap.md`.
-
----
-
-## 13. PKCE Flow Demo
-
-```bash
-# Generate authorization URL
-bash demo/auth/pkce-token-request.sh url
-```
-
-Follow the printed URL in a browser to complete the PKCE flow.
-
----
-
-## 14. CI Security Scan
-
-```bash
-# Install bandit first
-pip install bandit
-
-# Run local scan (gitleaks and trivy optional)
-bash ci/run-local-security-scan.sh
-```
-
-Results saved to `docs/evidence/tv3/security-scan-local.txt`.
-
----
-
-## 14b. Production-Oriented Hardening Checks
-
-```bash
-bash tests/security/container-runtime-hardening-tests.sh
-bash tests/security/openapi-contract-tests.sh
-```
-
-Container hardening checks render `infra/docker-compose.yml` and verify the
-intended `no-new-privileges`, `cap_drop`, `read_only`, and `tmpfs` settings
-without writing tracked evidence files. The OpenAPI contract test reuses the
-existing `ci-alice` token helper and verifies selected Kong-routed responses do
-not expose sensitive or debug/internal fields.
-
-For image supply-chain evidence in CI, `.github/workflows/security-scan.yml`
-builds local service images, scans them with Trivy, emits CycloneDX image SBOM
-artifacts, and runs a Cosign keyless-signing readiness dry-run. Dry-run mode
-does not create a signature; do not claim CI signing succeeded unless a reviewed
-workflow artifact contains signing and verification evidence for a real image
-digest. Real production signing should use GitHub Actions OIDC identity pinned
-during verification. Local commands:
-
-```bash
-SBOM_IMAGES="topic10-user-service:local" bash scripts/security/generate-sbom.sh
-bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:phase3-dry-run
-```
-
-Evidence note: `docs/evidence/final/production-hardening-bundle-1.md`.
-Downloaded workflow artifacts can be summarized with:
-
-```bash
-bash scripts/ci/summarize-github-actions-evidence.sh <artifact-dir>
-```
-
----
-
-## Final Regression Gate
-
-Run this before review or merge:
+Expected result: public health checks pass and authenticated user checks pass
+when the helper token flow succeeds.
 
 ```bash
 bash tests/final/main-regression.sh
 ```
 
-If `infra/.env` is missing or still has template defaults, the regression preflight
-calls `bash scripts/bootstrap-lab-env.sh` and reloads the file without printing
-secret values.
+Expected result: the script exits `0` only when all 12 configured suites pass.
+It requires the local stack, local lab secret values, Keycloak readiness, and
+local certificate material.
 
-Expected result: `Suites passed: 12`, `Suites failed: 0`. The final
-regression includes Redis-backed webhook nonce persistence across Billing
-restart and Redis fail-closed behavior.
-
----
-
-## 15. MTTD/MTTR Measurement
+## 6. Authorization And Service-To-Service Tests
 
 ```bash
-ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/metrics/measure-mttd-mttr.sh
+bash tests/security/client-credentials-tests.sh
+bash tests/security/authz-negative-tests.sh
+bash tests/security/opa-authz-tests.sh
+bash tests/security/token-lifecycle-tests.sh
+bash tests/security/s2s-ownership-tests.sh
 ```
 
-Results saved to:
-- `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
-- Authoritative summary: `docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md`
+Expected result: each script exits `0`. The current curated S2S evidence records
+Billing-to-Order ownership checks, least-privilege service-client behavior, and
+`25/25` S2S assertions passing.
 
-## 15b. Latency And Cost Metrics
+## 7. Edge Security Tests
 
 ```bash
-BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
-
-# Optional HTTPS lab path:
-HTTPS_BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh
-
-# Phase 3 k6 public gateway path:
-k6 run tests/performance/k6-phase3.js
+bash tests/security/edge-hardening-tests.sh
 ```
 
-Transient output is written to `.artifacts/test-runs/metrics/`. Read the p50/p95 method and SME cost/trade-off summary at `docs/evidence/tv3/secops-metrics/latency-cost-tradeoff-summary.md`.
-The k6 Phase 3 template is documented in `docs/evidence/tv3/performance/README.md`.
+Expected result: TLS/HSTS, CORS, request-size, rate-limit, and SQLi/XSS probe
+checks pass. Curated evidence records TLS 1.3 success, TLS 1.2 rejection, HSTS
+present, hostile origin rejection, HTTP `429` rate limit, and HTTP `403` SQLi/XSS
+blocks.
 
----
-
-## 16. Gateway Tests
-
-```bash
-# Test all routes
-bash demo/curl/test-gateway-routes.sh
-
-# Test CORS
-bash demo/curl/test-cors.sh
-
-# Test rate limiting
-bash demo/curl/test-rate-limit.sh
-
-# Test WAF edge filter
-bash demo/curl/test-waf-filter.sh
-
-# Test HTTPS + HSTS (requires Docker curl)
-docker run --rm curlimages/curl:latest --insecure --include \
-  https://host.docker.internal:8443/api/v1/users/health
-```
-
----
-
-## 16b. Gateway-to-Backend mTLS Default Runtime
-
-Default Compose now enforces Gateway-to-Backend mTLS through Nginx sidecars.
-Run the test with:
+## 8. mTLS And Webhook Tests
 
 ```bash
 bash tests/security/gateway-backend-mtls-tests.sh
+bash tests/security/webhook-tests.sh
+bash tests/security/webhook-nonce-persistence-tests.sh
 ```
 
-By default, transient runtime output is written to `.artifacts/test-runs/` so
-re-running tests does not dirty the committed official evidence. To intentionally
-refresh the official evidence snapshot, run:
+Expected result:
+
+- Kong reaches User, Order, Billing, and Admin through mTLS sidecars.
+- Sidecars reject missing or wrong client certificates.
+- Webhook valid HMAC is accepted.
+- Invalid signature, old timestamp, replay nonce, missing headers, and missing
+  client certificate are rejected.
+
+## 9. SSRF And Egress Tests
 
 ```bash
-UPDATE_OFFICIAL_EVIDENCE=1 bash tests/security/gateway-backend-mtls-tests.sh
+bash tests/security/network-egress-control-tests.sh
 ```
 
-Expected result: Kong-to-User/Order/Billing/Admin health routes return `200`;
-no-client and wrong-certificate probes are rejected; Kong's client certificate is
-accepted by each backend sidecar.
+Expected result: backend networks are internal, Admin cannot directly reach the
+metadata and public Internet targets used by the test, and Billing reaches Order
+only through the approved mTLS sidecar path.
 
----
+```bash
+ACCESS_TOKEN="${ALICE_TOKEN}" bash tests/attack/ssrf-attack.sh
+```
 
-## 17. Stop Stack
+Expected result: the fixed metadata-fetch endpoint blocks metadata access with
+HTTP `403`. The attack script is a runtime exercise; keep generated output out
+of final curated evidence unless reviewed and summarized.
+
+## 10. Negative And Fuzzing Tests
+
+```bash
+bash tests/security/fuzz-negative-tests.sh
+```
+
+Expected result: malformed input, missing fields, invalid JSON, SQLi/XSS probe,
+and missing webhook header checks pass.
+
+```bash
+bash tests/security/run-fuzzing.sh
+```
+
+Expected result: deterministic malformed-input checks run against
+`https://localhost:8443`; unexpected 5xx responses are treated as crashes.
+This is deterministic negative testing, not RESTler or Fuzzapi.
+
+RESTler runner:
+
+```bash
+bash tests/restler/run-restler-check.sh
+```
+
+Expected result: exits `0` only if RESTler is available and its compile/test/run
+steps complete. No completed RESTler result is claimed in curated evidence.
+
+## 11. ZAP Active Scan
+
+```bash
+bash tests/security/zap-active-scan.sh
+```
+
+Expected result: ZAP runs against the HTTPS gateway and writes runtime output.
+Curated evidence records `0` High, `0` Medium, `0` Low, and `8` Informational
+alerts for the recorded summary.
+
+## 12. k6 Low-Load Baseline
+
+```bash
+docker run --rm --network host \
+  --user "$(id -u):$(id -g)" \
+  -e BASE_URL=https://localhost:8443 \
+  -e ACCESS_TOKEN="$ALICE_TOKEN" \
+  -e K6_VUS=1 \
+  -e K6_DURATION=45s \
+  -e K6_SLEEP_SECONDS=12 \
+  -v "$PWD:/work" -w /work \
+  grafana/k6 run --insecure-skip-tls-verify \
+  tests/performance/k6-phase3.js
+```
+
+Expected result: k6 exits `0` if thresholds pass. The command above reproduces the recorded low-load secured baseline profile.
+
+Recorded secured low-load baseline:
+
+| Metric | Value |
+|---|---:|
+| target | `https://localhost:8443` |
+| authenticated `/users/me` | included |
+| health p50 | `5.03 ms` |
+| health p95 | `73.96 ms` |
+| authenticated p50 | `5.23 ms` |
+| authenticated p95 | `8.14 ms` |
+| failed request rate | `0.00%` |
+| total requests | `20` |
+
+This is not a stress test.
+
+## 13. Supply Chain And Secret Checks
+
+```bash
+bash tests/security/verify-no-tracked-secrets.sh
+bash scripts/security/generate-sbom.sh
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-example
+```
+
+Expected result: tracked secret check passes, SBOM files are generated, and
+Cosign dry-run documents readiness without creating a signature.
+
+## 14. Repo Consistency Audit
+
+```bash
+bash scripts/audit/repo-consistency-audit.sh
+```
+
+Expected result: `FAIL=0`. A warning requires review before staging.
+
+## 15. Local Cleanup
+
+To stop the stack:
 
 ```bash
 docker compose -f infra/docker-compose.yml down
 ```
 
----
+To remove local generated certificate and runtime artifacts before packaging:
 
-## Troubleshooting
-
-### Kong fails to start
-Kong depends on all 4 services being healthy. If a service fails to build:
 ```bash
-docker compose -f infra/docker-compose.yml logs user-service
-docker compose -f infra/docker-compose.yml logs order-service
+find infra/certs -type f \( -name '*.key' -o -name '*.p12' -o -name '*.srl' -o -name '*.csr' -o -name '*.ext' \) -delete
+rm -rf .artifacts
 ```
 
-### Keycloak not ready / Network Error / Failed to fetch
-If you get a "Failed to fetch" error on the frontend or `exit 1` when getting a token, Keycloak is down or its database is out of sync.
-Run the clean restart script:
-```bash
-bash fix-and-restart.sh
-```
-
-### Token verification fails (503 idp_unavailable)
-The user/order services try to reach `http://keycloak:8080` (internal Docker name).
-If Keycloak is not up yet, wait and retry. The JWKS cache will be populated on the next request.
-
-### Rate limit resets
-Rate limits reset each minute. If you want to trigger 429 again, wait 60 seconds.
-
-### Windows: Python path issue for webhook scripts
-```bash
-export PYTHON_BIN=/c/Users/duynh/AppData/Local/Programs/Python/Python313/python.exe
-```
+Expected result: generated local-only artifacts are removed. Do not remove
+tracked safe certificate documentation files.

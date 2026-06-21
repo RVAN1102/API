@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Repo-wide URL/security-scope consistency audit for Phase 3 evidence.
+# Repo-wide URL/security-scope consistency audit.
 
 set -euo pipefail
 
@@ -47,6 +47,14 @@ DOC_TARGETS=(
   .github
 )
 
+OLD_PUBLIC_API_A='http://localhost:'
+OLD_PUBLIC_API_B='8000'
+OLD_PUBLIC_API="${OLD_PUBLIC_API_A}${OLD_PUBLIC_API_B}"
+OLD_LOOPBACK_API_A='http://127.0.0.1:'
+OLD_LOOPBACK_API_B='8000'
+OLD_LOOPBACK_API="${OLD_LOOPBACK_API_A}${OLD_LOOPBACK_API_B}"
+OLD_PUBLIC_API_PATTERN="${OLD_PUBLIC_API}|${OLD_LOOPBACK_API}"
+
 current_doc_matches() {
   rg -n \
     --glob '!docs/evidence/**/*.txt' \
@@ -57,11 +65,11 @@ current_doc_matches() {
     "$@" "${DOC_TARGETS[@]}" 2>/dev/null || true
 }
 
-if current_doc_matches 'http://localhost:8000|http://127\.0\.0\.1:8000' | grep -q .; then
+if current_doc_matches "${OLD_PUBLIC_API_PATTERN}" | grep -q .; then
   fail "Old plaintext public API references found"
-  record_matches "old public API references" current_doc_matches 'http://localhost:8000|http://127\.0\.0\.1:8000'
+  record_matches "old public API references" current_doc_matches "${OLD_PUBLIC_API_PATTERN}"
 else
-  pass "No current old public API references to http://localhost:8000"
+  pass "No current old public API references to ${OLD_PUBLIC_API}"
 fi
 
 if current_doc_matches 'users should call .*http://|direct backend service URLs|direct HTTP service URLs are used by users' | grep -q .; then
@@ -104,7 +112,11 @@ else
   pass "No current stale ZAP server-version leak wording"
 fi
 
-SECRET_STATUS="$(git status --short -- .env infra/.env infra/certs .artifacts '*.p12' '*.key' '*token*' 2>/dev/null || true)"
+SECRET_STATUS="$(
+  git status --short -- .env infra/.env infra/certs .artifacts '*.p12' '*.key' '*token*' 2>/dev/null \
+    | grep -vE '^[[:space:]]*D[[:space:]]+docs/' \
+    || true
+)"
 if [ -n "${SECRET_STATUS}" ]; then
   warn "Generated or secret-like files appear in git status; review before staging"
   {

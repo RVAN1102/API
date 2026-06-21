@@ -1,2 +1,0 @@
---- Fetching 169.254.169.254 from fixed endpoint ---
-[PASS] Fixed endpoint blocked metadata fetch (HTTP 403) - DEFENSE SUCCESS
