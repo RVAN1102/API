@@ -1,6 +1,7 @@
 # Nginx sidecar template for Gateway-to-Backend mTLS runtime profile.
 # The official nginx image renders this file with envsubst before startup.
 server {
+    server_tokens off;
     resolver 127.0.0.11 valid=10s ipv6=off;
     listen 8443 ssl;
     server_name ${MTLS_SERVER_NAME};

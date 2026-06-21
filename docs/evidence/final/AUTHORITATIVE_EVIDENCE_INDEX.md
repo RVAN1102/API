@@ -4,8 +4,8 @@ This index points to the official, reviewable evidence set for the current harde
 
 ## Final Regression
 
-- Historical final regression 9/9: `docs/evidence/final/main-regression-final.txt`
-- Historical post-hardening final regression: `docs/evidence/final/final-security-regression-after-all-hardening.txt`
+- Current final regression gate: `bash tests/final/main-regression.sh` (12 suites expected)
+- Historical final regression snapshots are retained only as point-in-time records and are not the current merge gate.
 - Quality gate summary: `docs/evidence/final/final-quality-gate-summary.txt`
 - Production-oriented hardening bundle 1: `docs/evidence/final/production-hardening-bundle-1.md`
 - Final stale reference audit: `docs/evidence/final/FINAL_REPO_STALE_AUDIT.md`
@@ -43,12 +43,12 @@ This index points to the official, reviewable evidence set for the current harde
 
 ## DAST, Fuzzing, And Security Scans
 
-- ZAP Active Scan: rerun `bash tests/security/zap-active-scan.sh` against the current HTTPS gateway before making current DAST claims. Pre-HTTPS reports are archived under `docs/evidence/archive/pre-8443-http8000/tv3/zap/`.
-- RESTler execution: rerun `bash tests/restler/run-restler-check.sh` against the current HTTPS gateway before making current RESTler claims. Pre-HTTPS summary is archived under `docs/evidence/archive/pre-8443-http8000/tv3/restler/`.
-- Structured fuzzing: rerun `bash tests/security/run-fuzzing.sh` against the current HTTPS gateway before making current fuzzing claims. Pre-HTTPS summary is archived under `docs/evidence/archive/pre-8443-http8000/tv3/fuzzing/`.
+- ZAP Active Scan: rerun `bash tests/security/zap-active-scan.sh` against the current HTTPS gateway; runtime output is written to `.artifacts/test-runs/tv3/zap/`.
+- RESTler execution: rerun `bash tests/restler/run-restler-check.sh` against the current HTTPS gateway before making current RESTler claims.
+- Structured fuzzing: rerun `bash tests/security/run-fuzzing.sh` against the current HTTPS gateway; runtime output is written to `.artifacts/test-runs/tv3/fuzzing/`.
 - Local security scan evidence: `docs/evidence/tv3/security-scan-local.txt`
-- Supply-chain evidence, SBOM, and signing summaries: `docs/evidence/tv3/supply-chain/`
-- CI image SBOM and Cosign dry-run path: `.github/workflows/security-scan.yml`, `scripts/security/generate-sbom.sh`, `scripts/security/cosign-sign.sh`
+- Supply-chain evidence and SBOM summaries: `docs/evidence/tv3/supply-chain/`
+- CI image SBOM and Cosign keyless-readiness path: `.github/workflows/security-scan.yml`, `scripts/security/generate-sbom.sh`, `scripts/security/cosign-sign.sh`
 
 ## Runtime Test Artifacts
 

@@ -53,15 +53,11 @@ USER_TOKEN=""
   USER_TOKEN="${ACCESS_TOKEN:-}"
 
   if [ -z "${USER_TOKEN}" ]; then
-    TOKEN_RESP=$(curl -s -X POST \
-      "${KC_URL}/realms/topic10-sme-api/protocol/openid-connect/token" \
-      -H "Content-Type: application/x-www-form-urlencoded" \
-      -d "grant_type=password" \
-      -d "client_id=sme-lab-automation-client" \
-      -d "username=ci-alice" \
-      -d "password=ci-alice-password-123" 2>/dev/null || echo "{}")
-
-    USER_TOKEN=$(echo "${TOKEN_RESP}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('access_token',''))" 2>/dev/null || echo "")
+    TOKEN_HELPER_LOG="$(mktemp /tmp/topic10-zap-token-helper.XXXXXX)"
+    if bash demo/auth/get-user-token.sh ci-alice >"${TOKEN_HELPER_LOG}" 2>&1; then
+      USER_TOKEN="$(cat /tmp/user-token.txt 2>/dev/null || true)"
+    fi
+    rm -f "${TOKEN_HELPER_LOG}"
   fi
 
   if [ -z "${USER_TOKEN}" ]; then
@@ -79,8 +75,8 @@ echo "" | tee -a "${LOG_FILE}"
 # --------------------------------------------------
 echo "--- Step 2: Preparing ZAP config ---" | tee -a "${LOG_FILE}"
 
-# Write auth header to config file (not exposing token in process args)
-ZAP_AUTH_SCRIPT_DIR="$(pwd)/tests/security/zap-auth"
+# Write auth header to ignored runtime artifacts (not exposing token in process args).
+ZAP_AUTH_SCRIPT_DIR="${REPORT_DIR}/zap-auth"
 mkdir -p "${ZAP_AUTH_SCRIPT_DIR}"
 
 if [ -n "${USER_TOKEN}" ]; then
@@ -91,13 +87,13 @@ def sending_request(communicator, message, initiator):
     message.getRequestHeader().setHeader("X-Correlation-ID", "zap-active-scan")
 AUTHEOF
   echo "[OK] Auth hook written (token not logged)." | tee -a "${LOG_FILE}"
-  HOOK_ARG="--hook=/zap/wrk/tests/security/zap-auth/zap-auth-hook.py"
+  HOOK_ARG="--hook=/zap/wrk/${ZAP_AUTH_SCRIPT_DIR}/zap-auth-hook.py"
 else
   cat > "${ZAP_AUTH_SCRIPT_DIR}/zap-auth-hook.py" <<AUTHEOF
 def sending_request(communicator, message, initiator):
     message.getRequestHeader().setHeader("X-Correlation-ID", "zap-active-scan-noauth")
 AUTHEOF
-  HOOK_ARG="--hook=/zap/wrk/tests/security/zap-auth/zap-auth-hook.py"
+  HOOK_ARG="--hook=/zap/wrk/${ZAP_AUTH_SCRIPT_DIR}/zap-auth-hook.py"
 fi
 
 echo "" | tee -a "${LOG_FILE}"

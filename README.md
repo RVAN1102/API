@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a prototype for **Cloud API-Based Network Application Security
+This project is a production-oriented security prototype for **Cloud API-Based Network Application Security
 for Small Company Services** (Topic 10). The goal is to design, implement, and
 evaluate a practical API security architecture suitable for a small company.
 
@@ -43,8 +43,8 @@ Supporting Services:
 - HTTPS/TLS termination + HSTS header
 - Webhook channel mTLS at Kong: valid client certificate accepted, missing
   client certificate rejected
-- Gateway-to-backend mTLS enforced by default via Nginx sidecars; backend S2S
-  ownership still uses short-lived Keycloak Client Credentials
+- Gateway-to-backend and Billing-to-Order ownership traffic use mTLS sidecars;
+  backend S2S authorization also uses short-lived Keycloak Client Credentials
 - Webhook HMAC-SHA256 + nonce/timestamp enforcement
 - Redis-backed webhook nonce TTL store for replay protection across restarts
 - Correlation ID propagation
@@ -52,15 +52,15 @@ Supporting Services:
 ### Identity, Authorization, And Core Services
 - Keycloak OAuth2/OIDC realm (`topic10-sme-api`)
 - Authorization Code + PKCE for user login
-- Client Credentials for service-to-service
+- Client Credentials for service-to-service application authorization over mTLS
 - JWT validation with JWKS (RS256)
 - RBAC backend authorization (roles: user, admin, billing-service)
 - BOLA vulnerable/fixed demo (Order Service)
 - Billing checkout verifies Order ownership through the Order service, rejects
   client amount/currency mismatches, and supports caller-scoped idempotency
-  keys for safe retries and duplicate-checkout detection in the lab prototype
+  keys for safe retries and duplicate-checkout detection in the lab
 - HashiCorp Vault dev-mode secret-path and rotation workflow evidence; local
-  Docker Compose injects prototype runtime secrets from ignored `infra/.env`
+  Docker Compose injects lab runtime secrets from ignored `infra/.env`
 
 ### Observability, Testing, And Supply Chain
 - Billing Service with HMAC webhook handling
@@ -72,6 +72,7 @@ Supporting Services:
 - OWASP ZAP Active Scan
 - RESTler API fuzzing plan
 - CI security scan (Bandit, Gitleaks, Trivy)
+- CycloneDX SBOM generation and Cosign keyless-signing readiness path
 - MTTD/MTTR measurement
 
 ## Quick Start
@@ -107,9 +108,9 @@ bash tests/security/gateway-backend-mtls-tests.sh
 ```
 
 Generated certificate material stays under `infra/certs/gateway-backend/` and
-is ignored by Git. The legacy `infra/docker-compose.mtls.yml` override is kept
-only for backward-compatible evidence commands and should merge cleanly with the
-default compose file.
+is ignored by Git. Billing-to-Order ownership verification also uses
+`https://order-mtls-proxy:8443` with the lab CA and a Billing client
+certificate by default.
 
 ### Run the Frontend Security Dashboard
 ```bash
@@ -223,6 +224,8 @@ Run the final regression gate before review or merge:
 ```bash
 bash tests/final/main-regression.sh
 ```
+
+Expected current result: 12 suites passed, 0 failed.
 
 The regression preflight runs `scripts/bootstrap-lab-env.sh` when `infra/.env`
 is missing or still contains placeholders. This creates local lab-only values

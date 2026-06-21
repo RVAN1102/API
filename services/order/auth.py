@@ -136,6 +136,8 @@ async def validate_token(token: str) -> Dict[str, Any]:
             token,
             signing_key,
             algorithms=["RS256"],
+            # Client binding is enforced below with azp/client_id and audience
+            # fallback against ALLOWED_TOKEN_CLIENT_IDS.
             options={"verify_aud": False, "verify_exp": True},
         )
     except JWTError as exc:

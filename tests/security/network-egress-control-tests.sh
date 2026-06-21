@@ -91,33 +91,54 @@ assert_only_internal_networks() {
   fi
 }
 
-assert_billing_order_s2s_network() {
+assert_billing_order_mtls_network() {
   local billing_cid="$1"
   local order_cid="$2"
-  local shared=""
-  local count=0
+  local proxy_cid="$3"
+  local direct_shared=0
+  local billing_proxy_shared=0
+  local proxy_order_shared=0
   local billing_net
   local order_net
+  local proxy_net
 
   for billing_net in $(network_names "${billing_cid}"); do
     for order_net in $(network_names "${order_cid}"); do
       if [ "${billing_net}" = "${order_net}" ]; then
-        shared="${billing_net}"
-        count=$((count + 1))
+        direct_shared=$((direct_shared + 1))
+      fi
+    done
+    for proxy_net in $(network_names "${proxy_cid}"); do
+      if [ "${billing_net}" = "${proxy_net}" ] && [[ "${billing_net}" == *"billing-order-mtls-internal" ]]; then
+        billing_proxy_shared=$((billing_proxy_shared + 1))
       fi
     done
   done
 
-  if [ "${count}" -eq 1 ] && [[ "${shared}" == *"billing-order-s2s-internal" ]]; then
-    pass "billing-service and order-service share only approved S2S network: ${shared}"
+  for proxy_net in $(network_names "${proxy_cid}"); do
+    for order_net in $(network_names "${order_cid}"); do
+      if [ "${proxy_net}" = "${order_net}" ] && [[ "${proxy_net}" == *"kong-order-internal" ]]; then
+        proxy_order_shared=$((proxy_order_shared + 1))
+      fi
+    done
+  done
+
+  if [ "${direct_shared}" -eq 0 ]; then
+    pass "billing-service and order-service do not share a plaintext Docker network"
   else
-    fail "billing-service/order-service shared networks are not limited to billing-order-s2s-internal (count=${count}, last=${shared:-none})"
+    fail "billing-service and order-service still share ${direct_shared} direct network(s)"
   fi
 
-  if [ -n "${shared}" ] && [ "$(network_internal "${shared}")" = "true" ]; then
-    pass "approved Billing-to-Order S2S network is internal=true"
+  if [ "${billing_proxy_shared}" -eq 1 ]; then
+    pass "billing-service reaches order-mtls-proxy only through billing-order-mtls-internal"
   else
-    fail "approved Billing-to-Order S2S network is missing or not internal"
+    fail "billing-service/order-mtls-proxy approved mTLS network missing or duplicated"
+  fi
+
+  if [ "${proxy_order_shared}" -eq 1 ]; then
+    pass "order-mtls-proxy reaches order-service through kong-order-internal"
+  else
+    fail "order-mtls-proxy/order-service upstream network missing or duplicated"
   fi
 }
 
@@ -170,19 +191,26 @@ PY
   fi
 }
 
-probe_billing_to_order() {
+probe_billing_to_order_mtls() {
   local output
   local code
 
   set +e
   output="$(compose exec -T billing-service python - <<'PY'
 import json
+import os
+import ssl
 import sys
 import urllib.request
 
-url = "http://order-service:8000/api/v1/orders/health"
+url = "https://order-mtls-proxy:8443/api/v1/orders/health"
 try:
-    with urllib.request.urlopen(url, timeout=3) as response:
+    context = ssl.create_default_context(cafile=os.environ["ORDER_SERVICE_TLS_CA_CERT"])
+    context.load_cert_chain(
+        certfile=os.environ["ORDER_SERVICE_TLS_CLIENT_CERT"],
+        keyfile=os.environ["ORDER_SERVICE_TLS_CLIENT_KEY"],
+    )
+    with urllib.request.urlopen(url, timeout=3, context=context) as response:
         body = response.read(120).decode("utf-8", "replace")
         status = getattr(response, "status", None)
         print(json.dumps({"reachable": True, "status": status, "body": body}))
@@ -199,11 +227,11 @@ PY
   code=$?
   set -e
 
-  echo "billing-service -> order-service probe result: ${output}"
+  echo "billing-service -> order-mtls-proxy probe result: ${output}"
   if [ "${code}" -eq 0 ]; then
-    pass "billing-service can reach order-service over the approved internal S2S path"
+    pass "billing-service can reach order-service only through the approved mTLS sidecar path"
   else
-    fail "billing-service cannot reach order-service over the approved internal S2S path"
+    fail "billing-service cannot reach order-service over the approved mTLS sidecar path"
   fi
 }
 
@@ -220,7 +248,7 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-for service in kong user-service order-service billing-service admin-service keycloak opa; do
+for service in kong user-service order-service order-mtls-proxy billing-service admin-service keycloak opa; do
   assert_service_running "${service}"
 done
 
@@ -228,6 +256,7 @@ ADMIN_CID="$(container_id admin-service)"
 USER_CID="$(container_id user-service)"
 ORDER_CID="$(container_id order-service)"
 BILLING_CID="$(container_id billing-service)"
+ORDER_PROXY_CID="$(container_id order-mtls-proxy)"
 
 echo ""
 echo "===== Backend network isolation ====="
@@ -235,7 +264,7 @@ assert_only_internal_networks "user-service" "${USER_CID}"
 assert_only_internal_networks "order-service" "${ORDER_CID}"
 assert_only_internal_networks "billing-service" "${BILLING_CID}"
 assert_only_internal_networks "admin-service" "${ADMIN_CID}"
-assert_billing_order_s2s_network "${BILLING_CID}" "${ORDER_CID}"
+assert_billing_order_mtls_network "${BILLING_CID}" "${ORDER_CID}" "${ORDER_PROXY_CID}"
 
 echo ""
 echo "===== Direct egress probes from admin-service ====="
@@ -244,7 +273,7 @@ probe_blocked_url "admin-service" "https://example.com" "public Internet https:/
 
 echo ""
 echo "===== Approved internal service-to-service probe ====="
-probe_billing_to_order
+probe_billing_to_order_mtls
 
 echo ""
 echo "============================================================"

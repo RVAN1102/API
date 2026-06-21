@@ -20,7 +20,7 @@ issued by Keycloak. This document defines the claim contract.
 | `azp`                   | string | Authorized party (client_id)             |
 | `exp`                   | int    | Expiration Unix timestamp                |
 | `iss`                   | string | Issuer URL (must match Keycloak realm)   |
-| `aud`                   | array  | Audience (optional check for prototype)  |
+| `aud`                   | array  | Audience claim; used as fallback for token-client allowlist checks |
 
 ---
 
@@ -64,8 +64,10 @@ All services perform these steps in `auth.py`:
 5. Verify JWT signature with RS256.
 6. Verify `exp` (not expired).
 7. Verify `iss` == `http://keycloak:8080/realms/topic10-sme-api`.
-8. Extract `realm_access.roles` for RBAC.
-9. Return identity object to route handler.
+8. Enforce token-client binding with `azp` / `client_id` and audience
+   fallback against each service's allowed client set.
+9. Extract `realm_access.roles` for RBAC.
+10. Return identity object to route handler.
 
 ---
 
@@ -84,5 +86,6 @@ All services perform these steps in `auth.py`:
 
 - Tokens expire in 300 seconds (5 minutes) by default.
 - JWKS is cached in-memory; refreshed when a new `kid` is encountered.
-- Services do NOT forward tokens to other services in this prototype.
+- User-facing calls use human-client allowlists, while service-to-service calls
+  use dedicated service-client allowlists and roles.
 - Do NOT log full access tokens. Log only `sub` and `preferred_username`.

@@ -32,7 +32,8 @@ authoritative evidence index at
 
 - ✅ MFA: runtime Keycloak required actions are configured for demo human users (`alice`, `bob`, `admin01` must complete `CONFIGURE_TOTP`; CI automation uses dedicated lab accounts)
 - ✅ Webhook mTLS: implemented and evidenced at Kong (valid client cert accepted, missing cert rejected)
-- ✅ Gateway-to-backend mTLS: enforced by default through Nginx sidecars in `infra/docker-compose.yml`; backend S2S ownership still uses short-lived Keycloak Client Credentials
+- ✅ Gateway-to-backend mTLS: enforced by default through Nginx sidecars in `infra/docker-compose.yml`
+- ✅ Billing-to-Order S2S: ownership verification uses the Order mTLS sidecar plus short-lived `billing-service-client` Client Credentials
 - ✅ OPA: policy decision point and backend enforcement evidenced for selected authorization paths
 - ⚠️ Keycloak runs in dev mode (not production-grade)
 - ⚠️ Vault runs in dev mode

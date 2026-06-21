@@ -1,7 +1,6 @@
 # Gateway-to-Backend mTLS runtime configuration.
-# This DB-less Kong config is retained for the backward-compatible
-# infra/docker-compose.mtls.yml override; default Compose now uses the same
-# mTLS upstream model through gateway/kong.yml.
+# This DB-less Kong config documents the same mTLS upstream model used by the
+# default runtime through gateway/kong.yml.
 # Kong presents an internal client certificate to the backend sidecar proxies,
 # and verifies backend proxy server certificates using the internal demo CA.
 

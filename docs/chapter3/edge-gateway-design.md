@@ -42,11 +42,13 @@ encoding, and a maintained managed WAF or OWASP Core Rule Set deployment.
 
 ## 3.6 Gateway-to-Service mTLS
 
-The mTLS design uses an internal CA, a client certificate for Kong, and server
-certificates for backends. Both parties validate the peer certificate and
-service identity. The default Docker Compose runtime enforces this through
-Nginx sidecars in front of the backend services. Certificate-generation scripts
-create local ignored lab certificates for reproducible testing.
+The mTLS design uses an internal CA, client certificates for Kong and the
+Billing service, and server certificates for backend sidecars. Both parties
+validate the peer certificate and service identity. The default Docker Compose
+runtime enforces this through Nginx sidecars in front of the backend services.
+Billing-to-Order ownership verification uses the Order sidecar over mTLS plus
+the least-privilege `billing-service-client` token. Certificate-generation
+scripts create local ignored lab certificates for reproducible testing.
 
 ## 3.7 Webhook HMAC and Replay Defense
 

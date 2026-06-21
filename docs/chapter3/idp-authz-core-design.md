@@ -12,7 +12,7 @@ This section covers the core identity provider (IdP), centralized secret managem
 ### 3.2.1 OAuth2/OIDC Flows
 We employ two primary OAuth2 flows based on the client type:
 1. **Authorization Code + PKCE:** Used for public clients (e.g., single-page apps, mobile apps). PKCE prevents authorization code interception attacks without requiring a hardcoded client secret.
-2. **Client Credentials:** Used for confidential machine-to-machine (M2M) communication (e.g., the Billing service making internal API calls).
+2. **Client Credentials:** Used for confidential machine-to-machine (M2M) application authorization over mTLS transport (e.g., the Billing service making internal Order ownership calls).
 
 ### 3.2.2 Token Architecture
 Keycloak issues signed JSON Web Tokens (JWTs) using the RS256 algorithm.

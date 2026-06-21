@@ -34,4 +34,4 @@ The local Keycloak runtime now enforces MFA setup for demo human users by assign
 
 ## OPA/RBAC decision
 
-The current runtime uses RBAC plus ownership checks as the primary authorization model and includes OPA as a policy decision point for selected authorization paths. The report may claim OPA-backed fine-grained authorization only for the paths covered by runtime evidence, while Billing-to-Order ownership remains a service-to-service check backed by short-lived Keycloak Client Credentials and least-privilege roles. Do not overclaim that every authorization decision in the prototype is delegated to OPA.
+The current runtime uses RBAC plus ownership checks as the primary authorization model and includes OPA as a policy decision point for selected authorization paths. The report may claim OPA-backed fine-grained authorization only for the paths covered by runtime evidence. Billing-to-Order ownership remains a service-to-service check backed by both mTLS transport through the Order sidecar and short-lived Keycloak Client Credentials with least-privilege roles. Do not overclaim that every authorization decision is delegated to OPA.

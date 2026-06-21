@@ -3,8 +3,9 @@
 This evidence directory is for the default `infra/docker-compose.yml` runtime.
 Kong now calls User, Order, Billing, and Admin through Nginx sidecars that
 enforce Gateway-to-Backend mutual TLS without rewriting backend application
-code. The legacy `infra/docker-compose.mtls.yml` override remains only as a
-backward-compatible evidence path.
+code. Billing-to-Order ownership verification uses
+`https://order-mtls-proxy:8443` with lab CA verification and a Billing client
+certificate by default.
 
 ## Security model
 

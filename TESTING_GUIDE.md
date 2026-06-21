@@ -54,6 +54,9 @@ infra-webhook-demo-1
 The default Compose stack is the stable final-regression baseline and now
 enforces Gateway-to-Backend mTLS. Kong acts as a TLS client and backend
 sidecars require Kong's internal client certificate.
+Billing-to-Order ownership verification also uses the Order mTLS sidecar with a
+Billing client certificate, plus the short-lived `billing-service-client` token
+for application authorization.
 
 ```bash
 bash demo/mtls/ensure-gateway-backend-certs.sh
@@ -65,8 +68,8 @@ Expected result: Kong health routes return HTTP 200 through the mTLS sidecars;
 direct TLS probes without a client certificate and with a rogue client
 certificate fail. Evidence is written to
 `docs/evidence/tv1/gateway-backend-mtls/gateway-backend-mtls-runtime.txt`.
-The legacy `infra/docker-compose.mtls.yml` override remains available only for
-backward-compatible evidence commands.
+Billing-to-Order ownership verification uses `https://order-mtls-proxy:8443`
+with lab CA verification and a Billing client certificate by default.
 
 ---
 
@@ -198,6 +201,10 @@ canonical. If the request amount or currency does not match the Order service,
 Billing returns `409`. Reusing the same `Idempotency-Key` with the same payload
 is a safe retry; reusing it with a different payload or using another key for
 the same caller/order after an idempotent checkout returns `409`.
+
+Billing-to-Order ownership verification uses both controls: mTLS transport to
+`order-mtls-proxy:8443` with the local lab CA/client certificate, and the
+least-privilege `billing-service-client` token for Order authorization.
 
 ---
 
@@ -331,7 +338,10 @@ not expose sensitive or debug/internal fields.
 
 For image supply-chain evidence in CI, `.github/workflows/security-scan.yml`
 builds local service images, scans them with Trivy, emits CycloneDX image SBOM
-artifacts, and runs a Cosign keyless-signing dry-run. Local commands:
+artifacts, and runs a Cosign keyless-signing readiness dry-run. Dry-run mode
+does not create a signature; real production signing should use a published
+image digest and GitHub Actions OIDC identity pinned during verification. Local
+commands:
 
 ```bash
 SBOM_IMAGES="topic10-user-service:local" bash scripts/security/generate-sbom.sh
@@ -354,7 +364,9 @@ If `infra/.env` is missing or still has placeholders, the regression preflight
 calls `bash scripts/bootstrap-lab-env.sh` and reloads the file without printing
 secret values.
 
-Expected result: `Suites passed: 11`, `Suites failed: 0`.
+Expected result: `Suites passed: 12`, `Suites failed: 0`. The final
+regression includes Redis-backed webhook nonce persistence across Billing
+restart and Redis fail-closed behavior.
 
 ---
 
@@ -430,7 +442,6 @@ accepted by each backend sidecar.
 
 ```bash
 docker compose -f infra/docker-compose.yml down
-docker compose -f infra/docker-compose.yml down -v  # also remove volumes
 ```
 
 ---

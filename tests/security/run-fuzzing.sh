@@ -15,9 +15,8 @@
 #   USER_TOKEN  – Bearer token for authenticated fuzz
 #
 # Output:
-#   docs/evidence/tv3/fuzzing/fuzzing-summary.md
-#   docs/evidence/tv3/fuzzing/fuzzing-run.log
-#   docs/evidence/tv3/fuzzing/fuzzing-findings.json
+#   .artifacts/test-runs/tv3/fuzzing/fuzzing-run.log
+#   .artifacts/test-runs/tv3/fuzzing/fuzzing-findings.json
 
 set -uo pipefail
 
@@ -25,10 +24,10 @@ BASE_URL="${BASE_URL:-https://localhost:8443}"
 CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
 
 curl() { command curl ${CURL_TLS_OPTS} "$@"; }
-KC_URL="${KC_URL:-http://localhost:8080}"
-REPORT_DIR="docs/evidence/tv3/fuzzing"
+REPORT_DIR="${REPORT_DIR:-.artifacts/test-runs/tv3/fuzzing}"
 LOG_FILE="${REPORT_DIR}/fuzzing-run.log"
 FINDINGS_FILE="${REPORT_DIR}/fuzzing-findings.json"
+SUMMARY_FILE="${REPORT_DIR}/fuzzing-summary.md"
 
 mkdir -p "${REPORT_DIR}"
 
@@ -43,16 +42,12 @@ echo "" | tee -a "${LOG_FILE}"
 # --------------------------------------------------
 USER_TOKEN="${USER_TOKEN:-}"
 if [ -z "${USER_TOKEN}" ]; then
-  echo "--- Obtaining auth token ---" | tee -a "${LOG_FILE}"
-  TOKEN_RESP=$(curl -s -X POST \
-    "${KC_URL}/realms/topic10-sme-api/protocol/openid-connect/token" \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "grant_type=password" \
-    -d "client_id=sme-lab-automation-client" \
-    -d "username=ci-alice" \
-    -d "password=ci-alice-password-123" 2>/dev/null || echo "{}")
-  USER_TOKEN=$(echo "${TOKEN_RESP}" | python3 -c \
-    "import sys,json; d=json.load(sys.stdin); print(d.get('access_token',''))" 2>/dev/null || echo "")
+  echo "--- Obtaining auth token with local demo/dev helper ---" | tee -a "${LOG_FILE}"
+  TOKEN_HELPER_LOG="$(mktemp /tmp/topic10-fuzz-token-helper.XXXXXX)"
+  if bash demo/auth/get-user-token.sh ci-alice >"${TOKEN_HELPER_LOG}" 2>&1; then
+    USER_TOKEN="$(cat /tmp/user-token.txt 2>/dev/null || true)"
+  fi
+  rm -f "${TOKEN_HELPER_LOG}"
   if [ -n "${USER_TOKEN}" ]; then
     echo "[OK] Token obtained (length=${#USER_TOKEN})" | tee -a "${LOG_FILE}"
   else
@@ -101,7 +96,10 @@ fuzz_request() {
   fi
 
   local actual
-  actual=$(curl "${cmd_args[@]}" "${BASE_URL}${path}" 2>/dev/null || echo "000")
+  actual=$(curl "${cmd_args[@]}" "${BASE_URL}${path}" 2>/dev/null || true)
+  if [ -z "${actual}" ]; then
+    actual="000"
+  fi
   TOTAL_REQUESTS=$((TOTAL_REQUESTS + 1))
 
   if [[ "${actual}" == 5* ]]; then
@@ -241,6 +239,22 @@ echo "Total requests:  ${TOTAL_REQUESTS}" | tee -a "${LOG_FILE}"
 echo "4xx responses:   ${ERRORS_4XX} (expected for invalid inputs)" | tee -a "${LOG_FILE}"
 echo "5xx/crashes:     ${CRASHES}" | tee -a "${LOG_FILE}"
 echo "" | tee -a "${LOG_FILE}"
+
+{
+  echo "# Structured Negative API Test Summary"
+  echo ""
+  echo "- Date: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  echo "- Target: ${BASE_URL}"
+  echo "- OpenAPI: services/openapi.yaml"
+  echo "- Total requests: ${TOTAL_REQUESTS}"
+  echo "- 4xx responses: ${ERRORS_4XX}"
+  echo "- 5xx/crashes: ${CRASHES}"
+  if [ "${CRASHES}" -gt 0 ]; then
+    echo "- Result: FAIL"
+  else
+    echo "- Result: PASS"
+  fi
+} > "${SUMMARY_FILE}"
 
 if [ "${CRASHES}" -gt 0 ]; then
   echo "[FAIL] ${CRASHES} unexpected 5xx response(s) detected. Review findings." | tee -a "${LOG_FILE}"

@@ -16,11 +16,11 @@
 | 4. Secrets Scan | Gitleaks v8.x | Superseded by 2026-06-18 post-purge package scan | `supply-chain/gitleaks-report-after-secret-purge.json` |
 | 5. SBOM | Trivy CycloneDX | ✅ PASS | `supply-chain/sbom-cyclonedx.json` |
 | 6. Build Check | Docker Compose | ✅ PASS | – |
-| 7. Artifact Signing | Cosign | ✅ PASS | `supply-chain/cosign-verify-output.txt` |
+| 7. Artifact Signing | Cosign | Readiness dry-run; real signing requires keyless CI image digest | `supply-chain/cosign-signing-summary.md` |
 | 8. Security Tests | Bash test suite | ✅ PASS | `docs/evidence/tv3/` |
-| 9. ZAP Active Scan | OWASP ZAP | ✅ PASS (0 HIGH) | `zap/zap-active-summary.md` |
-| 10. API Fuzzing | Fuzz suite | ✅ PASS (0 crashes) | `fuzzing/fuzzing-summary.md` |
-| 11. Final Regression | main-regression.sh | ✅ PASS | `docs/evidence/final/` |
+| 9. ZAP Active Scan | OWASP ZAP | Rerunnable OpenAPI active scan against HTTPS gateway | `.artifacts/test-runs/tv3/zap/` |
+| 10. API Fuzzing | Fuzz suite | Rerunnable negative-input tests against HTTPS gateway | `.artifacts/test-runs/tv3/fuzzing/` |
+| 11. Final Regression | main-regression.sh | Current gate is 12 suites | `bash tests/final/main-regression.sh` |
 
 ---
 
@@ -47,6 +47,7 @@ Jobs:
 - `bandit` – Python SAST
 - `gitleaks` – secrets scan
 - `trivy` – SCA filesystem scan
+- `image-sbom-cosign` – image scan, CycloneDX image SBOM, Cosign readiness dry-run
 
 Triggers on push to: `qa/tv3-*`, `main`
 
@@ -73,7 +74,7 @@ Gitleaks ──────────────────────┤ �
 SBOM (Trivy CycloneDX) ────────┤
     │                          │
     ▼                          │
-Build + Sign (Cosign) ─────────┤
+Build + SBOM + Cosign readiness ┤
     │                          │
     ▼                          │
 Security Tests ────────────────┤

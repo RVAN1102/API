@@ -140,7 +140,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
-      - name: Cosign keyless readiness dry-run
+      - name: Cosign keyless readiness dry-run (no signature created)
         env:
           REPORT_DIR: ".artifacts/supply-chain-${{ matrix.service }}"
         run: |

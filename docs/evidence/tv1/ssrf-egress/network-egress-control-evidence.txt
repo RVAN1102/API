@@ -4,7 +4,9 @@ Docker-level network egress control is implemented in infra/docker-compose.yml.
 Network-layer control:
 - user-service, order-service, billing-service, and admin-service attach only to Docker networks with internal: true.
 - Kong remains reachable from the host on infra_default and joins per-service internal upstream networks for backend routing.
-- billing-service and order-service share billing-order-s2s-internal for the approved internal service-to-service path.
+- billing-service and order-service do not share a direct plaintext Docker network.
+- billing-service reaches order-mtls-proxy over billing-order-mtls-internal.
+- order-mtls-proxy reaches order-service over kong-order-internal and requires a client certificate signed by the lab CA.
 - backend services do not attach to infra_default or other non-internal management networks, so they do not inherit unrestricted Internet egress.
 
 Runtime proof:

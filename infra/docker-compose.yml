@@ -50,6 +50,7 @@ services:
       admin-mtls-proxy:
         condition: service_started
     environment:
+      KONG_HEADERS: "off"
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
       KONG_PROXY_LISTEN: "0.0.0.0:8443 ssl"
@@ -121,6 +122,7 @@ services:
       - "8443"
     networks:
       - kong-order-internal
+      - billing-order-mtls-internal
     depends_on:
       order-service:
         condition: service_healthy
@@ -205,7 +207,6 @@ services:
       - kong-order-internal
       - order-identity-internal
       - order-policy-internal
-      - billing-order-s2s-internal
     expose:
       - "8000"
     healthcheck:
@@ -232,7 +233,10 @@ services:
       KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
       BILLING_SERVICE_CLIENT_ID: "billing-service-client"
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
-      ORDER_SERVICE_URL: "http://order-service:8000"
+      ORDER_SERVICE_URL: "https://order-mtls-proxy:8443"
+      ORDER_SERVICE_TLS_CA_CERT: "/etc/s2s-mtls/ca.crt"
+      ORDER_SERVICE_TLS_CLIENT_CERT: "/etc/s2s-mtls/billing-client.crt"
+      ORDER_SERVICE_TLS_CLIENT_KEY: "/etc/s2s-mtls/billing-client.key"
       OPA_URL: "http://opa:8181"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}"
       WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-redis}"
@@ -247,8 +251,10 @@ services:
       - kong-billing-internal
       - billing-identity-internal
       - billing-policy-internal
-      - billing-order-s2s-internal
+      - billing-order-mtls-internal
       - billing-nonce-internal
+    volumes:
+      - ../infra/certs/gateway-backend:/etc/s2s-mtls:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/billing/health')"]
       interval: 10s
@@ -535,7 +541,7 @@ networks:
     internal: true
   admin-policy-internal:
     internal: true
-  billing-order-s2s-internal:
+  billing-order-mtls-internal:
     internal: true
   billing-nonce-internal:
     internal: true

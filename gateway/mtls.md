@@ -13,10 +13,6 @@ docker compose -f infra/docker-compose.yml up -d --build
 bash tests/security/gateway-backend-mtls-tests.sh
 ```
 
-`infra/docker-compose.mtls.yml` is retained only as a backward-compatible
-compatibility/legacy override path. The authoritative default runtime is now
-`infra/docker-compose.yml`.
-
 ## Runtime architecture
 
 ```text
@@ -30,7 +26,8 @@ For each backend service, the default runtime includes an Nginx sidecar:
 - `billing-mtls-proxy` fronts `billing-service`
 - `admin-mtls-proxy` fronts `admin-service`
 
-Kong routes in `gateway/kong.yml` point upstreams at the HTTPS sidecars instead of direct HTTP service URLs. `gateway/kong-mtls.yml` is retained for compatibility with older profile-based evidence commands.
+Kong routes in `gateway/kong.yml` point upstreams at the HTTPS sidecars instead
+of direct HTTP service URLs.
 
 ## Trust model
 
