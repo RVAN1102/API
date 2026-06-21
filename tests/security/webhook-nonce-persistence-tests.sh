@@ -58,7 +58,7 @@ wait_for_billing() {
   local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
   for attempt in $(seq 1 30); do
     code="$(curl ${curl_tls_opts} -sS -o /dev/null -w "%{http_code}" https://localhost:8443/api/v1/billing/health 2>/dev/null || echo "000")"
-    echo "[INFO] billing readiness attempt ${attempt}/30: HTTP ${code}"
+    echo "[INFO] billing HTTPS readiness attempt ${attempt}/30: status ${code}"
     [ "${code}" = "200" ] && return 0
     sleep 2
   done

@@ -12,18 +12,17 @@ This directory contains all QA/regression/security evidence produced by TV3 (Huy
 
 | File | Script | Proves |
 |------|--------|--------|
-| `zap/zap-active-summary.md` | `tests/security/zap-active-scan.sh` | Active Scan results, triage (0 HIGH, 2 MEDIUM) |
-| `zap/zap-active-run.log` | `tests/security/zap-active-scan.sh` | Full scan log |
-| `zap/zap-active-report.html` | `tests/security/zap-active-scan.sh` | HTML report |
-| `zap/zap-active-report.json` | `tests/security/zap-active-scan.sh` | JSON report |
+| `.artifacts/test-runs/tv3/zap/zap-active-summary.md` | `tests/security/zap-active-scan.sh` | Rerunnable OpenAPI active scan summary |
+| `.artifacts/test-runs/tv3/zap/zap-active-run.log` | `tests/security/zap-active-scan.sh` | Runtime scan log |
+| `.artifacts/test-runs/tv3/zap/zap-active-report.html` | `tests/security/zap-active-scan.sh` | Runtime HTML report |
+| `.artifacts/test-runs/tv3/zap/zap-active-report.json` | `tests/security/zap-active-scan.sh` | Runtime JSON report |
 
 ### P0-02: API Fuzzing
 
 | File | Script | Proves |
 |------|--------|--------|
-| `fuzzing/fuzzing-summary.md` | `tests/security/run-fuzzing.sh` | 47 requests, 0 crashes, 2 minor findings |
-| `fuzzing/fuzzing-run.log` | `tests/security/run-fuzzing.sh` | Full fuzz log |
-| `fuzzing/fuzzing-findings.json` | `tests/security/run-fuzzing.sh` | JSON findings |
+| `.artifacts/test-runs/tv3/fuzzing/fuzzing-run.log` | `tests/security/run-fuzzing.sh` | Runtime negative-input log |
+| `.artifacts/test-runs/tv3/fuzzing/fuzzing-findings.json` | `tests/security/run-fuzzing.sh` | Runtime JSON findings |
 
 ### P0-03: Supply Chain Security
 
@@ -39,8 +38,8 @@ This directory contains all QA/regression/security evidence produced by TV3 (Huy
 | `supply-chain/sbom-cyclonedx.json` | `scripts/security/generate-sbom.sh` | SBOM CycloneDX 1.4 |
 | `supply-chain/sbom-spdx.json` | `scripts/security/generate-sbom.sh` | SBOM SPDX 2.3 |
 | `supply-chain/sbom-summary.md` | `scripts/security/generate-sbom.sh` | SBOM summary |
-| `supply-chain/cosign-signing-summary.md` | `scripts/security/cosign-sign.sh` | Artifact signing summary |
-| `supply-chain/cosign-verify-output.txt` | `scripts/security/cosign-sign.sh` | Cosign verify output |
+| `supply-chain/cosign-signing-summary.md` | `scripts/security/cosign-sign.sh` | Cosign signing/readiness summary |
+| `.artifacts/test-runs/tv3/supply-chain/cosign-verify-output.txt` | `scripts/security/cosign-sign.sh` | Runtime Cosign output for the selected mode |
 
 ### P0-04: Observability
 
@@ -72,8 +71,7 @@ See `red-team/ssrf-egress-defense.md` above.
 
 | File | Script | Proves |
 |------|--------|--------|
-| `../final/final-security-regression-after-all-hardening.txt` | `tests/final/main-regression.sh` | All test suites pass |
-| `../final/main-regression-final.txt` | `tests/final/main-regression.sh` | Previous regression |
+| `bash tests/final/main-regression.sh` | `tests/final/main-regression.sh` | Current 12-suite final regression gate |
 
 ### P0-08: Resilience Drills
 
@@ -165,10 +163,10 @@ bash tests/security/run-fuzzing.sh
 # P0-03: Supply Chain
 bash ci/run-local-security-scan.sh
 bash scripts/security/generate-sbom.sh
-bash scripts/security/cosign-sign.sh evidence
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-placeholder
 
 # P0-07: Final Regression
-bash tests/final/main-regression.sh | tee docs/evidence/final/final-security-regression-after-all-hardening.txt
+bash tests/final/main-regression.sh
 
 # P1-01: Metrics
 k6 run tests/performance/k6-latency-test.js

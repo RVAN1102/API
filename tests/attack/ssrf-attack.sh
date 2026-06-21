@@ -3,7 +3,8 @@
 # TV1 SSRF Attack Simulation & Network Egress Evidence
 # Output: docs/evidence/tv1/ssrf-egress/
 #
-# Self-contained: fetches its own token via curl, no Python required.
+# Self-contained: reuses the local demo/dev token helper when ACCESS_TOKEN is
+# not provided. The helper output is not copied into committed evidence.
 # =============================================================================
 set -euo pipefail
 
@@ -14,7 +15,6 @@ GATEWAY_URL="${GATEWAY_URL:-https://localhost:8443}"
 CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
 
 curl() { command curl ${CURL_TLS_OPTS} "$@"; }
-KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 
 # Source secrets so we have CLIENT_SECRET, etc.
 if [ -f "${REPO_ROOT}/infra/.env" ]; then
@@ -26,49 +26,19 @@ fi
 
 mkdir -p "${EVIDENCE_DIR}"
 
-# ---------------------------------------------------------------------------
-# Self-contained token fetch — pure curl + grep, zero Python dependency
-# ---------------------------------------------------------------------------
 ACCESS_TOKEN="${ACCESS_TOKEN:-}"
 if [ -z "${ACCESS_TOKEN}" ]; then
-  echo "Fetching admin01 user token directly via curl..."
-
-  TOKEN_RESPONSE="$(curl -sS -X POST \
-    "${KEYCLOAK_URL}/realms/topic10-sme-api/protocol/openid-connect/token" \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "grant_type=password" \
-    -d "client_id=sme-lab-automation-client" \
-    -d "username=admin01" \
-    -d "password=admin-password-123" \
-    -d "scope=openid profile email" 2>&1)" || true
-
-  # Extract access_token using grep+sed (no Python needed)
-  ACCESS_TOKEN="$(echo "${TOKEN_RESPONSE}" | grep -o '"access_token":"[^"]*' | head -1 | sed 's/"access_token":"//')" || true
-
-  if [ -z "${ACCESS_TOKEN}" ]; then
-    echo "WARNING: Could not fetch token via user password grant."
-    echo "Curl response (first 200 chars): ${TOKEN_RESPONSE:0:200}"
-    echo ""
-    echo "Trying admin-service-client (client_credentials)..."
-
-    ADMIN_SECRET="${ADMIN_SERVICE_CLIENT_SECRET:-}"
-    if [ -n "${ADMIN_SECRET}" ]; then
-      TOKEN_RESPONSE="$(curl -sS -X POST \
-        "${KEYCLOAK_URL}/realms/topic10-sme-api/protocol/openid-connect/token" \
-        -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "grant_type=client_credentials" \
-        -d "client_id=admin-service-client" \
-        -d "client_secret=${ADMIN_SECRET}" 2>&1)" || true
-
-      ACCESS_TOKEN="$(echo "${TOKEN_RESPONSE}" | grep -o '"access_token":"[^"]*' | head -1 | sed 's/"access_token":"//')" || true
-    fi
+  echo "Fetching admin01 user token with local demo/dev helper..."
+  TOKEN_HELPER_LOG="$(mktemp /tmp/topic10-ssrf-token-helper.XXXXXX)"
+  if bash "${REPO_ROOT}/demo/auth/get-user-token.sh" admin01 >"${TOKEN_HELPER_LOG}" 2>&1; then
+    ACCESS_TOKEN="$(cat /tmp/user-token.txt 2>/dev/null || true)"
   fi
+  rm -f "${TOKEN_HELPER_LOG}"
 fi
 
 if [ -z "${ACCESS_TOKEN}" ]; then
   echo "ERROR: ACCESS_TOKEN is required. Could not auto-fetch."
-  echo "Try running from Git Bash, or set ACCESS_TOKEN manually:"
-  echo "  export ACCESS_TOKEN=\$(curl -s ... | grep ...)"
+  echo "Set ACCESS_TOKEN manually or rerun: bash demo/auth/get-user-token.sh admin01"
   exit 1
 fi
 
@@ -145,7 +115,8 @@ echo "===== 4. Network Egress Control Evidence ====="
   echo "Backend services are attached only to internal:true Docker networks:"
   echo "- user-service, order-service, billing-service, and admin-service are not attached to infra_default or any other non-internal network."
   echo "- Kong remains on infra_default for host/test access and joins per-service internal upstream networks."
-  echo "- billing-service and order-service share billing-order-s2s-internal for the approved internal S2S path."
+  echo "- billing-service no longer shares a direct plaintext network with order-service."
+  echo "- Billing-to-Order ownership verification uses order-mtls-proxy with a Billing client certificate."
   echo ""
   echo "Runtime proof is produced by:"
   echo "  bash tests/security/network-egress-control-tests.sh"

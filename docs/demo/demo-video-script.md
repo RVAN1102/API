@@ -17,7 +17,7 @@ sleep 30
 docker compose -f infra/docker-compose.yml ps
 
 # 3. Open browser tabs:
-#    - Grafana: http://localhost:3000
+#    - Grafana: http://localhost:3001
 #    - Jaeger:  http://localhost:16686
 #    - Keycloak: http://localhost:8080/admin (do NOT screen-share login credentials)
 
@@ -34,9 +34,9 @@ history -c
 ```bash
 # Show all services healthy
 docker compose -f infra/docker-compose.yml ps
-curl https://localhost:8443/api/v1/users/health | python3 -m json.tool
-curl http://localhost:8001/api/v1/orders/health | python3 -m json.tool
-curl http://localhost:8002/api/v1/billing/health | python3 -m json.tool
+curl -k https://localhost:8443/api/v1/users/health | python3 -m json.tool
+curl -k https://localhost:8443/api/v1/orders/health | python3 -m json.tool
+curl -k https://localhost:8443/api/v1/billing/health | python3 -m json.tool
 ```
 
 **Show:** All services `Up`, health endpoints return `{"status": "ok"}`
@@ -55,7 +55,7 @@ bash demo/auth/pkce-token-request.sh exchange <code> <code_verifier>
 export ALICE_TOKEN=<access_token_from_exchange_output>
 
 # Use token
-curl -s https://localhost:8443/api/v1/users/me \
+curl -k -s https://localhost:8443/api/v1/users/me \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-auth-001" \
   | python3 -m json.tool
@@ -92,7 +92,7 @@ curl -s -X POST \
 
 ```bash
 # Alice owns ord-alice-5001 – checkout succeeds
-curl -v -X POST https://localhost:8443/api/v1/billing/checkout \
+curl -k -v -X POST https://localhost:8443/api/v1/billing/checkout \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-ownership-001" \
   -H "Content-Type: application/json" \
@@ -110,7 +110,7 @@ curl -v -X POST https://localhost:8443/api/v1/billing/checkout \
 ```bash
 # BOLA attempt: Alice tries Bob's order
 echo "--- BOLA Attack ---"
-curl -v https://localhost:8443/api/v1/orders/ord-bob-2001/fixed \
+curl -k -v https://localhost:8443/api/v1/orders/ord-bob-2001/fixed \
   -H "Authorization: Bearer $ALICE_TOKEN" \
   -H "X-Correlation-ID: demo-bola-001"
 # Expected: 403 Forbidden
@@ -130,7 +130,7 @@ echo "--- Loki Query (403 logs) ---"
 
 ```bash
 # Bad HMAC
-curl -v -X POST https://localhost:8443/api/v1/auth/webhook \
+curl -k -v -X POST https://localhost:8443/api/v1/webhooks/payment \
   -H "X-Webhook-Timestamp: $(date +%s)" \
   -H "X-Webhook-Signature: sha256=deadbeefdeadbeef" \
   -H "X-Webhook-Nonce: demo-bad-001" \
@@ -152,14 +152,18 @@ bash tests/attack/webhook-forgery.sh 2>&1 | tail -20
 
 ```bash
 # SSRF attempt – fixed endpoint
-curl -v "https://localhost:8443/api/v1/admin/metadata-fixed?url=http://169.254.169.254/latest/meta-data/" \
+curl -k -v -X POST "https://localhost:8443/api/v1/admin/metadata-fetch/fixed" \
   -H "Authorization: Bearer $ALICE_TOKEN" \
-  -H "X-Correlation-ID: demo-ssrf-001"
+  -H "X-Correlation-ID: demo-ssrf-001" \
+  -H "Content-Type: application/json" \
+  -d '{"fetch_url":"http://169.254.169.254/latest/meta-data/"}'
 # Expected: 403
 
 # vs vulnerable endpoint (demo)
-curl -v "https://localhost:8443/api/v1/admin/metadata-vulnerable?url=http://169.254.169.254/" \
-  -H "Authorization: Bearer $ALICE_TOKEN"
+curl -k -v -X POST "https://localhost:8443/api/v1/admin/metadata-fetch/vulnerable" \
+  -H "Authorization: Bearer $ALICE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"fetch_url":"http://169.254.169.254/"}'
 # Shows attack risk on vulnerable endpoint
 ```
 
@@ -175,8 +179,8 @@ bash tests/security/zap-active-scan.sh
 cat docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
 ```
 
-**Show:** ZAP command and authoritative evidence index. Archived pre-HTTPS ZAP
-reports are retained only for audit history.
+**Show:** ZAP command and authoritative evidence index. Current ZAP output is
+written under `.artifacts/test-runs/tv3/zap/`.
 
 ---
 
@@ -196,7 +200,7 @@ cat docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
 **Narration:** "3 alert rules: 401, 403, 429. Grafana/Loki shows real alert data."
 
 **Show in browser:**
-1. Open Grafana: `http://localhost:3000`
+1. Open Grafana: `http://localhost:3001`
 2. Navigate to Alerting → Alert rules
 3. Show `HighUnauthorizedRate`, `HighForbiddenRate`, `RateLimitTriggered`
 4. Show Loki Explorer with query: `{job="docker"} |= "401" | json`
@@ -204,7 +208,7 @@ cat docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md
 ```bash
 # Trigger alerts live (optional)
 for i in $(seq 1 12); do
-  curl -s -o /dev/null https://localhost:8443/api/v1/users/me \
+  curl -k -s -o /dev/null https://localhost:8443/api/v1/users/me \
     -H "Authorization: Bearer fake.token.$i"
 done
 echo "Triggered 12x 401 – check Grafana for alert"
@@ -230,7 +234,7 @@ cat docs/evidence/tv3/observability/tracing-jaeger-billing-order.md
 
 ## Scene 12: SBOM / Artifact Signing Proof (14:00 – 15:00)
 
-**Narration:** "SBOM CycloneDX cho 28 components Python. Cosign verify xác nhận image đã được ký."
+**Narration:** "SBOM CycloneDX được tạo bằng Trivy. Cosign readiness mô tả đường ký keyless trong CI; chỉ claim image đã ký khi chạy signing thật với image digest."
 
 ```bash
 # SBOM
@@ -242,8 +246,8 @@ print(f'Components: {len(d.get(\"components\", []))}')
 print(f'Format: {d.get(\"bomFormat\")}')
 "
 
-# Cosign verify
-cat docs/evidence/tv3/supply-chain/cosign-verify-output.txt | head -20
+# Cosign readiness / signing path
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-placeholder
 ```
 
 ---
@@ -265,14 +269,14 @@ cat docs/evidence/tv3/secops-metrics/secops-mttd-mttr-summary.md
 
 ```bash
 bash tests/final/main-regression.sh 2>&1 | tail -20
-cat docs/evidence/final/final-security-regression-after-all-hardening.txt | tail -30
+bash tests/final/main-regression.sh
 ```
 
 ---
 
 ## Closing
 
-**Narration:** "Nhóm đã hoàn thành: ZAP Active Scan, API Fuzzing, SAST/SCA/SBOM/Cosign, Observability với 3 alert rules, Distributed Tracing, 4 Red Team scenarios, Resilience Drills, p50/p95 metrics, MTTD/MTTR, 3 Runbooks, và Final Regression. Tất cả evidence đều có thể chạy lại."
+**Narration:** "Nhóm đã hoàn thành: ZAP Active Scan, API Fuzzing, SAST/SCA/SBOM/Cosign readiness, Observability với alert rules, Distributed Tracing, Red Team scenarios, Resilience Drills, p50/p95 metrics, MTTD/MTTR, runbooks, và Final Regression. Tất cả current evidence đều có command chạy lại."
 
 ---
 

@@ -142,7 +142,9 @@ async def validate_token(token: str) -> Dict[str, Any]:
             signing_key,
             algorithms=["RS256"],
             options={
-                "verify_aud": False,  # audience check is optional for this prototype
+                # Audience/client binding is enforced below with azp/client_id
+                # and audience fallback against ALLOWED_HUMAN_CLIENT_IDS.
+                "verify_aud": False,
                 "verify_exp": True,
             },
         )

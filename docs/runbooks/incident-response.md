@@ -37,7 +37,7 @@ This runbook covers:
 ### Step 1: Acknowledge Alert
 
 ```bash
-# Check Grafana alerts (http://localhost:3000/alerting/list)
+# Check Grafana alerts (http://localhost:3001/alerting/list)
 # Or Loki:
 {job="docker"} |= "security_event" | json | line_format "{{.timestamp}} {{.event_type}} {{.actor}} {{.correlation_id}}"
 ```
@@ -165,9 +165,9 @@ Template:
 
 | Dashboard | URL |
 |-----------|-----|
-| Grafana main | `http://localhost:3000` |
-| Alert list | `http://localhost:3000/alerting/list` |
-| Loki Explorer | `http://localhost:3000/explore` |
+| Grafana main | `http://localhost:3001` |
+| Alert list | `http://localhost:3001/alerting/list` |
+| Loki Explorer | `http://localhost:3001/explore` |
 | Jaeger traces | `http://localhost:16686` |
 
 ---

@@ -23,6 +23,29 @@ need_openssl() {
   fi
 }
 
+reset_generated_material() {
+  rm -f \
+    "${OUT_DIR}/ca.crt" \
+    "${OUT_DIR}/ca.key" \
+    "${OUT_DIR}/ca.srl" \
+    "${OUT_DIR}/"*.crt \
+    "${OUT_DIR}/"*.key \
+    "${OUT_DIR}/"*.csr \
+    "${OUT_DIR}/"*.ext
+}
+
+regenerate_if_ca_is_legacy() {
+  if [ ! -s "${OUT_DIR}/ca.crt" ]; then
+    return
+  fi
+
+  if ! openssl x509 -in "${OUT_DIR}/ca.crt" -noout -text 2>/dev/null \
+      | grep -q "Certificate Sign"; then
+    echo "[INFO] Existing mTLS demo CA is missing CA key usage; regenerating local ignored certificate material"
+    reset_generated_material
+  fi
+}
+
 write_ext() {
   local name="$1"
   local type="$2"
@@ -56,6 +79,8 @@ generate_ca() {
     -out "${OUT_DIR}/ca.crt" \
     -days "${DAYS}" \
     -sha256 \
+    -addext "basicConstraints=critical,CA:TRUE" \
+    -addext "keyUsage=critical,keyCertSign,cRLSign" \
     -subj "/CN=topic10-gateway-backend-demo-ca" >/dev/null 2>&1
   chmod 600 "${OUT_DIR}/ca.key"
   chmod 644 "${OUT_DIR}/ca.crt"
@@ -92,8 +117,10 @@ generate_leaf() {
 }
 
 need_openssl
+regenerate_if_ca_is_legacy
 generate_ca
 generate_leaf "kong-client" "client"
+generate_leaf "billing-client" "client"
 generate_leaf "user-mtls-proxy" "server"
 generate_leaf "order-mtls-proxy" "server"
 generate_leaf "billing-mtls-proxy" "server"

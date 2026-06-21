@@ -17,6 +17,7 @@ mkdir -p "${EVIDENCE_DIR}"
 HEAD_COMMIT="$(git rev-parse HEAD)"
 BRANCH_NAME="$(git branch --show-current)"
 GENERATED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+PRE_GENERATION_STATUS="$(git status -sb)"
 
 {
   echo "generated_at=${GENERATED_AT}"
@@ -36,22 +37,13 @@ GENERATED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
 {
   echo "generated_at=${GENERATED_AT}"
-  git status -sb
+  printf '%s\n' "${PRE_GENERATION_STATUS}"
 } > "${EVIDENCE_DIR}/final-git-status.txt"
 
 {
   echo "generated_at=${GENERATED_AT}"
   git log --oneline --decorate -n 20
 } > "${EVIDENCE_DIR}/final-recent-commits.txt"
-
-{
-  echo "generated_at=${GENERATED_AT}"
-  find . -maxdepth 4 \
-    -path ./.git -prune -o \
-    -path ./node_modules -prune -o \
-    -path ./.venv -prune -o \
-    -print | sort
-} > "${EVIDENCE_DIR}/final-file-tree-maxdepth4.txt"
 
 {
   echo "# Final Quality Gate Summary"

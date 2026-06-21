@@ -146,7 +146,7 @@ Bảo vệ webhook hiện tại gồm:
 - Redis-backed nonce replay protection
 - Timestamp freshness check
 
-Gateway-to-backend mTLS is a separate control from webhook ingress mTLS. The default Docker Compose runtime now routes Kong to User/Order/Billing/Admin through HTTPS/mTLS Nginx sidecars. Runtime evidence proves that Kong presents an internal client certificate, callers without a valid client certificate are rejected, wrong/self-signed certificates are rejected, and the valid Kong client certificate is accepted. Internal Billing-to-Order authorization is still implemented with short-lived Keycloak Client Credentials and least-privilege service roles, while webhook ingress uses a separate mTLS channel plus HMAC/timestamp/nonce.
+Gateway-to-backend mTLS is a separate control from webhook ingress mTLS. The default Docker Compose runtime routes Kong to User/Order/Billing/Admin through HTTPS/mTLS Nginx sidecars. Runtime evidence proves that Kong presents an internal client certificate, callers without a valid client certificate are rejected, wrong/self-signed certificates are rejected, and the valid Kong client certificate is accepted. Billing-to-Order ownership verification also uses the Order mTLS sidecar with a Billing client certificate plus short-lived Keycloak Client Credentials and least-privilege service roles, while webhook ingress uses a separate mTLS channel plus HMAC/timestamp/nonce.
 
 Chi tiết: `p0-09-webhook-mtls-status.md`
 

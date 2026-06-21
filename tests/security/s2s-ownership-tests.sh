@@ -13,6 +13,14 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 AUTH_HEADER_NAME="Authorization"
 BEARER_SCHEME="Bearer"
+COMPOSE_FILE="${PROJECT_ROOT}/infra/docker-compose.yml"
+
+if [ -f "${PROJECT_ROOT}/infra/.env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${PROJECT_ROOT}/infra/.env"
+  set +a
+fi
 
 TOTAL=0
 PASSED=0
@@ -79,6 +87,10 @@ else:
 PY
 }
 
+compose() {
+  docker compose -f "${COMPOSE_FILE}" "$@"
+}
+
 echo "=============================================="
 echo "  REAL S2S ORDER OWNERSHIP TESTS"
 echo "  $(date)"
@@ -119,6 +131,78 @@ CI_ALICE_TOKEN="$(cat /tmp/s2s-ci-alice-token.txt)"
 CI_BOB_TOKEN="$(cat /tmp/s2s-ci-bob-token.txt)"
 BILLING_TOKEN="$(cat /tmp/s2s-billing-service-token.txt)"
 ADMIN_TOKEN="$(cat /tmp/s2s-admin-service-token.txt)"
+
+echo ""
+echo "===== Billing-to-Order mTLS transport ====="
+
+MTLS_CONFIG_STATUS="$(compose exec -T billing-service python - <<'PY'
+import os
+from pathlib import Path
+
+required = {
+    "ORDER_SERVICE_URL": "https://order-mtls-proxy:8443",
+    "ORDER_SERVICE_TLS_CA_CERT": "/etc/s2s-mtls/ca.crt",
+    "ORDER_SERVICE_TLS_CLIENT_CERT": "/etc/s2s-mtls/billing-client.crt",
+    "ORDER_SERVICE_TLS_CLIENT_KEY": "/etc/s2s-mtls/billing-client.key",
+}
+errors = []
+for key, expected in required.items():
+    actual = os.environ.get(key, "")
+    if actual != expected:
+        errors.append(f"{key}={actual!r}")
+for key in ("ORDER_SERVICE_TLS_CA_CERT", "ORDER_SERVICE_TLS_CLIENT_CERT", "ORDER_SERVICE_TLS_CLIENT_KEY"):
+    path = Path(os.environ.get(key, ""))
+    if not path.is_file():
+        errors.append(f"missing:{key}")
+if errors:
+    print(";".join(errors))
+    raise SystemExit(1)
+print("ok")
+PY
+)" || MTLS_CONFIG_STATUS="fail"
+if [ "${MTLS_CONFIG_STATUS}" = "ok" ]; then
+  pass "Billing service is configured for Order mTLS URL and client certificate material"
+else
+  fail "Billing service mTLS configuration invalid: ${MTLS_CONFIG_STATUS}"
+fi
+
+PLAINTEXT_PROBE="$(compose exec -T billing-service python - <<'PY'
+import json
+import urllib.request
+
+try:
+    host = "order-" + "service"
+    url = "http://" + host + ":8000/api/v1/orders/health"
+    with urllib.request.urlopen(url, timeout=3) as response:
+        print(json.dumps({"reachable": True, "status": getattr(response, "status", None)}))
+        raise SystemExit(0)
+except Exception as exc:
+    print(json.dumps({"reachable": False, "error_type": exc.__class__.__name__}))
+    raise SystemExit(10)
+PY
+)" && PLAINTEXT_STATUS=0 || PLAINTEXT_STATUS=$?
+echo "billing-service direct plaintext Order app-port probe: ${PLAINTEXT_PROBE}"
+if [ "${PLAINTEXT_STATUS}" -ne 0 ]; then
+  pass "Billing service cannot directly use the plaintext Order app port"
+else
+  fail "Billing service can still reach the plaintext Order app port"
+fi
+
+MTLS_HEALTH_STATUS="$(compose exec -T billing-service python - <<'PY'
+import os
+import ssl
+import urllib.request
+
+context = ssl.create_default_context(cafile=os.environ["ORDER_SERVICE_TLS_CA_CERT"])
+context.load_cert_chain(
+    certfile=os.environ["ORDER_SERVICE_TLS_CLIENT_CERT"],
+    keyfile=os.environ["ORDER_SERVICE_TLS_CLIENT_KEY"],
+)
+with urllib.request.urlopen("https://order-mtls-proxy:8443/api/v1/orders/health", context=context, timeout=5) as response:
+    print(getattr(response, "status", ""))
+PY
+)" || MTLS_HEALTH_STATUS="000"
+assert_status "Billing service reaches Order sidecar over verified mTLS" 200 "${MTLS_HEALTH_STATUS}"
 
 echo ""
 echo "===== Billing checkout ownership ====="

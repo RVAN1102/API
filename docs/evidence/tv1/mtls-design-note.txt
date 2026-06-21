@@ -12,9 +12,11 @@ backend sidecar, and the sidecars reject direct callers without a valid client
 certificate. Kong upstreams in gateway/kong.yml point to the HTTPS sidecars.
 
 Scope boundary:
-This proves Gateway-to-Backend mTLS at the backend ingress boundary. Backend
-S2S authorization such as Billing-to-Order ownership still uses short-lived
-Keycloak Client Credentials and least-privilege service roles. Production can
+This proves Gateway-to-Backend mTLS at the backend ingress boundary.
+Billing-to-Order ownership verification uses the Order mTLS sidecar with a
+Billing client certificate and also requires short-lived Keycloak Client
+Credentials with least-privilege service roles. The default endpoint is
+https://order-mtls-proxy:8443 with lab CA verification enabled. Production can
 extend this with a full service mesh/internal PKI for all east-west traffic.
 
 Prepared artifacts:
@@ -22,7 +24,6 @@ Prepared artifacts:
 - gateway/kong.yml
 - gateway/kong-mtls.yml
 - infra/docker-compose.yml
-- infra/docker-compose.mtls.yml
 - infra/nginx/gateway-backend-mtls.conf.template
 - demo/mtls/ensure-gateway-backend-certs.sh
 - tests/security/gateway-backend-mtls-tests.sh

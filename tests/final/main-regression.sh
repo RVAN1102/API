@@ -211,9 +211,9 @@ wait_for_kong() {
       code="000"
     fi
 
-    echo "[INFO] Kong readiness attempt ${attempt}/30: users health HTTP ${code}"
+    echo "[INFO] Kong readiness attempt ${attempt}/30: HTTPS users health status ${code}"
     if [ "${code}" = "200" ]; then
-      echo "[INFO] Kong users health is ready (HTTP 200)"
+      echo "[INFO] Kong HTTPS users health is ready (status 200)"
       return 0
     fi
     sleep 2

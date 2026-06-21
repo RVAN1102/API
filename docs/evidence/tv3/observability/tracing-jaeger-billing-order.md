@@ -15,7 +15,7 @@ Client
   │  X-Correlation-ID: corr-billing-order-001
   │  HTTP POST /api/v1/billing/checkout
   ▼
-Kong Gateway (Port 8000)
+Kong Gateway (HTTPS 8443)
   │  Span: gateway/request [duration: 45ms]
   │  TraceID: 3fa85f6457174562b3fc2c963f66afa6
   ▼

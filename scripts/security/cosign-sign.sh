@@ -24,14 +24,14 @@
 #   - Local key is for lab demo only.
 #
 # Output:
-#   docs/evidence/tv3/supply-chain/cosign-signing-summary.md
-#   docs/evidence/tv3/supply-chain/cosign-verify-output.txt
+#   ${REPORT_DIR}/cosign-signing-summary.md
+#   ${REPORT_DIR}/cosign-verify-output.txt
 
 set -uo pipefail
 
 MODE="${1:-evidence}"
 IMAGE="${2:-}"
-REPORT_DIR="${REPORT_DIR:-docs/evidence/tv3/supply-chain}"
+REPORT_DIR="${REPORT_DIR:-.artifacts/test-runs/tv3/supply-chain}"
 KEY_DIR="${TMPDIR:-/tmp}/cosign-lab-keys"
 
 mkdir -p "${REPORT_DIR}"
@@ -51,6 +51,10 @@ case "${MODE}" in
       echo "[ERROR] Image required: bash cosign-sign.sh keyless <image>"
       exit 1
     fi
+    if [ -z "${COSIGN_CERT_IDENTITY_REGEXP:-}" ]; then
+      echo "[ERROR] Set COSIGN_CERT_IDENTITY_REGEXP to the expected GitHub workflow identity before keyless verification."
+      exit 1
+    fi
     if ! command -v cosign > /dev/null 2>&1; then
       echo "[ERROR] cosign not installed. Install: https://docs.sigstore.dev/cosign/installation/"
       exit 1
@@ -60,7 +64,7 @@ case "${MODE}" in
     echo ""
     echo "--- Verifying signature ---"
     cosign verify \
-      --certificate-identity-regexp=".*" \
+      --certificate-identity-regexp="${COSIGN_CERT_IDENTITY_REGEXP}" \
       --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
       "${IMAGE}" 2>&1 | tee -a "${REPORT_DIR}/cosign-verify-output.txt"
     ;;
@@ -84,19 +88,19 @@ case "${MODE}" in
     echo "--- Generating local demo key (not committed to repo) ---"
     if [ ! -f "${KEY_FILE}" ]; then
       COSIGN_PASSWORD="" cosign generate-key-pair \
-        --output-key-prefix "${KEY_DIR}/cosign-lab" 2>/dev/null || true
+        --output-key-prefix "${KEY_DIR}/cosign-lab" 2>/dev/null
     fi
 
     echo "--- Signing ${IMAGE} with local key ---"
     COSIGN_PASSWORD="" cosign sign \
       --key "${KEY_FILE}" \
-      "${IMAGE}" 2>&1 | tee "${REPORT_DIR}/cosign-verify-output.txt" || true
+      "${IMAGE}" 2>&1 | tee "${REPORT_DIR}/cosign-verify-output.txt"
 
     echo ""
     echo "--- Verifying signature ---"
     COSIGN_PASSWORD="" cosign verify \
       --key "${PUB_FILE}" \
-      "${IMAGE}" 2>&1 | tee -a "${REPORT_DIR}/cosign-verify-output.txt" || true
+      "${IMAGE}" 2>&1 | tee -a "${REPORT_DIR}/cosign-verify-output.txt"
 
     # Cleanup private key immediately
     rm -f "${KEY_FILE}"
@@ -123,51 +127,32 @@ case "${MODE}" in
       echo "  cosign sign --yes ${IMAGE}"
       echo ""
       echo "Expected keyless verification command:"
-      echo "  cosign verify --certificate-identity-regexp=.* --certificate-oidc-issuer=https://token.actions.githubusercontent.com ${IMAGE}"
+      echo "  cosign verify --certificate-identity-regexp=<expected-github-workflow-identity> --certificate-oidc-issuer=https://token.actions.githubusercontent.com ${IMAGE}"
       echo ""
       echo "No signature, key, or credential is generated in dry-run mode."
     } | tee -a "${REPORT_DIR}/cosign-verify-output.txt"
     ;;
 
   # --------------------------------------------------
-  # Generate evidence template (no Docker image needed)
+  # Generate readiness evidence (no Docker image needed, no signing claim)
   # --------------------------------------------------
   evidence)
-    echo "--- Generating evidence template (no image required) ---"
+    echo "--- Generating Cosign readiness evidence (no image signed) ---"
     cat > "${REPORT_DIR}/cosign-verify-output.txt" <<'TXT'
-=== Cosign Signing Evidence (Lab Demo) ===
-Date: 2026-06-17T08:30:00Z
-Mode: local demo key (lab environment)
-Image: api-security-project/billing-service:latest
+=== Cosign Readiness Evidence ===
+Mode: evidence
 
---- Sign Output ---
-Generating ephemeral keys...
-Retrieving signed certificate...
-WARNING: Image reference api-security-project/billing-service:latest
-is not pinned to a digest. Consider using a digest.
-Pushing signature to: localhost:5000/billing-service
+No image is signed in evidence mode.
+Use this mode to document the expected CI/keyless commands without creating
+keys, credentials, signatures, or transparency-log entries.
 
---- Verify Output ---
-Verification for api-security-project/billing-service:latest --
-The following checks were performed on each of these signatures:
-  - The cosign claims were validated
-  - Existence of the claims in the transparency log was verified offline
-  - The code-signing certificate was verified using trusted certificate authority
+Expected keyless signing command for a published digest image:
+  cosign sign --yes <image-ref-by-digest>
 
-[{"critical":{"identity":{"docker-reference":"api-security-project/billing-service"},
-"image":{"docker-manifest-digest":"sha256:abc...def"},
-"type":"cosign container image signature"},
-"optional":{
-  "Bundle":{"SignedEntryTimestamp":"MEQCIHx...",
-             "Payload":{"body":"eyJ...","integratedTime":1718600000,
-                        "logIndex":12345678,"logID":"c0d23d..."}},
-  "Issuer":"https://github.com/login/oauth",
-  "Subject":"tv3-lab@example.com"
-}}]
-
-VERIFIED: Signature is valid.
+Expected keyless verification command:
+  cosign verify --certificate-identity-regexp=<github-workflow-identity> --certificate-oidc-issuer=https://token.actions.githubusercontent.com <image-ref-by-digest>
 TXT
-    echo "[OK] Evidence template created."
+    echo "[OK] Readiness evidence created; no image was signed."
     ;;
 esac
 
@@ -182,36 +167,44 @@ cat > "${REPORT_DIR}/cosign-signing-summary.md" <<MD
 **Mode:** ${MODE}  
 **Script:** \`scripts/security/cosign-sign.sh\`
 
-## What Was Signed
+## Signing Status
 
-| Artifact | Format | Signing Mode |
-|---------|--------|--------------|
-| billing-service | Docker image | Local demo key (lab) |
-| order-service | Docker image | Local demo key (lab) |
-| api-security-project | Filesystem artifact | Local demo key (lab) |
+| Mode | What Happens |
+|------|--------------|
+| \`keyless <image>\` | Runs real Cosign keyless sign and verify against a published image reference. Intended for CI with GitHub OIDC identity. |
+| \`local <image>\` | Runs a local lab signing demo with a temporary key under \`/tmp\`, then deletes the private key. |
+| \`dry-run <image>\` | Checks/document expected commands only; no image is signed. |
+| \`evidence\` | Writes readiness evidence only; no image is signed. |
 
 ## Signing Method
 
-**Lab environment:** Local ephemeral key pair (generated per-run, private key deleted immediately after signing).
+**Current CI path:** \`.github/workflows/security-scan.yml\` builds service images,
+runs Trivy image scans, emits CycloneDX image SBOM artifacts, installs Cosign,
+and runs \`dry-run\` readiness commands without storing secrets.
 
-**Production recommendation:** Use keyless signing via Cosign + Sigstore (Fulcio CA + Rekor transparency log) in GitHub Actions CI.
+**Production recommendation:** Publish immutable image digests and run Cosign
+keyless signing via GitHub Actions OIDC, Fulcio, and Rekor. Verification should
+pin the expected workflow identity and OIDC issuer.
 
 ## Security Notes
 
 - ✅ Private key **NOT committed** to repository
-- ✅ Private key deleted immediately after signing in lab mode
-- ✅ Only public key and verify output stored in evidence
+- ✅ Local demo private key deleted immediately after signing in \`local\` mode
+- ✅ Dry-run/evidence modes do not create signatures or credentials
 - ✅ No secrets exposed in this file
 
-## Verify Command (reproducible)
+## Reproducible Commands
 
 \`\`\`bash
-# Local key (lab):
+# Readiness only, no signing:
+bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-placeholder
+
+# Local lab signing demo:
 cosign verify --key cosign-lab.pub <image>
 
 # Keyless (production/CI):
 cosign verify \\
-  --certificate-identity-regexp=".*" \\
+  --certificate-identity-regexp="<expected GitHub workflow identity>" \\
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \\
   <image>
 \`\`\`
@@ -221,16 +214,13 @@ cosign verify \\
 | File | Contents |
 |------|----------|
 | \`cosign-signing-summary.md\` | This file |
-| \`cosign-verify-output.txt\` | Cosign verify output (no private key) |
+| \`cosign-verify-output.txt\` | Cosign output for the selected mode; dry-run/evidence output is readiness-only |
 
-## Verify Output Excerpt
+## Output Note
 
-See \`cosign-verify-output.txt\` for full output.
-
-Key verification fields:
-- Signature valid: ✅
-- Transparency log entry: ✅
-- Certificate issuer verified: ✅
+Do not claim that an image was signed unless this script was run in \`keyless\`
+or \`local\` mode against a real image and the resulting verify output is
+preserved.
 MD
 
 echo ""

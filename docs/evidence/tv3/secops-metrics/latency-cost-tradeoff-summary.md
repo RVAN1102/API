@@ -18,7 +18,7 @@
 
 | Evidence | Claim Type | Notes |
 |---|---|---|
-| `docs/evidence/archive/pre-8443-http8000/tv3/metrics/k6-gateway-waf-latency.md` | archived historical k6 lab run | Pre-HTTPS gateway evidence retained for audit history only; rerun k6 against the current HTTPS gateway for current p50/p95 claims |
+| `BASE_URL=https://localhost:8443 REQUESTS=5 bash scripts/metrics/latency-overhead-smoke.sh` | current lightweight latency smoke command | Writes transient p50/p95 output under `.artifacts/test-runs/metrics/`; use a fresh run before making current latency claims |
 | `demo/k6/gateway-latency.js` | reproducible smoke workload | Health endpoint k6 script; useful when k6 is installed or Docker k6 is available |
 | `scripts/metrics/latency-overhead-smoke.sh` | reproducible curl-based smoke method | Writes transient CSV/Markdown summaries to `.artifacts/test-runs/metrics/` |
 | `docs/evidence/tv3/metrics/kms-vault-call-overhead.md` | measured manual Vault read latency | Treats Vault/KMS as production startup/rotation budget, not proof that every lab service fetches runtime secrets from Vault |

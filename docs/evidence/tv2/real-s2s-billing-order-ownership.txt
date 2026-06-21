@@ -1,6 +1,6 @@
 ==============================================
   REAL S2S ORDER OWNERSHIP TESTS
-  Wed Jun 17 02:25:20 PM +07 2026
+  Sun Jun 21 15:14:58 +07 2026
 ==============================================
 
 ===== Prepare tokens =====
@@ -9,10 +9,21 @@
 [INFO] billing service token obtained
 [INFO] admin service token obtained
 
+===== Billing-to-Order mTLS transport =====
+[PASS] Billing service is configured for Order mTLS URL and client certificate material
+billing-service direct plaintext Order app-port probe: {"reachable": false, "error_type": "URLError"}
+[PASS] Billing service cannot directly use the plaintext Order app port
+[PASS] Billing service reaches Order sidecar over verified mTLS -> 200
+
 ===== Billing checkout ownership =====
 [PASS] Alice checkout Alice order accepted -> 202
+[PASS] Alice checkout Alice order wrong amount blocked -> 409
 [PASS] Alice checkout Bob order forbidden -> 403
 [PASS] Bob checkout Bob order accepted -> 202
+[PASS] Alice checkout idempotent first attempt accepted -> 202
+[PASS] Alice checkout idempotent safe retry accepted -> 202
+[PASS] Alice checkout same idempotency key different payload blocked -> 409
+[PASS] Alice duplicate checkout different idempotency key blocked -> 409
 [PASS] Billing fake user token rejected -> 401
 [PASS] Billing malformed user token rejected -> 401
 [PASS] Unknown order checkout fail closed -> 403
@@ -33,5 +44,5 @@
 [PASS] billing-service-client users/me forbidden -> 403
 
 ==============================================
-  REAL S2S RESULT: 17/17 passed, 0 failed
+  REAL S2S RESULT: 25/25 passed, 0 failed
 ==============================================

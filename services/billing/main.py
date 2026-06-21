@@ -22,7 +22,9 @@ import hmac
 import json
 import logging
 import os
+import ssl
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
@@ -62,7 +64,10 @@ KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 TOKEN_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
-ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "http://order-service:8000")
+ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "https://order-mtls-proxy:8443").rstrip("/")
+ORDER_SERVICE_TLS_CA_CERT: str = os.environ.get("ORDER_SERVICE_TLS_CA_CERT", "/etc/s2s-mtls/ca.crt")
+ORDER_SERVICE_TLS_CLIENT_CERT: str = os.environ.get("ORDER_SERVICE_TLS_CLIENT_CERT", "/etc/s2s-mtls/billing-client.crt")
+ORDER_SERVICE_TLS_CLIENT_KEY: str = os.environ.get("ORDER_SERVICE_TLS_CLIENT_KEY", "/etc/s2s-mtls/billing-client.key")
 BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
 BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
 OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
@@ -296,6 +301,8 @@ async def validate_token(token: str) -> Dict[str, Any]:
             token,
             signing_key,
             algorithms=["RS256"],
+            # Client binding is enforced below with azp/client_id and audience
+            # fallback against ALLOWED_HUMAN_CLIENT_IDS.
             options={"verify_aud": False, "verify_exp": True},
         )
     except HTTPException:
@@ -379,7 +386,7 @@ async def require_opa_allow(input_data: Dict[str, Any]) -> None:
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
             response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
-    except httpx.HTTPError:
+    except (httpx.HTTPError, OSError, ssl.SSLError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={"error": "opa_unavailable", "message": "Authorization policy engine unavailable"},
@@ -535,9 +542,37 @@ async def verify_order_ownership_with_order_service(
 ) -> Optional[Dict[str, Any]]:
     service_token = await obtain_billing_service_token()
     verify_url = f"{ORDER_SERVICE_URL}/api/v1/orders/internal/verify-ownership"
+    parsed_verify_url = urlparse(verify_url)
+    if parsed_verify_url.scheme != "https":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "error": "ownership_verification_failed",
+                "message": "Order ownership verification requires mTLS",
+            },
+        )
+
+    tls_files = (
+        ORDER_SERVICE_TLS_CA_CERT,
+        ORDER_SERVICE_TLS_CLIENT_CERT,
+        ORDER_SERVICE_TLS_CLIENT_KEY,
+    )
+    if not all(Path(path).is_file() for path in tls_files):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "error": "ownership_verification_failed",
+                "message": "Order ownership mTLS material is not configured",
+            },
+        )
 
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        tls_context = ssl.create_default_context(cafile=ORDER_SERVICE_TLS_CA_CERT)
+        tls_context.load_cert_chain(
+            certfile=ORDER_SERVICE_TLS_CLIENT_CERT,
+            keyfile=ORDER_SERVICE_TLS_CLIENT_KEY,
+        )
+        async with httpx.AsyncClient(timeout=5.0, verify=tls_context) as client:
             response = await client.post(
                 verify_url,
                 json={"order_id": order_id, "subject": subject},

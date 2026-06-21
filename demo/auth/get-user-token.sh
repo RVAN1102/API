@@ -43,6 +43,7 @@ trap 'rm -f "${RESPONSE_FILE}"' EXIT
 
 echo "=== Getting token for user: ${USERNAME} ==="
 echo "Token URL: ${TOKEN_URL}"
+echo "Flow: local demo/dev automation helper; public clients should use PKCE."
 echo ""
 
 CURL_EXIT=0
@@ -77,9 +78,8 @@ fi
 
 ACCESS_TOKEN=$(python3 -c "import sys,json; print(json.load(open(sys.argv[1]))['access_token'])" "${RESPONSE_FILE}")
 
-echo "Access token (first 60 chars):"
-echo "${ACCESS_TOKEN:0:60}..."
-echo ""
+echo "Access token obtained; value not printed."
+echo "Token length: ${#ACCESS_TOKEN} chars"
 echo "Full token saved to /tmp/user-token.txt"
 echo "${ACCESS_TOKEN}" > "${TOKEN_FILE}"
 echo ""
