@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-06-19
+**Last updated:** 2026-06-21
 
 ---
 
@@ -9,6 +9,8 @@
 The current baseline is defined by `tests/final/main-regression.sh` and the
 authoritative evidence index at
 `docs/evidence/final/AUTHORITATIVE_EVIDENCE_INDEX.md`.
+Canonical URL/security scope is defined in
+`docs/runbooks/url-and-security-scope.md`.
 
 ### Implemented And Evidenced
 
@@ -26,7 +28,7 @@ authoritative evidence index at
 - ✅ Security scan (Bandit/Trivy/Gitleaks) – python-jose CVE fixed
 - ✅ Frontend security dashboard at http://localhost:3002
 - ✅ Container runtime hardening and OpenAPI/excessive-data contract tests are integrated
-- ✅ Final regression gate currently runs 11 suites
+- ✅ Final regression gate currently runs 12 suites
 
 ### Prototype Boundaries
 
@@ -35,6 +37,9 @@ authoritative evidence index at
 - ✅ Gateway-to-backend mTLS: enforced by default through Nginx sidecars in `infra/docker-compose.yml`
 - ✅ Billing-to-Order S2S: ownership verification uses the Order mTLS sidecar plus short-lived `billing-service-client` Client Credentials
 - ✅ OPA: policy decision point and backend enforcement evidenced for selected authorization paths
+- ✅ Public API endpoint is `https://localhost:8443`; HTTP Kong Admin,
+  Keycloak, Vault, and Grafana URLs are lab-local control-plane/observability
+  endpoints only
 - ⚠️ Keycloak runs in dev mode (not production-grade)
 - ⚠️ Vault runs in dev mode
 - ⚠️ This is a lab/prototype baseline with production-oriented controls, not a fully managed production deployment

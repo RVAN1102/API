@@ -3,6 +3,7 @@
 **Date:** 2026-06-17  
 **Script:** `scripts/ci/security-pipeline.sh`  
 **GitHub Actions:** `.github/workflows/security-scan.yml`
+**Canonical URL/security scope:** `docs/runbooks/url-and-security-scope.md`
 
 ---
 
@@ -16,7 +17,7 @@
 | 4. Secrets Scan | Gitleaks v8.x | Superseded by 2026-06-18 post-purge package scan | `supply-chain/gitleaks-report-after-secret-purge.json` |
 | 5. SBOM | Trivy CycloneDX | ✅ PASS | `supply-chain/sbom-cyclonedx.json` |
 | 6. Build Check | Docker Compose | ✅ PASS | – |
-| 7. Artifact Signing | Cosign | Readiness dry-run; real signing requires keyless CI image digest | `supply-chain/cosign-signing-summary.md` |
+| 7. Artifact Signing | Cosign | Readiness dry-run; real signing requires keyless CI evidence for a real image digest | `supply-chain/cosign-signing-summary.md` |
 | 8. Security Tests | Bash test suite | ✅ PASS | `docs/evidence/tv3/` |
 | 9. ZAP Active Scan | OWASP ZAP | Rerunnable OpenAPI active scan against HTTPS gateway | `.artifacts/test-runs/tv3/zap/` |
 | 10. API Fuzzing | Fuzz suite | Rerunnable negative-input tests against HTTPS gateway | `.artifacts/test-runs/tv3/fuzzing/` |
@@ -35,6 +36,9 @@ SKIP_STACK=1 bash scripts/ci/security-pipeline.sh
 
 # Skip ZAP only:
 SKIP_ZAP=1 bash scripts/ci/security-pipeline.sh
+
+# Summarize downloaded GitHub Actions artifacts:
+bash scripts/ci/summarize-github-actions-evidence.sh <artifact-dir>
 ```
 
 ---
@@ -49,7 +53,13 @@ Jobs:
 - `trivy` – SCA filesystem scan
 - `image-sbom-cosign` – image scan, CycloneDX image SBOM, Cosign readiness dry-run
 
-Triggers on push to: `qa/tv3-*`, `main`
+Triggers on push to: `feat/tv3-devsecops-observability-redteam`,
+`setup/project-contracts`, and `main`; pull requests to `setup/project-contracts`
+and `main`.
+
+The workflow image supply-chain job runs Cosign readiness dry-run by default.
+Do not claim CI signing succeeded unless reviewed artifacts show real keyless
+signing and verification for a published image digest.
 
 ---
 
