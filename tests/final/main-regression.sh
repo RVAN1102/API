@@ -223,6 +223,36 @@ wait_for_kong() {
   exit 1
 }
 
+
+ensure_keycloak_ready() {
+  echo "[INFO] Ensuring Keycloak is running before token-based regression suites"
+
+  local project_root
+  project_root="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+
+  local compose_file
+  compose_file="${COMPOSE_FILE:-${project_root}/infra/docker-compose.yml}"
+
+  docker compose -f "${compose_file}" up -d keycloak >/dev/null
+
+  for attempt in $(seq 1 60); do
+    code="$(curl -sS -o /tmp/final-regression-keycloak-discovery.json -w '%{http_code}' \
+      --max-time 5 \
+      "http://localhost:8080/realms/topic10-sme-api/.well-known/openid-configuration" 2>/dev/null || true)"
+    echo "[INFO] Keycloak discovery attempt ${attempt}/60: HTTP ${code}"
+    if [ "${code}" = "200" ]; then
+      echo "[INFO] Keycloak discovery is ready (HTTP 200)"
+      return 0
+    fi
+    sleep 5
+  done
+
+  echo "[FAIL] Keycloak discovery did not become ready at http://localhost:8080" >&2
+  docker compose -f "${compose_file}" ps keycloak >&2 || true
+  docker compose -f "${compose_file}" logs --no-color --tail=120 keycloak >&2 || true
+  return 1
+}
+
 ensure_webhook_mtls_certs() {
   local ensure_script="${PROJECT_ROOT}/demo/mtls/ensure-mtls-certs.sh"
 
@@ -276,6 +306,8 @@ ensure_webhook_mtls_certs
 ensure_gateway_backend_mtls_certs
 restart_gateway_backend_mtls_proxies
 reset_kong_at_start
+ensure_keycloak_ready
+
 run_suite "Container Runtime Hardening" "tests/security/container-runtime-hardening-tests.sh"
 run_suite "Smoke Test" "tests/smoke/main-smoke.sh"
 run_suite "OpenAPI Contract" "tests/security/openapi-contract-tests.sh"
