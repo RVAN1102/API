@@ -1,0 +1,1466 @@
+2026-06-22 13:45:08.310: Will refresh token: sh /api/tests/restler/fetch-restler-auth.sh
+2026-06-22 13:45:08.463: New value: {u'app1': {}}
+_OMITTED_AUTH_TOKEN_
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 16)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.522: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 122\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"payment.succeeded",\n    "checkout_id":"checkout-001",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:08.605: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: 043afe85-6317-4b37-bc2f-9ce3c1d5c2d1\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 15)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.650: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 120\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"payment.succeeded",\n    "checkout_id":"checkout-001",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:08.660: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: 796e1e9d-16ee-4784-a0b5-cb69bf316f33\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 14)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.706: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 120\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"payment.succeeded",\n    "checkout_id":"fuzzstring",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:08.717: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: 748ed2c0-5216-4c19-a3b1-845c1f8a7cf4\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 13)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.761: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 118\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"payment.succeeded",\n    "checkout_id":"fuzzstring",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:08.771: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: 6daa2e69-a657-4659-9db2-be3e25ff0fa4\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 12)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.815: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 115\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"fuzzstring",\n    "checkout_id":"checkout-001",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:08.826: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: 1252462f-e751-47c4-b2b6-51c448941573\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 11)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.871: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 113\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"fuzzstring",\n    "checkout_id":"checkout-001",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:08.882: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: 4397cf74-1412-4e24-87d8-1c56ee1a445b\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 10)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.926: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 113\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"fuzzstring",\n    "checkout_id":"fuzzstring",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:08.937: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: cda8bdd3-ebd6-4742-a451-8a8396c076aa\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 9)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:08.980: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 111\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"evt-001",\n    "event_type":"fuzzstring",\n    "checkout_id":"fuzzstring",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:08.991: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:08 GMT\r\nx-correlation-id: f96383c8-9a10-4f23-80f2-5190c9c2067e\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 8)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.035: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 125\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"payment.succeeded",\n    "checkout_id":"checkout-001",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:09.045: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: 376dc572-9189-4005-86f2-d466f5e47e6e\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 7)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.094: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 123\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"payment.succeeded",\n    "checkout_id":"checkout-001",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:09.106: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: 3723344c-de46-447f-bae8-00f816c25074\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 6)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.150: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 123\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"payment.succeeded",\n    "checkout_id":"fuzzstring",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:09.160: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: fab6bdfe-80da-4722-a832-995cf150aa6f\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 5)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.204: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 121\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"payment.succeeded",\n    "checkout_id":"fuzzstring",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:09.213: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: dfced60d-17ae-45d4-a9ef-0763a3c239fb\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 4)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.256: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 118\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"fuzzstring",\n    "checkout_id":"checkout-001",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:09.266: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: 6d8ab46b-a7e4-4dcc-bc9c-e0de537a533c\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 3)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.309: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 116\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"fuzzstring",\n    "checkout_id":"checkout-001",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:09.319: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: 19c678d3-aac5-470f-8736-18c1decca2f8\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 2)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.362: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 116\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"fuzzstring",\n    "checkout_id":"fuzzstring",\n    "amount":150000}\r\n'
+
+2026-06-22 13:45:09.373: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: f72ab676-3ef4-45d8-a1bb-e9a6037573a6\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-1
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 015a505123e58b3587700a14cb895e7e3e726150
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.416: Sending: 'POST /api/v1/webhooks/payment HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Webhook-Timestamp: fuzzstring\r\nX-Webhook-Nonce: fuzzstring\r\nX-Webhook-Signature: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 114\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "event_id":"fuzzstring",\n    "event_type":"fuzzstring",\n    "checkout_id":"fuzzstring",\n    "amount":1.23}\r\n'
+
+2026-06-22 13:45:09.426: Received: 'HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: 202\r\nConnection: keep-alive\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: ab237b9b-385c-4398-85e5-516b16c73c50\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"mtls_client_cert_required","message":"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \'SUCCESS\')."}}'
+
+
+Generation-1: Rendering Sequence-2
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 06eb2665a309d030b008841a1a4c36d168fd4b16
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '/'
+		- restler_static_string: 'vulnerable'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.471: Sending: 'GET /api/v1/orders/fuzzstring/vulnerable HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:09.696: Received: 'HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nContent-Length: 71\r\nConnection: keep-alive\r\nRateLimit-Remaining: 9\r\nRateLimit-Reset: 51\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 9\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: 2f2f1acc-1a08-49fe-b612-0f0621036893\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"not_found","message":"Order fuzzstring not found"}}'
+
+
+Generation-1: Rendering Sequence-3
+
+	Request: 1 (Remaining candidate combinations: 4)
+	Request hash: 0e715249b3fbab8270e3fa523cdcbb9729d7fa11
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_static_string: 'internal'
+		- restler_static_string: '/'
+		- restler_static_string: 'verify-ownership'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Correlation-ID: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "order_id":'
+		+ restler_fuzzable_string: ["ord-alice-1001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "subject":'
+		+ restler_fuzzable_string: ["alice", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.740: Sending: 'POST /api/v1/orders/internal/verify-ownership HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Correlation-ID: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 59\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "order_id":"ord-alice-1001",\n    "subject":"alice"}\r\n'
+
+2026-06-22 13:45:09.843: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 192\r\nConnection: keep-alive\r\nRateLimit-Remaining: 8\r\nRateLimit-Reset: 51\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 8\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: fuzzstring\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required service client \'billing-service-client\' with role \'order-ownership-read\'. Token client: \'sme-lab-automation-client\'. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-3
+
+	Request: 1 (Remaining candidate combinations: 3)
+	Request hash: 0e715249b3fbab8270e3fa523cdcbb9729d7fa11
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_static_string: 'internal'
+		- restler_static_string: '/'
+		- restler_static_string: 'verify-ownership'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Correlation-ID: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "order_id":'
+		+ restler_fuzzable_string: ["ord-alice-1001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "subject":'
+		+ restler_fuzzable_string: ["alice", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.886: Sending: 'POST /api/v1/orders/internal/verify-ownership HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Correlation-ID: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 64\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "order_id":"ord-alice-1001",\n    "subject":"fuzzstring"}\r\n'
+
+2026-06-22 13:45:09.914: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 192\r\nConnection: keep-alive\r\nRateLimit-Remaining: 7\r\nRateLimit-Reset: 51\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 7\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: fuzzstring\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required service client \'billing-service-client\' with role \'order-ownership-read\'. Token client: \'sme-lab-automation-client\'. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-3
+
+	Request: 1 (Remaining candidate combinations: 2)
+	Request hash: 0e715249b3fbab8270e3fa523cdcbb9729d7fa11
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_static_string: 'internal'
+		- restler_static_string: '/'
+		- restler_static_string: 'verify-ownership'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Correlation-ID: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "order_id":'
+		+ restler_fuzzable_string: ["ord-alice-1001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "subject":'
+		+ restler_fuzzable_string: ["alice", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:09.958: Sending: 'POST /api/v1/orders/internal/verify-ownership HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Correlation-ID: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 55\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "order_id":"fuzzstring",\n    "subject":"alice"}\r\n'
+
+2026-06-22 13:45:09.986: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 192\r\nConnection: keep-alive\r\nRateLimit-Remaining: 6\r\nRateLimit-Reset: 51\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 6\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:09 GMT\r\nx-correlation-id: fuzzstring\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required service client \'billing-service-client\' with role \'order-ownership-read\'. Token client: \'sme-lab-automation-client\'. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-3
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 0e715249b3fbab8270e3fa523cdcbb9729d7fa11
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_static_string: 'internal'
+		- restler_static_string: '/'
+		- restler_static_string: 'verify-ownership'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Correlation-ID: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "order_id":'
+		+ restler_fuzzable_string: ["ord-alice-1001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "subject":'
+		+ restler_fuzzable_string: ["alice", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.029: Sending: 'POST /api/v1/orders/internal/verify-ownership HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nX-Correlation-ID: fuzzstring\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 60\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "order_id":"fuzzstring",\n    "subject":"fuzzstring"}\r\n'
+
+2026-06-22 13:45:10.056: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 192\r\nConnection: keep-alive\r\nRateLimit-Remaining: 5\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 5\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: fuzzstring\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required service client \'billing-service-client\' with role \'order-ownership-read\'. Token client: \'sme-lab-automation-client\'. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-4
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 31c77231707f7df65ab40b867de22f7aa9815234
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.099: Sending: 'GET /api/v1/orders HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:10.110: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 99\r\nConnection: keep-alive\r\nRateLimit-Remaining: 4\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 4\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 105bc07b-339d-4dfe-8038-dabf5157ba9c\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"caller":"ci-alice","orders":[],"count":0,"correlation_id":"105bc07b-339d-4dfe-8038-dabf5157ba9c"}'
+
+
+Generation-1: Rendering Sequence-5
+
+	Request: 1 (Remaining candidate combinations: 16)
+	Request hash: 35bde10c880e0fe58e6a6abef737ee12b6ce1ba5
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'billing'
+		- restler_static_string: '/'
+		- restler_static_string: 'checkout'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Idempotency-Key: '
+		+ restler_fuzzable_string: [checkout-alice-1001-001, fuzzstring, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "order_id":'
+		+ restler_fuzzable_string: ["ord-alice-1001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: ',\n    "currency":'
+		+ restler_fuzzable_string: ["VND", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.154: Sending: 'POST /api/v1/billing/checkout HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nIdempotency-Key: checkout-alice-1001-001\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 79\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "order_id":"ord-alice-1001",\n    "amount":150000,\n    "currency":"VND"}\r\n'
+
+2026-06-22 13:45:10.328: Received: 'HTTP/1.1 202 Accepted\r\nContent-Type: application/json\r\nContent-Length: 168\r\nConnection: keep-alive\r\nRateLimit-Remaining: 59\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 60\r\nX-RateLimit-Remaining-Minute: 59\r\nX-RateLimit-Limit-Minute: 60\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 9a8ac4d8-975f-41a1-8b0b-4c27c5222ea1\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"payment_id":"pay-866b70e2","order_id":"ord-alice-1001","status":"accepted","amount":150000.0,"currency":"VND","correlation_id":"9a8ac4d8-975f-41a1-8b0b-4c27c5222ea1"}'
+
+
+Generation-1: Rendering Sequence-6
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 4913bd6f86ec6edd0399467cb171cf0d5386403a
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_static_string: 'health'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.371: Sending: 'GET /api/v1/orders/health HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:10.382: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 41\r\nConnection: keep-alive\r\nRateLimit-Remaining: 59\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 60\r\nX-RateLimit-Remaining-Minute: 59\r\nX-RateLimit-Limit-Minute: 60\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: e642cf53-43e6-4e3a-8f9d-ca2edd54d247\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"status":"ok","service":"order-service"}'
+
+
+Generation-1: Rendering Sequence-7
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 4d818129923bf80aad825eb349a29f0e53aaa22f
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.426: Sending: 'GET /api/v1/orders/fuzzstring HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:10.437: Received: 'HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nContent-Length: 71\r\nConnection: keep-alive\r\nRateLimit-Remaining: 3\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 3\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 4d2b42c2-80d7-4d6c-bab6-13b3024f1620\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"not_found","message":"Order fuzzstring not found"}}'
+
+
+Generation-1: Rendering Sequence-8
+
+	Request: 1 (Remaining candidate combinations: 2)
+	Request hash: 6bda2321c58f4ded7442940df76a34d75970b7bd
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'metadata-fetch'
+		- restler_static_string: '/'
+		- restler_static_string: 'fixed'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "fetch_url":'
+		+ restler_fuzzable_string: ["http://169.254.169.254/latest/meta-data/", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.481: Sending: 'POST /api/v1/admin/metadata-fetch/fixed HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 63\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "fetch_url":"http://169.254.169.254/latest/meta-data/"}\r\n'
+
+2026-06-22 13:45:10.575: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 95\r\nConnection: keep-alive\r\nRateLimit-Remaining: 9\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 9\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 23fbdb79-4d72-40dc-b09b-512fbbb1b089\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required role(s): [\'admin\']. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-8
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 6bda2321c58f4ded7442940df76a34d75970b7bd
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'metadata-fetch'
+		- restler_static_string: '/'
+		- restler_static_string: 'fixed'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "fetch_url":'
+		+ restler_fuzzable_string: ["http://169.254.169.254/latest/meta-data/", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.617: Sending: 'POST /api/v1/admin/metadata-fetch/fixed HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 33\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "fetch_url":"fuzzstring"}\r\n'
+
+2026-06-22 13:45:10.628: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 95\r\nConnection: keep-alive\r\nRateLimit-Remaining: 8\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 8\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 1bcab73a-8ecb-47ab-9628-76ab2949766f\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required role(s): [\'admin\']. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-9
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: 94eb482ffa5d148f729382c3f022378a4511fe8d
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'users'
+		- restler_static_string: '/'
+		- restler_static_string: 'profile'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.678: Sending: 'GET /api/v1/users/profile HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:10.728: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 236\r\nConnection: keep-alive\r\nRateLimit-Remaining: 9\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 9\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 6c57a6a6-3263-4a2d-846d-b130b95865cb\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"user_id":"30573608-42d7-4cf5-b6cf-756bf40804dd","username":"ci-alice","email":"ci-alice@example.local","roles":["user"],"correlation_id":"6c57a6a6-3263-4a2d-846d-b130b95865cb","azp":"sme-lab-automation-client","scope":"email profile"}'
+
+
+Generation-1: Rendering Sequence-10
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: a2bf3c3a6bb4b105c3a371ab82536e630cd8ca45
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '/'
+		- restler_static_string: 'fixed'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.772: Sending: 'GET /api/v1/orders/fuzzstring/fixed HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:10.783: Received: 'HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nContent-Length: 71\r\nConnection: keep-alive\r\nRateLimit-Remaining: 2\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 2\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: af15ece2-38d7-44d6-a128-2c76010afa6c\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"not_found","message":"Order fuzzstring not found"}}'
+
+
+Generation-1: Rendering Sequence-11
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: a9cd9d286e3cdd7da53cae78bad7dc9132f7f4e7
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'users'
+		- restler_static_string: '/'
+		- restler_static_string: 'health'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.826: Sending: 'GET /api/v1/users/health HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:10.836: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 40\r\nConnection: keep-alive\r\nRateLimit-Remaining: 59\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 60\r\nX-RateLimit-Remaining-Minute: 59\r\nX-RateLimit-Limit-Minute: 60\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 66dcf3bc-2530-4cfe-a760-2d6e0e6113fc\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"status":"ok","service":"user-service"}'
+
+
+Generation-1: Rendering Sequence-12
+
+	Request: 1 (Remaining candidate combinations: 2)
+	Request hash: b0f5b54270742d63f2f1dd94827190cdc4d9aff0
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'maintenance'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "action":'
+		+ restler_fuzzable_string: ["health-check", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.880: Sending: 'POST /api/v1/admin/maintenance HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 32\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "action":"health-check"}\r\n'
+
+2026-06-22 13:45:10.914: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 187\r\nConnection: keep-alive\r\nRateLimit-Remaining: 7\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 7\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: 3c6dd133-d950-4bcb-ba65-4391db391b3f\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required service client \'admin-service-client\' with role \'admin-maintenance\'. Token client: \'sme-lab-automation-client\'. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-12
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: b0f5b54270742d63f2f1dd94827190cdc4d9aff0
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'maintenance'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "action":'
+		+ restler_fuzzable_string: ["health-check", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:10.958: Sending: 'POST /api/v1/admin/maintenance HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 30\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "action":"fuzzstring"}\r\n'
+
+2026-06-22 13:45:10.986: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 187\r\nConnection: keep-alive\r\nRateLimit-Remaining: 6\r\nRateLimit-Reset: 50\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 6\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:10 GMT\r\nx-correlation-id: aea22ced-9ec1-441b-9294-eec8213fe8cb\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required service client \'admin-service-client\' with role \'admin-maintenance\'. Token client: \'sme-lab-automation-client\'. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-13
+
+	Request: 1 (Remaining candidate combinations: 2)
+	Request hash: cd59988de0750c08ff30e4488cf48963200c98ca
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'metadata-fetch'
+		- restler_static_string: '/'
+		- restler_static_string: 'vulnerable'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "fetch_url":'
+		+ restler_fuzzable_string: ["http://169.254.169.254/latest/meta-data/", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:11.030: Sending: 'POST /api/v1/admin/metadata-fetch/vulnerable HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 63\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "fetch_url":"http://169.254.169.254/latest/meta-data/"}\r\n'
+
+2026-06-22 13:45:11.041: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 95\r\nConnection: keep-alive\r\nRateLimit-Remaining: 5\r\nRateLimit-Reset: 49\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 5\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:11 GMT\r\nx-correlation-id: dbaf95ff-8b00-4da6-a937-37fc9965951e\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required role(s): [\'admin\']. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-13
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: cd59988de0750c08ff30e4488cf48963200c98ca
+
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'metadata-fetch'
+		- restler_static_string: '/'
+		- restler_static_string: 'vulnerable'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "fetch_url":'
+		+ restler_fuzzable_string: ["http://169.254.169.254/latest/meta-data/", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:11.084: Sending: 'POST /api/v1/admin/metadata-fetch/vulnerable HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\nContent-Type: application/json\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 33\r\nUser-Agent: restler/8.5.0\r\n\r\n{\n    "fetch_url":"fuzzstring"}\r\n'
+
+2026-06-22 13:45:11.097: Received: 'HTTP/1.1 403 Forbidden\r\nContent-Type: application/json\r\nContent-Length: 95\r\nConnection: keep-alive\r\nRateLimit-Remaining: 4\r\nRateLimit-Reset: 49\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 4\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:11 GMT\r\nx-correlation-id: bd7a1f71-5c88-4e0d-a494-183f37443ea8\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"detail":{"error":"forbidden","message":"Required role(s): [\'admin\']. Token roles: [\'user\']"}}'
+
+
+Generation-1: Rendering Sequence-14
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: e58c6dd77b91b68b4777da6818dee5b1dc3c823c
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'billing'
+		- restler_static_string: '/'
+		- restler_static_string: 'health'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:11.141: Sending: 'GET /api/v1/billing/health HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:11.152: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 43\r\nConnection: keep-alive\r\nRateLimit-Remaining: 59\r\nRateLimit-Reset: 49\r\nRateLimit-Limit: 60\r\nX-RateLimit-Remaining-Minute: 59\r\nX-RateLimit-Limit-Minute: 60\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:11 GMT\r\nx-correlation-id: f09f2584-e63c-4be9-beb8-e0f49182e44f\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"status":"ok","service":"billing-service"}'
+
+
+Generation-1: Rendering Sequence-15
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: ec700bd5757fe4e5311abf3836a2b495a2d38cb5
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'health'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:11.195: Sending: 'GET /api/v1/admin/health HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:11.206: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 41\r\nConnection: keep-alive\r\nRateLimit-Remaining: 59\r\nRateLimit-Reset: 49\r\nRateLimit-Limit: 60\r\nX-RateLimit-Remaining-Minute: 59\r\nX-RateLimit-Limit-Minute: 60\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:11 GMT\r\nx-correlation-id: e0d975c7-9c08-4a80-9a98-0b6f702b2ae5\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"status":"ok","service":"admin-service"}'
+
+
+Generation-1: Rendering Sequence-16
+
+	Request: 1 (Remaining candidate combinations: 1)
+	Request hash: fa9736174e228b1df584e9068c4a40d158a78302
+
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'users'
+		- restler_static_string: '/'
+		- restler_static_string: 'me'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+2026-06-22 13:45:11.250: Sending: 'GET /api/v1/users/me HTTP/1.1\r\nAccept: application/json\r\nHost: localhost\r\n_OMITTED_AUTH_TOKEN_\r\nContent-Length: 0\r\nUser-Agent: restler/8.5.0\r\n\r\n'
+
+2026-06-22 13:45:11.260: Received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 178\r\nConnection: keep-alive\r\nRateLimit-Remaining: 9\r\nRateLimit-Reset: 49\r\nRateLimit-Limit: 10\r\nX-RateLimit-Remaining-Minute: 9\r\nX-RateLimit-Limit-Minute: 10\r\nServer: nginx\r\nDate: Mon, 22 Jun 2026 13:45:11 GMT\r\nx-correlation-id: 7d3a61a6-6de6-4bca-840f-8ffac2ceb5f6\r\nvary: Origin\r\nAccess-Control-Expose-Headers: X-Correlation-ID,X-RateLimit-Limit-Minute,X-RateLimit-Remaining-Minute\r\nX-Content-Type-Options: nosniff\r\nCross-Origin-Resource-Policy: same-origin\r\nReferrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\n\r\n{"user_id":"30573608-42d7-4cf5-b6cf-756bf40804dd","username":"ci-alice","email":"ci-alice@example.local","roles":["user"],"correlation_id":"7d3a61a6-6de6-4bca-840f-8ffac2ceb5f6"}'
+

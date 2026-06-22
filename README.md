@@ -108,6 +108,7 @@ curl -k https://localhost:8443/api/v1/admin/health
 | Network egress | `bash tests/security/network-egress-control-tests.sh` |
 | Negative inputs | `bash tests/security/fuzz-negative-tests.sh` |
 | Deterministic malformed input checks | `bash tests/security/run-fuzzing.sh` |
+| Authenticated RESTler runner | `RESTLER_AUTH_PASSWORD='<redacted>' bash tests/restler/run-restler-check.sh` |
 | ZAP active scan | `bash tests/security/zap-active-scan.sh` |
 | k6 baseline | `docker run --rm --network host \
   --user "$(id -u):$(id -g)" \
@@ -119,6 +120,9 @@ curl -k https://localhost:8443/api/v1/admin/health
   -v "$PWD:/work" -w /work \
   grafana/k6 run --insecure-skip-tls-verify \
   tests/performance/k6-phase3.js` |
+| k6 direct-vs-edge overhead | `bash tests/metrics/run-k6-overhead.sh` |
+| Loki MTTD/MTTR scenario | `bash tests/metrics/execute-mttd-scenario.sh` |
+| Vault/KMS-style secret-read overhead | `bash tests/metrics/measure-kms-overhead.sh` |
 | Repo consistency | `bash scripts/audit/repo-consistency-audit.sh` |
 
 See `TESTING_GUIDE.md` for expected results and setup notes.
@@ -152,8 +156,13 @@ The recorded k6 result is a low-load secured baseline, not a stress test:
   Compose still uses ignored local environment values for local runtime secrets.
 - Cosign evidence is readiness/dry-run unless real signing and verification
   output for an image digest is recorded.
-- RESTler support exists as a runner script, but curated evidence does not
-  record a RESTler or Fuzzapi result.
-- MTTD/MTTR tooling exists, but curated evidence does not record timing values.
+- RESTler support uses an external Keycloak token refresh command. Curated
+  evidence does not record a completed RESTler or Fuzzapi result unless the
+  generated RESTler evidence files are present.
+- MTTD/MTTR tooling uses Loki LogQL threshold polling. Curated evidence does not
+  record timing values unless generated metrics evidence is present, and it is
+  not Grafana alert firing evidence by itself.
+- Vault/KMS-style overhead automation measures local Vault dev-mode secret-read
+  latency only; it is not an AWS KMS measurement.
 - Do not commit `.env`, private keys, `.p12` files, generated certificates,
   tokens, `.artifacts`, raw secrets, `__pycache__`, or `.pyc`.

@@ -155,11 +155,102 @@ run_suite() {
   fi
 }
 
+compose_cmd() {
+  (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml "$@")
+}
+
+print_gateway_diagnostics() {
+  local sidecar="${1:-user-mtls-proxy}"
+  local service="${2:-user-service}"
+
+  echo "[DIAG] docker compose ps" >&2
+  compose_cmd ps >&2 || true
+
+  echo "[DIAG] recent kong logs" >&2
+  compose_cmd logs --no-color --tail=120 kong >&2 || true
+
+  echo "[DIAG] recent user-mtls-proxy logs" >&2
+  compose_cmd logs --no-color --tail=120 user-mtls-proxy >&2 || true
+
+  echo "[DIAG] recent user-service logs" >&2
+  compose_cmd logs --no-color --tail=120 user-service >&2 || true
+
+  if [ "${sidecar}" != "user-mtls-proxy" ]; then
+    echo "[DIAG] recent ${sidecar} logs" >&2
+    compose_cmd logs --no-color --tail=120 "${sidecar}" >&2 || true
+  fi
+
+  if [ "${service}" != "user-service" ]; then
+    echo "[DIAG] recent ${service} logs" >&2
+    compose_cmd logs --no-color --tail=120 "${service}" >&2 || true
+  fi
+}
+
+wait_for_sidecar_upstream() {
+  local sidecar="$1"
+  local service="$2"
+  local health_path="$3"
+  local url="http://${service}:8000${health_path}"
+
+  for attempt in $(seq 1 45); do
+    if compose_cmd exec -T "${sidecar}" getent hosts "${service}" >/dev/null 2>&1 \
+      && compose_cmd exec -T "${sidecar}" wget -qO- "${url}" >/dev/null 2>&1; then
+      echo "[INFO] ${sidecar} can resolve and reach ${url}"
+      return 0
+    fi
+
+    echo "[INFO] Upstream readiness attempt ${attempt}/45 failed for ${sidecar} -> ${service}"
+    sleep 2
+  done
+
+  echo "[ERROR] ${sidecar} could not resolve or reach ${url} after retries." >&2
+  print_gateway_diagnostics "${sidecar}" "${service}"
+  return 1
+}
+
+prepare_gateway_upstreams() {
+  local cert_script="${PROJECT_ROOT}/demo/mtls/ensure-gateway-backend-certs.sh"
+
+  if [ ! -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
+    echo "[INFO] infra/docker-compose.yml not available; skipping gateway upstream preparation"
+    return 0
+  fi
+
+  if [ -f "${cert_script}" ]; then
+    echo "[INFO] Ensuring gateway-backend mTLS demo certs before Kong restart"
+    bash "${cert_script}"
+  fi
+
+  echo "[INFO] Ensuring backend dependencies and services are running before Kong restart"
+  compose_cmd up -d \
+    opa \
+    redis \
+    keycloak \
+    vault \
+    user-service \
+    order-service \
+    billing-service \
+    admin-service
+
+  echo "[INFO] Ensuring gateway-backend mTLS sidecars are running before Kong restart"
+  compose_cmd up -d \
+    user-mtls-proxy \
+    order-mtls-proxy \
+    billing-mtls-proxy \
+    admin-mtls-proxy
+
+  wait_for_sidecar_upstream user-mtls-proxy user-service /api/v1/users/health
+  wait_for_sidecar_upstream order-mtls-proxy order-service /api/v1/orders/health
+  wait_for_sidecar_upstream billing-mtls-proxy billing-service /api/v1/billing/health
+  wait_for_sidecar_upstream admin-mtls-proxy admin-service /api/v1/admin/health
+}
+
 reset_kong_after_edge() {
   echo ""
   echo "[INFO] Resetting Kong after edge rate-limit test"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
-    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+    prepare_gateway_upstreams
+    compose_cmd restart kong
     wait_for_kong
   else
     echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
@@ -170,7 +261,8 @@ reset_kong_at_start() {
   echo ""
   echo "[INFO] Resetting Kong before final regression"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
-    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+    prepare_gateway_upstreams
+    compose_cmd restart kong
     wait_for_kong
   else
     echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
@@ -181,7 +273,8 @@ reset_kong_before_opa() {
   echo ""
   echo "[INFO] Resetting Kong before OPA authz test"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
-    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+    prepare_gateway_upstreams
+    compose_cmd restart kong
     wait_for_kong
   else
     echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
@@ -192,7 +285,8 @@ reset_kong_before_authz_negative() {
   echo ""
   echo "[INFO] Resetting Kong before authz negative test"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
-    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart kong)
+    prepare_gateway_upstreams
+    compose_cmd restart kong
     wait_for_kong
   else
     echo "[INFO] infra/docker-compose.yml not available; skipping Kong restart"
@@ -203,7 +297,9 @@ wait_for_kong() {
   local code
   local health_url="https://localhost:8443/api/v1/users/health"
   local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
+  local statuses=()
 
+  echo "[INFO] Waiting for Kong HTTPS users health readiness"
   for attempt in $(seq 1 30); do
     if code="$(curl ${curl_tls_opts} -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
       :
@@ -211,15 +307,16 @@ wait_for_kong() {
       code="000"
     fi
 
-    echo "[INFO] Kong readiness attempt ${attempt}/30: HTTPS users health status ${code}"
+    statuses+=("${code}")
     if [ "${code}" = "200" ]; then
-      echo "[INFO] Kong HTTPS users health is ready (status 200)"
+      echo "[OK] Kong HTTPS users health reached 200 after ${attempt} attempt(s)"
       return 0
     fi
     sleep 2
   done
 
-  echo "[ERROR] Kong did not return HTTP 200 from ${health_url} within 60s." >&2
+  echo "[FAIL] Kong readiness failed. Status sequence: ${statuses[*]}" >&2
+  print_gateway_diagnostics user-mtls-proxy user-service
   exit 1
 }
 
@@ -287,11 +384,11 @@ restart_gateway_backend_mtls_proxies() {
   echo ""
   echo "[INFO] Restarting gateway-backend mTLS sidecars after cert generation"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
-    (cd "${PROJECT_ROOT}" && docker compose -f infra/docker-compose.yml restart \
+    compose_cmd restart \
       user-mtls-proxy \
       order-mtls-proxy \
       billing-mtls-proxy \
-      admin-mtls-proxy)
+      admin-mtls-proxy
   else
     echo "[INFO] infra/docker-compose.yml not available; skipping mTLS sidecar restart"
   fi

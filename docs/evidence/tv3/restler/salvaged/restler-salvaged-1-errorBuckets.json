@@ -1,0 +1,2389 @@
+{
+  "401": {
+    "ca59a41c-8e32-409e-8e05-22ff7fca85e8": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"evt-001\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"evt-001\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  },
+  "403": {
+    "3d1fa58c-6f47-4278-a9f9-8eda927b3954": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\n    \"fetch_url\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "\"fuzzstring\""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{ \"fuzz\" : false }"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "false"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":\"fuzzstring\",\"fetch_url\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "83b7227c-9429-402c-a96f-a6da27dcf8db": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\n    \"action\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "\"fuzzstring\""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{ \"fuzz\" : false }"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\"action\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "[]"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "false"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\"action\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\"action\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\"action\":\"fuzzstring\",\"action\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "c10cc615-c6d6-4d6a-8811-e3e3dc7b6d0b": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":false,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":false,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":\"fuzzstring\",\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":\"fuzzstring\",\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":0,\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":0,\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"You do not have permission to checkout this order\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "c1ef14ba-c026-40da-aa9c-8a2560603fec": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"fuzzstring\",\n    \"subject\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"fuzzstring\",\n    \"subject\":\"alice\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"ord-alice-1001\",\n    \"subject\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\"order_id\":0,\"subject\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{ \"fuzz\" : false }"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\"order_id\":false,\"subject\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"subject\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"subject\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"subject\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  },
+  "404": {
+    "3f9e8a30-19d8-4889-b9ac-8ebf71dac1d9": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "GET",
+            "path": "/api/v1/orders/fuzzstring/fixed",
+            "query": "",
+            "body": ""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 404,
+            "codeDescription": "Not Found",
+            "content": "{\"detail\":{\"error\":\"not_found\",\"message\":\"Order fuzzstring not found\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "GET",
+            "path": "/api/v1/orders/fuzzstring",
+            "query": "",
+            "body": ""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 404,
+            "codeDescription": "Not Found",
+            "content": "{\"detail\":{\"error\":\"not_found\",\"message\":\"Order fuzzstring not found\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "GET",
+            "path": "/api/v1/orders/fuzzstring/vulnerable",
+            "query": "",
+            "body": ""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 404,
+            "codeDescription": "Not Found",
+            "content": "{\"detail\":{\"error\":\"not_found\",\"message\":\"Order fuzzstring not found\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  },
+  "422": {
+    "1ac2516d-97c2-4915-8e90-4d831b0c20b4": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":false,\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":false,\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":0,\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":0,\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":[],\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":[],\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":{ \"fuzz\" : false },\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":{ \"fuzz\" : false },\"amount\":0,\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "20d25cd8-ce1e-40d0-90e6-b9daa2db31c7": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{ \"fuzz\" : false }"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"fuzz\":false}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{ \"fuzz\" : false }"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"fuzz\":false}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "216baa8f-fab8-4819-846f-89caefb5cc66": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":[],\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":{ \"fuzz\" : false },\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":{ \"fuzz\" : false },\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "3ca19e19-757b-44f7-8f1f-b391c359e9c9": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":0,\"currency\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "5e159b48-7a0e-4229-880a-c78b0ba7adab": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":\"fuzzstring\",\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"float_parsing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number, unable to parse string as a number\",\"input\":\"fuzzstring\"}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\",\"amount\":\"fuzzstring\",\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"float_parsing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number, unable to parse string as a number\",\"input\":\"fuzzstring\"}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "64779e2b-36ec-4571-b5a8-75642c57c596": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":false},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":false},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":0},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":0}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":0},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":0}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":[]},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":[]}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":[]},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":[]}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":{\"fuzz\":false}}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":{\"fuzz\":false}}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "8445cd2c-8c31-4191-afe2-767655cd9788": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "\"fuzzstring\""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":\"fuzzstring\"}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "\"fuzzstring\""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":\"fuzzstring\"}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "[]"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "[]"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "false"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "false"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"model_attributes_type\",\"loc\":[\"body\"],\"msg\":\"Input should be a valid dictionary or object to extract fields from\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "9b73a4ca-a97c-45fe-ac92-8756cca2a928": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":\"fuzzstring\"}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"order_id\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"order_id\":\"fuzzstring\"}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "a50d7750-3afd-4e93-b069-4283c9e60679": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":[]}},{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":[]}},{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":{\"fuzz\":false}}},{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":{\"fuzz\":false}}},{\"type\":\"float_type\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "b3e2d4f7-2685-4495-ae4d-f5a0a694266f": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":\"fuzzstring\"}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":\"fuzzstring\"}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":\"fuzzstring\"}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":\"fuzzstring\"}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "bb024e54-a2f1-44c7-9bbd-ee6d8cdd7470": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":\"fuzzstring\"}},{\"type\":\"float_parsing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number, unable to parse string as a number\",\"input\":\"fuzzstring\"}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":\"fuzzstring\"}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":\"fuzzstring\"}},{\"type\":\"float_parsing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Input should be a valid number, unable to parse string as a number\",\"input\":\"fuzzstring\"}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "dc67e577-5960-4dfb-8219-13b4c96a3fd1": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":false}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":false}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":false}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":false}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":false}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":0}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":0}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":0}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":0}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":0}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":[]}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":[]}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":[]}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":[]}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":[]}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":{\"fuzz\":false}}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":{\"fuzz\":false}}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"currency\":{ \"fuzz\" : false }}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"currency\":{\"fuzz\":false}}},{\"type\":\"missing\",\"loc\":[\"body\",\"amount\"],\"msg\":\"Field required\",\"input\":{\"currency\":{\"fuzz\":false}}},{\"type\":\"string_type\",\"loc\":[\"body\",\"currency\"],\"msg\":\"Input should be a valid string\",\"input\":{\"fuzz\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "e43911d4-238e-42fd-9976-452a91f82de1": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":false}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":false}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":0}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/billing/checkout",
+            "query": "",
+            "body": "{\"amount\":0}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 422,
+            "codeDescription": "Unprocessable Content",
+            "content": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"order_id\"],\"msg\":\"Field required\",\"input\":{\"amount\":0}}]}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  },
+  "429": {
+    "ccced183-a647-41eb-a9b2-9e389f40aae6": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"5bb2d56d39f35601b747546dbb27fb10\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"6361bb7ac15dcb4c7f8e5231ac988a2c\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\"fetch_url\":[]}"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"793f101a8925ca2942d5f83c6e78d808\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"f8f19b374f42b81baac8b14653f7986a\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"bb76e22ffe7e8f058da2e410a187c767\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"ef882924366c7268c832667b1695c604\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"3061223c66fbb75e3eaf9e1d400f0d7c\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "0"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"6075252317ce85731b2fe50e152f0b06\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "[]"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"4937cf319a540a21b96404500aafc940\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "[]"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 429,
+            "codeDescription": "Too Many Requests",
+            "content": "{\n  \"message\":\"API rate limit exceeded\",\n  \"request_id\":\"f438c86ed93bf1507f88d20f11167a28\"\n}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  }
+}

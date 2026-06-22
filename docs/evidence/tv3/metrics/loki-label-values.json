@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-06-22T15:39:49Z",
+  "source": "http://localhost:3100/loki/api/v1/label/<name>/values",
+  "values": {
+    "compose_service": {
+      "status": "success"
+    },
+    "container": {
+      "data": [
+        "/infra-admin-service-1",
+        "/infra-billing-service-1",
+        "/infra-order-service-1",
+        "/infra-user-service-1"
+      ],
+      "status": "success"
+    },
+    "container_name": {
+      "status": "success"
+    },
+    "filename": {
+      "data": [
+        "/var/lib/docker/containers/0189f315d8bb0091625a1f097822cedc5d132c5ef7c4b7e3625a67a85e65909c/0189f315d8bb0091625a1f097822cedc5d132c5ef7c4b7e3625a67a85e65909c-json.log",
+        "/var/lib/docker/containers/2dc8c396096f5a0f21be71301852411c1aedef9615b3bdff33390440a767ef66/2dc8c396096f5a0f21be71301852411c1aedef9615b3bdff33390440a767ef66-json.log",
+        "/var/lib/docker/containers/2edea39d69afe7dec5b422cef3eb9c7ca409c34056ff5425edc733b3ee296b77/2edea39d69afe7dec5b422cef3eb9c7ca409c34056ff5425edc733b3ee296b77-json.log",
+        "/var/lib/docker/containers/4abde650470032a6139bd61aec3003a8ee1209877bd8a4913eeeb246d6e967bc/4abde650470032a6139bd61aec3003a8ee1209877bd8a4913eeeb246d6e967bc-json.log",
+        "/var/lib/docker/containers/502dcb585473434e176bc0cdffedd738a1a5bcbec8bf63f3709de0ca90bdf313/502dcb585473434e176bc0cdffedd738a1a5bcbec8bf63f3709de0ca90bdf313-json.log",
+        "/var/lib/docker/containers/588d6a37ee6280147ebcbd130e5d2c33072f3beebc270cbff1dcfecd6f59d3af/588d6a37ee6280147ebcbd130e5d2c33072f3beebc270cbff1dcfecd6f59d3af-json.log",
+        "/var/lib/docker/containers/5add0c2faba7cb04ee70d646d9d72e60ff75f6657d1f5b14365998027a1cc432/5add0c2faba7cb04ee70d646d9d72e60ff75f6657d1f5b14365998027a1cc432-json.log",
+        "/var/lib/docker/containers/601c4bdff3d0c4e3eb9d0ba351d31fa38ba091439dfd58aa1e410b48e1363639/601c4bdff3d0c4e3eb9d0ba351d31fa38ba091439dfd58aa1e410b48e1363639-json.log",
+        "/var/lib/docker/containers/63d492f37f6bc2530785fd3aed3a24d56eefc72b19439643ab00ce63d08a0d3a/63d492f37f6bc2530785fd3aed3a24d56eefc72b19439643ab00ce63d08a0d3a-json.log",
+        "/var/lib/docker/containers/6ff926b9736f0e7a77837a556d219c62dfe31441f85d246b02bb569c555435a5/6ff926b9736f0e7a77837a556d219c62dfe31441f85d246b02bb569c555435a5-json.log",
+        "/var/lib/docker/containers/84be003c16c536da2f60e45f257f1c65329ce0bb8781284f7a1d03a3aa4687ae/84be003c16c536da2f60e45f257f1c65329ce0bb8781284f7a1d03a3aa4687ae-json.log",
+        "/var/lib/docker/containers/8d62db8d79b133eef3ce4781ddcd1df6ae00f250dcf4006ec4d987ed44f7def1/8d62db8d79b133eef3ce4781ddcd1df6ae00f250dcf4006ec4d987ed44f7def1-json.log",
+        "/var/lib/docker/containers/9d7a02b46fdf8c6e2f73c6d649d9a8de537846819fa32d7bd9f7bd24079dadcd/9d7a02b46fdf8c6e2f73c6d649d9a8de537846819fa32d7bd9f7bd24079dadcd-json.log",
+        "/var/lib/docker/containers/9f1d31edfd29e1e5f317e60f870f0c3965698d88f37639cf15ef2a329f450773/9f1d31edfd29e1e5f317e60f870f0c3965698d88f37639cf15ef2a329f450773-json.log",
+        "/var/lib/docker/containers/a646afb5d1f00269a266b839d26de12463a2a93a2bac3c0c791c348349ae129f/a646afb5d1f00269a266b839d26de12463a2a93a2bac3c0c791c348349ae129f-json.log",
+        "/var/lib/docker/containers/bb41cc5c7824c299d1b4acfa9ddd94059fdda6288ac22d0fe4eaec0bba16614a/bb41cc5c7824c299d1b4acfa9ddd94059fdda6288ac22d0fe4eaec0bba16614a-json.log",
+        "/var/lib/docker/containers/c11db1c8e0f5a101310c4e0d344868d129a5ada4209248f04b92433a7e69cfa2/c11db1c8e0f5a101310c4e0d344868d129a5ada4209248f04b92433a7e69cfa2-json.log",
+        "/var/lib/docker/containers/cc2548c2029ceb69b8c06031884f4ce59a5950c4e56f0b12da469c0189126160/cc2548c2029ceb69b8c06031884f4ce59a5950c4e56f0b12da469c0189126160-json.log",
+        "/var/lib/docker/containers/d9be97ddbcea08bc5dba46e0c76e5f87e22d2796a9e5faf245c86779bcde3e21/d9be97ddbcea08bc5dba46e0c76e5f87e22d2796a9e5faf245c86779bcde3e21-json.log"
+      ],
+      "status": "success"
+    },
+    "job": {
+      "data": [
+        "docker"
+      ],
+      "status": "success"
+    },
+    "service": {
+      "data": [
+        "admin-service",
+        "billing-service",
+        "order-service",
+        "user-service"
+      ],
+      "status": "success"
+    },
+    "service_name": {
+      "data": [
+        "admin-service",
+        "billing-service",
+        "docker",
+        "order-service",
+        "user-service"
+      ],
+      "status": "success"
+    }
+  }
+}

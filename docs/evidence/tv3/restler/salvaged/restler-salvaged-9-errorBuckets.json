@@ -1,0 +1,455 @@
+{
+  "401": {
+    "62c2532d-da01-4c42-b006-4a29f66f0dd5": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"fuzzstring\",\n    \"event_type\":\"payment.succeeded\",\n    \"checkout_id\":\"checkout-001\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"evt-001\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":1.23}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/webhooks/payment",
+            "query": "",
+            "body": "{\n    \"event_id\":\"evt-001\",\n    \"event_type\":\"fuzzstring\",\n    \"checkout_id\":\"fuzzstring\",\n    \"amount\":150000}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 401,
+            "codeDescription": "Unauthorized",
+            "content": "{\"detail\":{\"error\":\"mtls_client_cert_required\",\"message\":\"Webhook channel requires mutual TLS. Client certificate must be verified by the gateway (header X-Mtls-Client-Verified must equal \\'SUCCESS\\').\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  },
+  "403": {
+    "2a48e3e6-3038-40ea-b4d3-8946f9eac575": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\n    \"fetch_url\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/vulnerable",
+            "query": "",
+            "body": "{\n    \"fetch_url\":\"http://169.254.169.254/latest/meta-data/\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/fixed",
+            "query": "",
+            "body": "{\n    \"fetch_url\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/metadata-fetch/fixed",
+            "query": "",
+            "body": "{\n    \"fetch_url\":\"http://169.254.169.254/latest/meta-data/\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required role(s): [\\'admin\\']. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "53a5cbde-e348-4150-b9bf-ef545abc299f": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\n    \"action\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/admin/maintenance",
+            "query": "",
+            "body": "{\n    \"action\":\"health-check\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'admin-service-client\\' with role \\'admin-maintenance\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ],
+    "86ce32ab-109f-4970-a751-57e7f19ecb10": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"fuzzstring\",\n    \"subject\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"fuzzstring\",\n    \"subject\":\"alice\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"ord-alice-1001\",\n    \"subject\":\"fuzzstring\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "POST",
+            "path": "/api/v1/orders/internal/verify-ownership",
+            "query": "",
+            "body": "{\n    \"order_id\":\"ord-alice-1001\",\n    \"subject\":\"alice\"}\r\n"
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 403,
+            "codeDescription": "Forbidden",
+            "content": "{\"detail\":{\"error\":\"forbidden\",\"message\":\"Required service client \\'billing-service-client\\' with role \\'order-ownership-read\\'. Token client: \\'sme-lab-automation-client\\'. Token roles: [\\'user\\']\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  },
+  "404": {
+    "4c274fb1-d48d-4298-abb3-5eee8b18d354": [
+      {
+        "request": {
+          "RequestData": {
+            "method": "GET",
+            "path": "/api/v1/orders/fuzzstring/fixed",
+            "query": "",
+            "body": ""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 404,
+            "codeDescription": "Not Found",
+            "content": "{\"detail\":{\"error\":\"not_found\",\"message\":\"Order fuzzstring not found\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "GET",
+            "path": "/api/v1/orders/fuzzstring",
+            "query": "",
+            "body": ""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 404,
+            "codeDescription": "Not Found",
+            "content": "{\"detail\":{\"error\":\"not_found\",\"message\":\"Order fuzzstring not found\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      },
+      {
+        "request": {
+          "RequestData": {
+            "method": "GET",
+            "path": "/api/v1/orders/fuzzstring/vulnerable",
+            "query": "",
+            "body": ""
+          }
+        },
+        "response": {
+          "ResponseData": {
+            "code": 404,
+            "codeDescription": "Not Found",
+            "content": "{\"detail\":{\"error\":\"not_found\",\"message\":\"Order fuzzstring not found\"}}",
+            "isFailure": true,
+            "isBug": false
+          }
+        }
+      }
+    ]
+  }
+}

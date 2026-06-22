@@ -1,0 +1,218 @@
+
+2026-06-22 13:51:01.473: Generation-1
+2026-06-22 13:51:01.473: 	Rendered requests: 16 / 16
+2026-06-22 13:51:01.473: 	Rendered requests with "valid" status codes: 8 / 16
+2026-06-22 13:51:01.473: 	Rendered requests determined to be fully valid (no resource creation failures): 8 / 16
+2026-06-22 13:51:01.473: List of failing requests:
+	Request: 0
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'webhooks'
+		- restler_static_string: '/'
+		- restler_static_string: 'payment'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Webhook-Timestamp: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Nonce: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'X-Webhook-Signature: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "event_id":'
+		+ restler_fuzzable_string: ["evt-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "event_type":'
+		+ restler_fuzzable_string: ["payment.succeeded", "fuzzstring", ...]
+		- restler_static_string: ',\n    "checkout_id":'
+		+ restler_fuzzable_string: ["checkout-001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "amount":'
+		+ restler_fuzzable_number: [150000, 1.23, ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+	Request: 1
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '/'
+		- restler_static_string: 'vulnerable'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+	Request: 2
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_static_string: 'internal'
+		- restler_static_string: '/'
+		- restler_static_string: 'verify-ownership'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'X-Correlation-ID: '
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "order_id":'
+		+ restler_fuzzable_string: ["ord-alice-1001", "fuzzstring", ...]
+		- restler_static_string: ',\n    "subject":'
+		+ restler_fuzzable_string: ["alice", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+	Request: 6
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+	Request: 7
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'metadata-fetch'
+		- restler_static_string: '/'
+		- restler_static_string: 'fixed'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "fetch_url":'
+		+ restler_fuzzable_string: ["http://169.254.169.254/latest/meta-data/", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+	Request: 9
+		- restler_static_string: 'GET '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'orders'
+		- restler_static_string: '/'
+		- restler_fuzzable_string: 'fuzzstring'
+		- restler_static_string: '/'
+		- restler_static_string: 'fixed'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+
+	Request: 11
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'maintenance'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "action":'
+		+ restler_fuzzable_string: ["health-check", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+	Request: 12
+		- restler_static_string: 'POST '
+		- restler_static_string: ''
+		- restler_static_string: '/'
+		- restler_static_string: 'api'
+		- restler_static_string: '/'
+		- restler_static_string: 'v1'
+		- restler_static_string: '/'
+		- restler_static_string: 'admin'
+		- restler_static_string: '/'
+		- restler_static_string: 'metadata-fetch'
+		- restler_static_string: '/'
+		- restler_static_string: 'vulnerable'
+		- restler_static_string: ' HTTP/1.1\r\n'
+		- restler_static_string: 'Accept: application/json\r\n'
+		- restler_static_string: 'Host: localhost\r\n'
+		- restler_static_string: 'Content-Type: '
+		- restler_static_string: 'application/json'
+		- restler_static_string: '\r\n'
+		+ restler_refreshable_authentication_token: [token_refresh_cmd, token_refresh_interval, ...]
+		- restler_static_string: '\r\n'
+		- restler_static_string: '{'
+		- restler_static_string: '\n    "fetch_url":'
+		+ restler_fuzzable_string: ["http://169.254.169.254/latest/meta-data/", "fuzzstring", ...]
+		- restler_static_string: '}'
+		- restler_static_string: '\r\n'
+
+-------------------------
+
+
+2026-06-22 13:51:01.475: 	Never Rendered requests:
+-------------------------
+
