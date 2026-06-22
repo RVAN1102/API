@@ -3,12 +3,17 @@
 ## Requirement Proven
 
 The repository records a low-load secured k6 baseline and identifies SecOps
-detection signals without inventing detection timing.
+detection signals without inventing detection timing. It also provides
+implementation-ready automation for edge-overhead, Loki LogQL MTTD/MTTR, and
+Vault secret-read overhead evidence.
 
 ## Command Or Evidence Source
 
 ```bash
 ACCESS_TOKEN="${ALICE_TOKEN}" k6 run tests/performance/k6-phase3.js
+bash tests/metrics/run-k6-overhead.sh
+bash tests/metrics/execute-mttd-scenario.sh
+bash tests/metrics/measure-kms-overhead.sh
 bash tests/metrics/measure-mttd-mttr.sh
 ```
 
@@ -31,7 +36,18 @@ Security signals available to the metrics script include authentication
 failures, authorization failures, rate-limit responses, SSRF blocks, and webhook
 security failures.
 
+Additional quantitative automation:
+
+| Area | Methodology | Current curated result |
+|---|---|---|
+| direct-vs-edge latency | `tests/metrics/run-k6-overhead.sh` compares authenticated `/api/v1/users/me` through `http://user-service:8000` on the Docker internal network and `https://localhost:8443` through Kong | generated only when `docs/evidence/tv3/metrics/k6-users-me-overhead-analysis.md` exists |
+| MTTD/MTTR | `tests/metrics/execute-mttd-scenario.sh` runs the existing Loki LogQL threshold polling script and captures one correlation-ID log sample | no timing value is claimed unless the generated metrics evidence exists |
+| Vault/KMS-style overhead | `tests/metrics/measure-kms-overhead.sh` measures local Vault dev-mode KV reads for `/v1/secret/data/api/webhook` without writing secret values | generated only when `docs/evidence/tv3/metrics/vault-kms-overhead-summary.md` exists |
+
 ## Scope And Limitation
 
 The k6 result is a low-load secured baseline, not a stress test. No current
-MTTD or MTTR timing value is claimed.
+MTTD or MTTR timing value is claimed in this curated summary. The MTTD/MTTR
+source of truth is Loki LogQL threshold polling unless separate Grafana firing
+state evidence is explicitly captured. The direct-vs-edge k6 comparison measures
+edge path overhead for one endpoint and does not isolate mTLS overhead.

@@ -56,12 +56,29 @@ random_nonce() {
 wait_for_billing() {
   local code
   local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
+  local statuses=()
+
+  echo "[INFO] Waiting for billing HTTPS readiness"
   for attempt in $(seq 1 30); do
     code="$(curl ${curl_tls_opts} -sS -o /dev/null -w "%{http_code}" https://localhost:8443/api/v1/billing/health 2>/dev/null || echo "000")"
-    echo "[INFO] billing HTTPS readiness attempt ${attempt}/30: status ${code}"
-    [ "${code}" = "200" ] && return 0
+    statuses+=("${code}")
+    if [ "${code}" = "200" ]; then
+      echo "[OK] billing HTTPS readiness reached 200 after ${attempt} attempt(s)"
+      return 0
+    fi
     sleep 2
   done
+
+  echo "[ERROR] billing HTTPS readiness did not reach HTTP 200 after 30 attempts." >&2
+  echo "[ERROR] billing HTTPS readiness status sequence: ${statuses[*]}" >&2
+  echo "[DIAG] docker compose ps" >&2
+  compose ps >&2 || true
+  echo "[DIAG] recent kong logs" >&2
+  compose logs --no-color --tail=120 kong >&2 || true
+  echo "[DIAG] recent billing-mtls-proxy logs" >&2
+  compose logs --no-color --tail=120 billing-mtls-proxy >&2 || true
+  echo "[DIAG] recent billing-service logs" >&2
+  compose logs --no-color --tail=120 billing-service >&2 || true
   return 1
 }
 

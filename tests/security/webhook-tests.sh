@@ -99,7 +99,9 @@ wait_for_kong() {
   local code
   local health_url="https://localhost:8443/api/v1/users/health"
   local curl_tls_opts="${CURL_TLS_OPTS:---insecure}"
+  local statuses=()
 
+  echo "[INFO] Waiting for Kong HTTPS users health readiness"
   for attempt in $(seq 1 30); do
     if code="$(curl ${curl_tls_opts} -sS -o /dev/null -w "%{http_code}" "${health_url}" 2>/dev/null)"; then
       :
@@ -107,14 +109,23 @@ wait_for_kong() {
       code="000"
     fi
 
-    echo "[INFO] Kong readiness attempt ${attempt}/30: HTTPS users health status ${code}"
+    statuses+=("${code}")
     if [ "${code}" = "200" ]; then
-      echo "[INFO] Kong HTTPS users health is ready (status 200)"
+      echo "[OK] Kong HTTPS users health reached 200 after ${attempt} attempt(s)"
       return 0
     fi
     sleep 2
   done
 
+  echo "[FAIL] Kong readiness failed. Status sequence: ${statuses[*]}" >&2
+  echo "[DIAG] docker compose ps" >&2
+  (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml ps) >&2 || true
+  echo "[DIAG] recent kong logs" >&2
+  (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 kong) >&2 || true
+  echo "[DIAG] recent user-mtls-proxy logs" >&2
+  (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 user-mtls-proxy) >&2 || true
+  echo "[DIAG] recent user-service logs" >&2
+  (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 user-service) >&2 || true
   die "Kong did not return HTTP 200 from ${health_url} within 60s."
 }
 

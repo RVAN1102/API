@@ -1,0 +1,27 @@
+{
+  "source": "Loki LogQL threshold polling",
+  "selector": "{job=\"docker\"}",
+  "pattern": "mttd-403-bola",
+  "result": [
+    {
+      "stream": {
+        "detected_level": "warn",
+        "filename": "/var/lib/docker/containers/601c4bdff3d0c4e3eb9d0ba351d31fa38ba091439dfd58aa1e410b48e1363639/601c4bdff3d0c4e3eb9d0ba351d31fa38ba091439dfd58aa1e410b48e1363639-json.log",
+        "job": "docker",
+        "service_name": "docker",
+        "stream": "stderr"
+      },
+      "values": [
+        [
+          "1782142802015167483",
+          "{\"timestamp\": \"2026-06-22T15:40:01Z\", \"level\": \"WARNING\", \"service\": \"order-service\", \"method\": \"GET\", \"path\": \"/api/v1/orders/ord-bob-2001/fixed\", \"status_code\": 403, \"client_ip\": \"192.168.48.4\", \"correlation_id\": \"mttd-403-bola-verify\", \"event_type\": \"auth_failure\", \"reason\": \"ownership_denied\", \"category\": \"ownership_denied\", \"security_event\": true}\n"
+        ],
+        [
+          "1782142801014753731",
+          "{\"timestamp\": \"2026-06-22T15:40:00Z\", \"level\": \"WARNING\", \"service\": \"order-service\", \"method\": \"GET\", \"path\": \"/api/v1/orders/ord-bob-2001/fixed\", \"status_code\": 403, \"client_ip\": \"192.168.48.4\", \"correlation_id\": \"mttd-403-bola-5\", \"event_type\": \"auth_failure\", \"reason\": \"ownership_denied\", \"category\": \"ownership_denied\", \"security_event\": true}\n"
+        ]
+      ]
+    }
+  ],
+  "scope": "correlation-ID sample for MTTD/MTTR scenario evidence; not Grafana alert firing evidence"
+}

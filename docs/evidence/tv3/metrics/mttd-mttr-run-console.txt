@@ -1,0 +1,13 @@
+--- 401_unauthorized_spike ---
+[PASS] 401_unauthorized_spike: MTTD=7s MTTR=0s detection_value=31.0 containment=429
+--- 403_forbidden_bola_spike ---
+ Container infra-kong-1 Restarting 
+ Container infra-kong-1 Started 
+[PASS] 403_forbidden_bola_spike: MTTD=5s MTTR=0s detection_value=10.0 containment=403
+--- 429_rate_limit_spike ---
+[PASS] 429_rate_limit_spike: MTTD=1s MTTR=0s detection_value=13.0 containment=429
+CSV: docs/evidence/tv3/metrics/mttd-mttr-alert-based-results.csv
+Analysis: docs/evidence/tv3/metrics/mttd-mttr-alert-based-analysis.md
+Labels: docs/evidence/tv3/metrics/loki-labels.json
+Label values: docs/evidence/tv3/metrics/loki-label-values.json
+[INFO] Wrote Loki correlation sample for mttd-403-bola to /home/rvan1102/API/docs/evidence/tv3/metrics/correlation-id-log-sample.json

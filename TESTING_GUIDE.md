@@ -169,11 +169,14 @@ This is deterministic negative testing, not RESTler or Fuzzapi.
 RESTler runner:
 
 ```bash
-bash tests/restler/run-restler-check.sh
+RESTLER_AUTH_PASSWORD='<redacted>' bash tests/restler/run-restler-check.sh
 ```
 
-Expected result: exits `0` only if RESTler is available and its compile/test/run
-steps complete. No completed RESTler result is claimed in curated evidence.
+Expected result: exits `0` only if RESTler is available, Keycloak is running,
+the supplied password is valid for the configured user, and compile/test/fuzz-lean
+complete. The runner passes an authenticated RESTler settings file to both
+`test` and `fuzz-lean`; evidence is valid only when the generated summary proves
+requests were sent beyond pure 401/403 gateway rejection.
 
 ## 11. ZAP Active Scan
 
@@ -217,7 +220,54 @@ Recorded secured low-load baseline:
 
 This is not a stress test.
 
-## 13. Supply Chain And Secret Checks
+## 13. k6 Direct-Vs-Edge Overhead
+
+```bash
+bash tests/metrics/run-k6-overhead.sh
+```
+
+Expected result: the script exits `0`, writes baseline and edge k6 summaries
+under `docs/evidence/tv3/metrics/`, and writes
+`k6-users-me-overhead-analysis.md` with edge minus baseline p50 and p95 latency.
+The baseline run uses the Docker internal network attached to `user-service` and
+does not expose backend ports to the host. The edge run defaults to Linux Docker
+host networking and calls `https://localhost:8443`; Docker Desktop users must
+provide a reachable `EDGE_BASE_URL` with `EDGE_DOCKER_NETWORK` if needed, or run
+the edge k6 command from the host.
+
+This measures edge path overhead for `/api/v1/users/me`; it does not isolate
+mTLS overhead.
+
+## 14. SecOps MTTD/MTTR Scenario
+
+```bash
+bash tests/metrics/execute-mttd-scenario.sh
+```
+
+Expected result: the wrapper runs the existing Loki LogQL threshold-based
+measurement, writes console output to
+`docs/evidence/tv3/metrics/mttd-mttr-run-console.txt`, and writes one matching
+correlation-ID sample to
+`docs/evidence/tv3/metrics/correlation-id-log-sample.json`. If Loki has no
+matching sample, the wrapper fails rather than creating fake evidence. Do not
+interpret this as Grafana alert firing evidence unless a separate Grafana firing
+state is captured.
+
+## 15. Vault/KMS-Style Secret Retrieval Overhead
+
+```bash
+bash tests/metrics/measure-kms-overhead.sh
+```
+
+Expected result: the script performs 30 local Vault dev-mode KV reads against
+`/v1/secret/data/api/webhook`, writes
+`docs/evidence/tv3/metrics/vault-kms-overhead.csv`, and writes
+`docs/evidence/tv3/metrics/vault-kms-overhead-summary.md` with p50, p95,
+average latency, and successful sample count. It writes only status and timing
+data, not secret values. This is a Vault secret-read overhead lab proxy, not an
+AWS KMS measurement.
+
+## 16. Supply Chain And Secret Checks
 
 ```bash
 bash tests/security/verify-no-tracked-secrets.sh
@@ -228,7 +278,7 @@ bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-exa
 Expected result: tracked secret check passes, SBOM files are generated, and
 Cosign dry-run documents readiness without creating a signature.
 
-## 14. Repo Consistency Audit
+## 17. Repo Consistency Audit
 
 ```bash
 bash scripts/audit/repo-consistency-audit.sh
@@ -236,7 +286,7 @@ bash scripts/audit/repo-consistency-audit.sh
 
 Expected result: `FAIL=0`. A warning requires review before staging.
 
-## 15. Local Cleanup
+## 18. Local Cleanup
 
 To stop the stack:
 
