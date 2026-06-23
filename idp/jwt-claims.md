@@ -2,29 +2,31 @@
 
 ## Overview
 
-All backend services (user, order, billing, admin) validate JWT access tokens
-issued by Keycloak. This document defines the claim contract.
-
----
+All backend services validate JWT access tokens issued by Keycloak. This
+document defines the claim contract for the final HTTPS runtime.
 
 ## Required Claims
 
-| Claim                   | Type   | Description                              |
-|-------------------------|--------|------------------------------------------|
-| `sub`                   | string | Unique user/service identifier (UUID)    |
-| `preferred_username`    | string | Human-readable username (alice, bob)     |
-| `email`                 | string | User email address                       |
-| `realm_access.roles`    | array  | List of realm-level roles                |
-| `resource_access`       | object | Client-specific roles (optional)         |
-| `scope`                 | string | Granted scopes                           |
-| `azp`                   | string | Authorized party (client_id)             |
-| `exp`                   | int    | Expiration Unix timestamp                |
-| `iss`                   | string | Issuer URL (must match Keycloak realm)   |
-| `aud`                   | array  | Audience claim; used as fallback for token-client allowlist checks |
+| Claim | Type | Description |
+|---|---|---|
+| `sub` | string | Unique user/service identifier |
+| `preferred_username` | string | Human-readable username for user tokens |
+| `email` | string | User email address when present |
+| `realm_access.roles` | array | Realm-level roles |
+| `resource_access` | object | Client-specific roles when present |
+| `scope` | string | Granted scopes |
+| `azp` | string | Authorized party / client id |
+| `exp` | int | Expiration Unix timestamp |
+| `iss` | string | Issuer URL |
+| `aud` | array/string | Audience; fallback for token-client allowlist checks |
 
----
+Expected issuer:
 
-## Example Access Token (User)
+```text
+https://localhost:8446/realms/topic10-sme-api
+```
+
+## Example Access Token Claims
 
 ```json
 {
@@ -45,47 +47,44 @@ issued by Keycloak. This document defines the claim contract.
   },
   "scope": "openid profile email",
   "azp": "sme-web-client",
-  "iss": "http://keycloak:8080/realms/topic10-sme-api",
+  "iss": "https://localhost:8446/realms/topic10-sme-api",
   "exp": 1718272800,
   "iat": 1718272500
 }
 ```
 
----
+## Validation Steps
 
-## Validation Steps (Backend)
-
-All services perform these steps in `auth.py`:
+All services perform these steps:
 
 1. Extract Bearer token from `Authorization` header.
-2. Decode header (unverified) to get `kid`.
+2. Decode header without trust to get `kid`.
 3. Fetch JWKS from `{KEYCLOAK_URL}/realms/{REALM}/protocol/openid-connect/certs`.
 4. Find matching key by `kid`.
 5. Verify JWT signature with RS256.
-6. Verify `exp` (not expired).
-7. Verify `iss` == `http://keycloak:8080/realms/topic10-sme-api`.
-8. Enforce token-client binding with `azp` / `client_id` and audience
-   fallback against each service's allowed client set.
+6. Verify `exp`.
+7. Verify `iss` equals `https://localhost:8446/realms/topic10-sme-api`.
+8. Enforce token-client binding with `azp` / `client_id` and audience fallback
+   against each service's allowed client set.
 9. Extract `realm_access.roles` for RBAC.
-10. Return identity object to route handler.
-
----
+10. Return identity object to the route handler.
 
 ## RBAC Role Mapping
 
-| Role              | Permission                                        |
-|-------------------|---------------------------------------------------|
-| `user`            | Access own profile, own orders                    |
-| `admin`           | Access profile, all orders, admin endpoints       |
-| `billing-service` | Service-to-service billing calls                  |
-| `internal-service`| Internal service calls                            |
-
----
+| Role | Permission |
+|---|---|
+| `user` | Access own profile and own orders |
+| `admin` | Access profile, all orders, and admin endpoints |
+| `billing-service` | Billing service identity |
+| `internal-service` | Internal service access |
+| `order-ownership-read` | Order ownership verification |
+| `admin-maintenance` | Admin maintenance action |
 
 ## Security Notes
 
-- Tokens expire in 300 seconds (5 minutes) by default.
-- JWKS is cached in-memory; refreshed when a new `kid` is encountered.
-- User-facing calls use human-client allowlists, while service-to-service calls
-  use dedicated service-client allowlists and roles.
-- Do NOT log full access tokens. Log only `sub` and `preferred_username`.
+- Tokens expire in 300 seconds by default.
+- JWKS is cached in memory and refreshed when a new `kid` is encountered.
+- User-facing calls use human-client allowlists.
+- Service-to-service calls use dedicated service-client allowlists and roles.
+- Do not log full access tokens. Log only stable non-secret identifiers such as
+  `sub` and `preferred_username`.

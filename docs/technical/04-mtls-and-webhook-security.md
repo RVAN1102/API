@@ -2,23 +2,22 @@
 
 ## Requirement
 
-The API must prove the implemented mTLS paths and webhook authentication
+The API must prove the implemented HTTPS/mTLS paths and webhook authentication
 controls without expanding the claim beyond the runtime configuration.
 
-## Scoped mTLS Paths
+## Direct HTTPS/mTLS Paths
 
-- Client to Kong uses HTTPS/TLS on `https://localhost:8443`.
-- Kong to backend services uses gateway-backend direct HTTPS/mTLS upstreams.
+- Client to Kong uses HTTPS on `https://localhost:8443`.
+- Kong to backend services uses direct HTTPS/mTLS to backend port `8443`.
 - Billing to Order ownership verification uses `https://order-service:8443`.
-- Webhook uses HMAC timestamp/nonce validation plus mTLS client certificate.
-
-mTLS coverage is limited to these paths.
+- Webhook traffic uses HMAC timestamp/nonce validation plus mTLS client
+  certificate verification.
 
 ## Gateway-To-Backend mTLS
 
-Kong routes the four primary services to Nginx direct HTTPS/mTLS upstreams. Kong presents an
-internal client certificate. Each sidecar verifies the client certificate before
-forwarding to the service container.
+Kong presents the internal `kong-client` certificate to each backend service.
+Each backend validates the client certificate against the internal CA and
+presents its own backend server certificate.
 
 Rerunnable command:
 
@@ -26,8 +25,8 @@ Rerunnable command:
 bash tests/security/gateway-backend-mtls-tests.sh
 ```
 
-Curated evidence records successful health calls through all sidecars and
-rejection of missing or wrong client certificates.
+Curated evidence records successful health calls through all four direct
+HTTPS/mTLS upstreams and rejection of missing or wrong client certificates.
 
 ## Billing-To-Order mTLS
 
@@ -40,8 +39,8 @@ ORDER_SERVICE_TLS_CLIENT_CERT=/etc/internal-tls/billing-client.crt
 ORDER_SERVICE_TLS_CLIENT_KEY=/etc/internal-tls/billing-client.key
 ```
 
-Curated evidence records that Billing reaches Order through the direct HTTPS/mTLS path and
-cannot use the plaintext Order application port directly.
+Curated evidence records that Billing reaches Order through the approved direct
+HTTPS/mTLS path and cannot use a plaintext Order application port.
 
 ## Webhook Controls
 
@@ -53,8 +52,8 @@ X-Webhook-Nonce
 X-Webhook-Signature
 ```
 
-Billing validates HMAC-SHA256 over timestamp, nonce, and raw body. Redis stores
-accepted nonce values with TTL to block replay. Kong checks client certificate
+Billing validates HMAC-SHA256 over timestamp, nonce, and raw body. The nonce
+store blocks replay for the configured TTL. Kong checks client certificate
 verification state and passes the result to Billing.
 
 Rerunnable commands:
@@ -67,4 +66,3 @@ bash tests/security/webhook-nonce-persistence-tests.sh
 Curated evidence records valid webhook acceptance and rejection of invalid
 signature, old timestamp, replayed nonce, missing headers, and missing client
 certificate.
-

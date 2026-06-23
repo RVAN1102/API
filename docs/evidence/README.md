@@ -17,6 +17,6 @@ are not included.
 | CI and supply chain | `results/ci-supply-chain.md` |
 | Performance and SecOps | `results/performance-and-secops.md` |
 
-All public API evidence targets `https://localhost:8443`. Kong Admin,
-Keycloak, Vault, and Grafana URLs are lab-local control-plane or observability
-surfaces.
+All public API evidence targets `https://localhost:8443`. Final runtime
+evidence describes direct HTTPS/mTLS to backend port `8443`, HTTPS Keycloak,
+HTTPS OPA, HTTPS Vault, and constrained Docker networks.

@@ -1,17 +1,19 @@
 # Gateway-to-Backend HTTPS/mTLS
 
-The final runtime does not use an HTTP sidecar hop. Kong connects directly to
-backend services over HTTPS and presents the internal `kong-client` certificate.
-Each backend service listens on port `8443`, presents its own server certificate,
-and requires a client certificate signed by the internal demo CA.
+Kong connects directly to backend services over HTTPS and presents the internal
+`kong-client` certificate. Each backend service listens on port `8443`, presents
+its own server certificate, and requires a client certificate signed by the
+internal demo CA.
 
 Runtime identities:
 
 - `kong-client.crt` / `kong-client.key`: Kong client identity.
-- `billing-client.crt` / `billing-client.key`: Billing service client identity for Billing-to-Order calls.
+- `billing-client.crt` / `billing-client.key`: Billing service client identity
+  for Billing-to-Order calls.
 - `user-service.crt` / `user-service.key`: User service server identity.
 - `order-service.crt` / `order-service.key`: Order service server identity.
-- `billing-service.crt` / `billing-service.key`: Billing service server identity.
+- `billing-service.crt` / `billing-service.key`: Billing service server
+  identity.
 - `admin-service.crt` / `admin-service.key`: Admin service server identity.
 - `keycloak.crt` / `keycloak.key`: HTTPS identity for Keycloak.
 - `opa.crt` / `opa.key`: HTTPS identity for OPA.

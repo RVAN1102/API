@@ -18,12 +18,11 @@ bash scripts/audit/repo-consistency-audit.sh
 
 | Check | Observed result |
 |---|---|
-| branch | `docs/rebuild-technical-documentation` |
-| Compose config | exit `0` |
-| repo consistency audit | `PASS=7 WARN=0 FAIL=0` after final documentation rebuild |
+| branch | `docs/sync-no-plaintext-runtime` |
+| Compose config | expected exit `0` |
+| repo consistency audit | expected `FAIL=0` |
 
 ## Scope And Limitation
 
 These checks validate branch, documentation consistency, and rendered Compose
 syntax. They do not prove that the full stack is running.
-
