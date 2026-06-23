@@ -19,15 +19,15 @@ and tests should not call backend service containers directly.
 loki
 promtail
 user-service
-user-mtls-proxy
+user-service
 opa
 order-service
 admin-service
 redis
 billing-service
-billing-mtls-proxy
-admin-mtls-proxy
-order-mtls-proxy
+billing-service
+admin-service
+order-service
 kong
 vault
 webhook-demo
@@ -50,14 +50,14 @@ keycloak
 ## Gateway
 
 Kong runs in DB-less mode from `gateway/kong.yml`. It terminates the public TLS
-listener, applies edge controls, and routes to mTLS sidecars:
+listener, applies edge controls, and routes to direct HTTPS/mTLS upstreams:
 
 | Upstream | Kong target |
 |---|---|
-| User | `https://user-mtls-proxy:8443` |
-| Order | `https://order-mtls-proxy:8443` |
-| Billing | `https://billing-mtls-proxy:8443` |
-| Admin | `https://admin-mtls-proxy:8443` |
+| User | `https://user-service:8443` |
+| Order | `https://order-service:8443` |
+| Billing | `https://billing-service:8443` |
+| Admin | `https://admin-service:8443` |
 | Webhook demo container | Docker-internal `webhook-demo:8080` |
 
 ## Supporting Services
@@ -85,8 +85,8 @@ These endpoints are not public application APIs:
 ## Trust Boundaries
 
 - Client to Kong uses HTTPS/TLS at the public gateway.
-- Kong to backends uses gateway-backend mTLS sidecars.
-- Billing to Order ownership verification uses `https://order-mtls-proxy:8443`.
+- Kong to backends uses gateway-backend direct HTTPS/mTLS upstreams.
+- Billing to Order ownership verification uses `https://order-service:8443`.
 - Webhook uses HMAC timestamp/nonce validation plus mTLS client certificate.
 - Keycloak tokens and selected OPA decisions enforce identity and authorization.
 

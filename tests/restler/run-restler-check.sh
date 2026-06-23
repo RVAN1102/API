@@ -138,14 +138,14 @@ configure_target() {
 
     if [ "${RESTLER_DOCKER_NETWORK}" = "host" ]; then
       TARGET_URL="${TARGET_URL:-https://localhost:8443}"
-      DOCKER_KEYCLOAK_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-${DOCKER_KEYCLOAK_URL:-http://127.0.0.1:8080}}}"
+      DOCKER_KEYCLOAK_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-${DOCKER_KEYCLOAK_URL:-https://127.0.0.1:8446}}}"
     else
       TARGET_URL="${TARGET_URL:-https://kong:8443}"
-      DOCKER_KEYCLOAK_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-${DOCKER_KEYCLOAK_URL:-http://keycloak:8080}}}"
+      DOCKER_KEYCLOAK_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-${DOCKER_KEYCLOAK_URL:-https://keycloak:8443}}}"
     fi
   else
     TARGET_URL="${TARGET_URL:-https://localhost:8443}"
-    DOCKER_KEYCLOAK_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-${DOCKER_KEYCLOAK_URL:-http://localhost:8080}}}"
+    DOCKER_KEYCLOAK_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-${DOCKER_KEYCLOAK_URL:-https://localhost:8446}}}"
   fi
 
   parsed_target="$(parse_target_url)"
@@ -227,7 +227,7 @@ base_url = sys.argv[1].rstrip("/")
 keycloak_url = (
     os.environ.get("RESTLER_KEYCLOAK_BASE_URL")
     or os.environ.get("KEYCLOAK_BASE_URL")
-    or "http://localhost:8080"
+    or "https://localhost:8446"
 ).rstrip("/")
 realm = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 client_id = os.environ.get("RESTLER_AUTH_CLIENT_ID", "sme-lab-automation-client")

@@ -8,15 +8,15 @@ controls without expanding the claim beyond the runtime configuration.
 ## Scoped mTLS Paths
 
 - Client to Kong uses HTTPS/TLS on `https://localhost:8443`.
-- Kong to backend services uses gateway-backend mTLS sidecars.
-- Billing to Order ownership verification uses `https://order-mtls-proxy:8443`.
+- Kong to backend services uses gateway-backend direct HTTPS/mTLS upstreams.
+- Billing to Order ownership verification uses `https://order-service:8443`.
 - Webhook uses HMAC timestamp/nonce validation plus mTLS client certificate.
 
 mTLS coverage is limited to these paths.
 
 ## Gateway-To-Backend mTLS
 
-Kong routes the four primary services to Nginx mTLS sidecars. Kong presents an
+Kong routes the four primary services to Nginx direct HTTPS/mTLS upstreams. Kong presents an
 internal client certificate. Each sidecar verifies the client certificate before
 forwarding to the service container.
 
@@ -34,13 +34,13 @@ rejection of missing or wrong client certificates.
 Billing is configured with:
 
 ```text
-ORDER_SERVICE_URL=https://order-mtls-proxy:8443
-ORDER_SERVICE_TLS_CA_CERT=/etc/s2s-mtls/ca.crt
-ORDER_SERVICE_TLS_CLIENT_CERT=/etc/s2s-mtls/billing-client.crt
-ORDER_SERVICE_TLS_CLIENT_KEY=/etc/s2s-mtls/billing-client.key
+ORDER_SERVICE_URL=https://order-service:8443
+ORDER_SERVICE_TLS_CA_CERT=/etc/internal-tls/ca.crt
+ORDER_SERVICE_TLS_CLIENT_CERT=/etc/internal-tls/billing-client.crt
+ORDER_SERVICE_TLS_CLIENT_KEY=/etc/internal-tls/billing-client.key
 ```
 
-Curated evidence records that Billing reaches Order through the mTLS sidecar and
+Curated evidence records that Billing reaches Order through the direct HTTPS/mTLS path and
 cannot use the plaintext Order application port directly.
 
 ## Webhook Controls

@@ -50,13 +50,25 @@ write_ext() {
   local name="$1"
   local type="$2"
   local ext_file="${OUT_DIR}/${name}.ext"
+  local san="DNS:${name}"
+
+  case "${name}" in
+    user-service) san="DNS:user-service" ;;
+    order-service) san="DNS:order-service" ;;
+    billing-service) san="DNS:billing-service" ;;
+    admin-service) san="DNS:admin-service" ;;
+    keycloak) san="DNS:keycloak,DNS:localhost" ;;
+    opa) san="DNS:opa,DNS:localhost" ;;
+    redis) san="DNS:redis" ;;
+    vault) san="DNS:vault,DNS:localhost" ;;
+  esac
 
   if [ "${type}" = "server" ]; then
     cat > "${ext_file}" <<EXT
 basicConstraints=CA:FALSE
 keyUsage=digitalSignature,keyEncipherment
 extendedKeyUsage=serverAuth
-subjectAltName=DNS:${name}
+subjectAltName=${san}
 EXT
   else
     cat > "${ext_file}" <<EXT
@@ -121,10 +133,14 @@ regenerate_if_ca_is_legacy
 generate_ca
 generate_leaf "kong-client" "client"
 generate_leaf "billing-client" "client"
-generate_leaf "user-mtls-proxy" "server"
-generate_leaf "order-mtls-proxy" "server"
-generate_leaf "billing-mtls-proxy" "server"
-generate_leaf "admin-mtls-proxy" "server"
+generate_leaf "user-service" "server"
+generate_leaf "order-service" "server"
+generate_leaf "billing-service" "server"
+generate_leaf "admin-service" "server"
+generate_leaf "keycloak" "server"
+generate_leaf "opa" "server"
+generate_leaf "redis" "server"
+generate_leaf "vault" "server"
 
 cat > "${OUT_DIR}/README.generated.txt" <<README
 Generated demo certificate material for Topic 10 gateway-backend mTLS.

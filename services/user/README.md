@@ -26,7 +26,7 @@ Token must be issued by Keycloak realm `topic10-sme-api`.
 ```bash
 cd services/user
 pip install -r requirements.txt
-KEYCLOAK_URL=http://localhost:8080 uvicorn main:app --port 8001
+KEYCLOAK_URL=https://localhost:8446 uvicorn main:app --port 8443
 ```
 
 ## Run via Docker Compose

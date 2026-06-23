@@ -75,8 +75,8 @@ wait_for_billing() {
   compose ps >&2 || true
   echo "[DIAG] recent kong logs" >&2
   compose logs --no-color --tail=120 kong >&2 || true
-  echo "[DIAG] recent billing-mtls-proxy logs" >&2
-  compose logs --no-color --tail=120 billing-mtls-proxy >&2 || true
+  echo "[DIAG] recent billing-service logs" >&2
+  compose logs --no-color --tail=120 billing-service >&2 || true
   echo "[DIAG] recent billing-service logs" >&2
   compose logs --no-color --tail=120 billing-service >&2 || true
   return 1

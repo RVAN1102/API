@@ -84,7 +84,7 @@ app = FastAPI(
 security = HTTPBearer(auto_error=True)
 _jwks_cache: Optional[Dict[str, Any]] = None
 
-KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
+KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "https://keycloak:8443")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 KEYCLOAK_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
 EXPECTED_ISSUER: str = KEYCLOAK_ISSUER
@@ -114,8 +114,16 @@ TOKEN_INTROSPECTION_CLIENT_SECRET: str = (
     or os.environ.get("TOKEN_INTROSPECTION_CLIENT_SECRET")
     or ADMIN_SERVICE_CLIENT_SECRET
 )
-OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_URL: str = os.environ.get("OPA_URL", "https://opa:8181").rstrip("/")
 OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
+INTERNAL_TLS_CA_CERT: str = os.environ.get("INTERNAL_TLS_CA_CERT", "/etc/internal-tls/ca.crt")
+
+
+def _internal_tls_verify(url: str):
+    parsed = urlparse(url)
+    if parsed.scheme == "https" and os.path.isfile(INTERNAL_TLS_CA_CERT):
+        return INTERNAL_TLS_CA_CERT
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -128,7 +136,7 @@ async def _fetch_jwks() -> Dict[str, Any]:
     if _jwks_cache is not None:
         return _jwks_cache
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(JWKS_URL)) as client:
             response = await client.get(JWKS_URL)
             response.raise_for_status()
             _jwks_cache = response.json()
@@ -222,7 +230,7 @@ async def require_introspection_active(token: str) -> None:
         raise _introspection_failed_exception()
 
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(INTROSPECTION_URL)) as client:
             response = await client.post(
                 INTROSPECTION_URL,
                 data={
@@ -321,7 +329,7 @@ def _subject_type(payload: Dict[str, Any]) -> str:
 
 async def require_opa_allow(input_data: Dict[str, Any]) -> None:
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
+        async with httpx.AsyncClient(timeout=2.0, verify=_internal_tls_verify(OPA_ALLOW_URL)) as client:
             response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
     except httpx.HTTPError:
         raise HTTPException(

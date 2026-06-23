@@ -11,7 +11,7 @@ DEFAULT_TOKEN_FILE="/tmp/user-token.txt"
 TOKEN_FILE="${TOKEN_FILE:-/tmp/user-token.txt}"
 K6_IMAGE="${K6_IMAGE:-grafana/k6:0.49.0}"
 PREFLIGHT_IMAGE="${PREFLIGHT_IMAGE:-curlimages/curl:8.10.1}"
-BASELINE_URL="http://user-service:8000"
+BASELINE_URL="https://user-service:8443"
 EDGE_BASE_URL="${EDGE_BASE_URL:-https://kong:8443}"
 
 BASELINE_SUMMARY="${EVIDENCE_DIR}/k6-baseline-users-me-summary.json"

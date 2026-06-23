@@ -19,7 +19,7 @@ addresses, null network, dangerous schemes, and non-HTTP schemes.
 
 Compose attaches application services to internal networks. Redis is
 Docker-internal. Billing reaches Order through `billing-order-mtls-internal` and
-the Order mTLS sidecar.
+the Order direct HTTPS/mTLS path.
 
 ## Evidence
 

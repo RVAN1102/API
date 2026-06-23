@@ -140,10 +140,10 @@ import os
 from pathlib import Path
 
 required = {
-    "ORDER_SERVICE_URL": "https://order-mtls-proxy:8443",
-    "ORDER_SERVICE_TLS_CA_CERT": "/etc/s2s-mtls/ca.crt",
-    "ORDER_SERVICE_TLS_CLIENT_CERT": "/etc/s2s-mtls/billing-client.crt",
-    "ORDER_SERVICE_TLS_CLIENT_KEY": "/etc/s2s-mtls/billing-client.key",
+    "ORDER_SERVICE_URL": "https://order-service:8443",
+    "ORDER_SERVICE_TLS_CA_CERT": "/etc/internal-tls/ca.crt",
+    "ORDER_SERVICE_TLS_CLIENT_CERT": "/etc/internal-tls/billing-client.crt",
+    "ORDER_SERVICE_TLS_CLIENT_KEY": "/etc/internal-tls/billing-client.key",
 }
 errors = []
 for key, expected in required.items():
@@ -198,11 +198,11 @@ context.load_cert_chain(
     certfile=os.environ["ORDER_SERVICE_TLS_CLIENT_CERT"],
     keyfile=os.environ["ORDER_SERVICE_TLS_CLIENT_KEY"],
 )
-with urllib.request.urlopen("https://order-mtls-proxy:8443/api/v1/orders/health", context=context, timeout=5) as response:
+with urllib.request.urlopen("https://order-service:8443/api/v1/orders/health", context=context, timeout=5) as response:
     print(getattr(response, "status", ""))
 PY
 )" || MTLS_HEALTH_STATUS="000"
-assert_status "Billing service reaches Order sidecar over verified mTLS" 200 "${MTLS_HEALTH_STATUS}"
+assert_status "Billing service reaches Order service over direct verified HTTPS/mTLS" 200 "${MTLS_HEALTH_STATUS}"
 
 echo ""
 echo "===== Billing checkout ownership ====="

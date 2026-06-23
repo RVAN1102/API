@@ -22,13 +22,22 @@ services:
       - run
       - --server
       - --addr=0.0.0.0:8181
+      - --tls-cert-file=/etc/internal-tls/opa.crt
+      - --tls-private-key-file=/etc/internal-tls/opa.key
       - /policies
     volumes:
       - ../opa/policies:/policies:ro
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     expose:
       - "8181"
     ports:
       - "127.0.0.1:8181:8181"
+    healthcheck:
+      test: ["CMD", "/opa", "eval", "true"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
     networks:
       - default
       - order-policy-internal
@@ -41,20 +50,20 @@ services:
   kong:
     image: kong:3.9
     depends_on:
-      user-mtls-proxy:
-        condition: service_started
-      order-mtls-proxy:
-        condition: service_started
-      billing-mtls-proxy:
-        condition: service_started
-      admin-mtls-proxy:
-        condition: service_started
+      user-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      billing-service:
+        condition: service_healthy
+      admin-service:
+        condition: service_healthy
     environment:
       KONG_HEADERS: "off"
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
       KONG_PROXY_LISTEN: "0.0.0.0:8443 ssl"
-      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8444 ssl"
       KONG_LOG_LEVEL: notice
       KONG_NGINX_WORKER_PROCESSES: "1"
       KONG_SSL_CIPHER_SUITE: "custom"
@@ -75,91 +84,18 @@ services:
       - ../infra/certs/gateway-backend:/kong/gb-mtls:ro
     ports:
       - "8443:8443"
-      - "127.0.0.1:8001:8001"
+      - "127.0.0.1:8445:8444"
     networks:
       - default
       - kong-user-internal
       - kong-order-internal
       - kong-billing-internal
       - kong-admin-internal
-      - kong-webhook-internal
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 5s
       timeout: 5s
       retries: 12
-
-  # ---------------------------------------------------------------------------
-  # TV1 – Gateway-to-Backend mTLS sidecars (default runtime)
-  # ---------------------------------------------------------------------------
-  user-mtls-proxy:
-    <<: *no_new_privileges_runtime_hardening
-    image: nginx:1.27-alpine
-    environment:
-      MTLS_SERVER_NAME: user-mtls-proxy
-      UPSTREAM_HOST: user-service
-    volumes:
-      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
-      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
-    expose:
-      - "8443"
-    networks:
-      - kong-user-internal
-    depends_on:
-      user-service:
-        condition: service_healthy
-
-  order-mtls-proxy:
-    <<: *no_new_privileges_runtime_hardening
-    image: nginx:1.27-alpine
-    environment:
-      MTLS_SERVER_NAME: order-mtls-proxy
-      UPSTREAM_HOST: order-service
-    volumes:
-      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
-      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
-    expose:
-      - "8443"
-    networks:
-      - kong-order-internal
-      - billing-order-mtls-internal
-    depends_on:
-      order-service:
-        condition: service_healthy
-
-  billing-mtls-proxy:
-    <<: *no_new_privileges_runtime_hardening
-    image: nginx:1.27-alpine
-    environment:
-      MTLS_SERVER_NAME: billing-mtls-proxy
-      UPSTREAM_HOST: billing-service
-    volumes:
-      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
-      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
-    expose:
-      - "8443"
-    networks:
-      - kong-billing-internal
-    depends_on:
-      billing-service:
-        condition: service_healthy
-
-  admin-mtls-proxy:
-    <<: *no_new_privileges_runtime_hardening
-    image: nginx:1.27-alpine
-    environment:
-      MTLS_SERVER_NAME: admin-mtls-proxy
-      UPSTREAM_HOST: admin-service
-    volumes:
-      - ../infra/nginx/gateway-backend-mtls.conf.template:/etc/nginx/templates/default.conf.template:ro
-      - ../infra/certs/gateway-backend:/etc/nginx/certs:ro
-    expose:
-      - "8443"
-    networks:
-      - kong-admin-internal
-    depends_on:
-      admin-service:
-        condition: service_healthy
 
   # ---------------------------------------------------------------------------
   # TV2 – User Service
@@ -170,16 +106,22 @@ services:
       context: ../services/user
       dockerfile: Dockerfile
     environment:
-      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_URL: https://keycloak:8443
       KEYCLOAK_REALM: topic10-sme-api
-      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-https://localhost:8446/realms/topic10-sme-api}"
+      INTERNAL_TLS_CA_CERT: "/etc/internal-tls/ca.crt"
+      SSL_CERT_FILE: "/etc/internal-tls/ca.crt"
+      REQUESTS_CA_BUNDLE: "/etc/internal-tls/ca.crt"
     networks:
       - kong-user-internal
       - user-identity-internal
     expose:
-      - "8000"
+      - "8443"
+    volumes:
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
+      - vault-data:/vault/file
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/users/health')"]
+      test: ["CMD", "python", "-c", "import ssl,urllib.request; ctx=ssl.create_default_context(cafile='/etc/internal-tls/ca.crt'); ctx.load_cert_chain('/etc/internal-tls/kong-client.crt','/etc/internal-tls/kong-client.key'); urllib.request.urlopen('https://user-service:8443/api/v1/users/health',context=ctx,timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -194,23 +136,29 @@ services:
       context: ../services/order
       dockerfile: Dockerfile
     environment:
-      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_URL: https://keycloak:8443
       KEYCLOAK_REALM: topic10-sme-api
-      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-https://localhost:8446/realms/topic10-sme-api}"
+      INTERNAL_TLS_CA_CERT: "/etc/internal-tls/ca.crt"
+      SSL_CERT_FILE: "/etc/internal-tls/ca.crt"
+      REQUESTS_CA_BUNDLE: "/etc/internal-tls/ca.crt"
       TOKEN_INTROSPECTION_ENABLED: "true"
       ORDER_TOKEN_INTROSPECTION_CLIENT_ID: "billing-service-client"
       ORDER_TOKEN_INTROSPECTION_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
-      OPA_URL: "http://opa:8181"
+      OPA_URL: "https://opa:8181"
     depends_on:
       - opa
     networks:
       - kong-order-internal
       - order-identity-internal
       - order-policy-internal
+      - billing-order-mtls-internal
     expose:
-      - "8000"
+      - "8443"
+    volumes:
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/orders/health')"]
+      test: ["CMD", "python", "-c", "import ssl,urllib.request; ctx=ssl.create_default_context(cafile='/etc/internal-tls/ca.crt'); ctx.load_cert_chain('/etc/internal-tls/kong-client.crt','/etc/internal-tls/kong-client.key'); urllib.request.urlopen('https://order-service:8443/api/v1/orders/health',context=ctx,timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -225,28 +173,29 @@ services:
       context: ../services/billing
       dockerfile: Dockerfile
     expose:
-      - "8000"
+      - "8443"
     environment:
       WEBHOOK_MAX_AGE_SECONDS: "300"
-      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_URL: "https://keycloak:8443"
       KEYCLOAK_REALM: "topic10-sme-api"
-      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-https://localhost:8446/realms/topic10-sme-api}"
+      INTERNAL_TLS_CA_CERT: "/etc/internal-tls/ca.crt"
+      SSL_CERT_FILE: "/etc/internal-tls/ca.crt"
+      REQUESTS_CA_BUNDLE: "/etc/internal-tls/ca.crt"
       BILLING_SERVICE_CLIENT_ID: "billing-service-client"
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
-      ORDER_SERVICE_URL: "https://order-mtls-proxy:8443"
-      ORDER_SERVICE_TLS_CA_CERT: "/etc/s2s-mtls/ca.crt"
-      ORDER_SERVICE_TLS_CLIENT_CERT: "/etc/s2s-mtls/billing-client.crt"
-      ORDER_SERVICE_TLS_CLIENT_KEY: "/etc/s2s-mtls/billing-client.key"
-      OPA_URL: "http://opa:8181"
+      ORDER_SERVICE_URL: "https://order-service:8443"
+      ORDER_SERVICE_TLS_CA_CERT: "/etc/internal-tls/ca.crt"
+      ORDER_SERVICE_TLS_CLIENT_CERT: "/etc/internal-tls/billing-client.crt"
+      ORDER_SERVICE_TLS_CLIENT_KEY: "/etc/internal-tls/billing-client.key"
+      OPA_URL: "https://opa:8181"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}"
-      WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-redis}"
-      WEBHOOK_NONCE_REDIS_URL: "${WEBHOOK_NONCE_REDIS_URL:-redis://redis:6379/0}"
+      WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-memory}"
+      WEBHOOK_NONCE_REDIS_URL: "${WEBHOOK_NONCE_REDIS_URL:-rediss://redis:6379/0}"
       WEBHOOK_NONCE_TTL_SECONDS: "${WEBHOOK_NONCE_TTL_SECONDS:-300}"
     depends_on:
       opa:
         condition: service_started
-      redis:
-        condition: service_healthy
     networks:
       - kong-billing-internal
       - billing-identity-internal
@@ -254,9 +203,9 @@ services:
       - billing-order-mtls-internal
       - billing-nonce-internal
     volumes:
-      - ../infra/certs/gateway-backend:/etc/s2s-mtls:ro
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/billing/health')"]
+      test: ["CMD", "python", "-c", "import ssl,urllib.request; ctx=ssl.create_default_context(cafile='/etc/internal-tls/ca.crt'); ctx.load_cert_chain('/etc/internal-tls/kong-client.crt','/etc/internal-tls/kong-client.key'); urllib.request.urlopen('https://billing-service:8443/api/v1/billing/health',context=ctx,timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -266,6 +215,7 @@ services:
   # Webhook replay nonce store – Redis-backed TTL store for lab regression
   # ---------------------------------------------------------------------------
   redis:
+    profiles: ["optional-tls-redis"]
     image: redis:7.4-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     expose:
@@ -288,44 +238,32 @@ services:
       context: ../services/admin
       dockerfile: Dockerfile
     expose:
-      - "8000"
+      - "8443"
     environment:
-      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_URL: "https://keycloak:8443"
       KEYCLOAK_REALM: "topic10-sme-api"
-      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-http://localhost:8080/realms/topic10-sme-api}"
+      KEYCLOAK_ISSUER: "${KEYCLOAK_ISSUER:-https://localhost:8446/realms/topic10-sme-api}"
+      INTERNAL_TLS_CA_CERT: "/etc/internal-tls/ca.crt"
+      SSL_CERT_FILE: "/etc/internal-tls/ca.crt"
+      REQUESTS_CA_BUNDLE: "/etc/internal-tls/ca.crt"
       TOKEN_INTROSPECTION_ENABLED: "true"
       ADMIN_TOKEN_INTROSPECTION_CLIENT_ID: "admin-service-client"
       ADMIN_TOKEN_INTROSPECTION_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:?ADMIN_SERVICE_CLIENT_SECRET is required}"
-      OPA_URL: "http://opa:8181"
+      OPA_URL: "https://opa:8181"
     depends_on:
       - opa
     networks:
       - kong-admin-internal
       - admin-identity-internal
       - admin-policy-internal
+    volumes:
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/admin/health')"]
+      test: ["CMD", "python", "-c", "import ssl,urllib.request; ctx=ssl.create_default_context(cafile='/etc/internal-tls/ca.crt'); ctx.load_cert_chain('/etc/internal-tls/kong-client.crt','/etc/internal-tls/kong-client.key'); urllib.request.urlopen('https://admin-service:8443/api/v1/admin/health',context=ctx,timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 10s
-
-  # ---------------------------------------------------------------------------
-  # TV2 – Webhook demo receiver (kept from TV1 for HMAC demo scripts)
-  # ---------------------------------------------------------------------------
-  webhook-demo:
-    <<: *readonly_runtime_hardening
-    image: python:3.13-alpine
-    command: python /app/receiver.py
-    environment:
-      WEBHOOK_SECRET: "${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}"
-      WEBHOOK_MAX_AGE_SECONDS: "300"
-    volumes:
-      - ../demo/webhook/receiver.py:/app/receiver.py:ro
-    networks:
-      - kong-webhook-internal
-    expose:
-      - "8080"
 
   # ---------------------------------------------------------------------------
   # TV2 – Keycloak Identity Provider
@@ -352,17 +290,21 @@ services:
           -e "s/[$$]{ADMIN_SERVICE_CLIENT_SECRET}/$$esc_admin/g" \
           "$$template" > "$$target"
 
-        exec /opt/keycloak/bin/kc.sh start-dev --import-realm
+        exec /opt/keycloak/bin/kc.sh start --import-realm --http-enabled=false --https-port=8443 --https-certificate-file=/etc/internal-tls/keycloak.crt --https-certificate-key-file=/etc/internal-tls/keycloak.key --hostname=https://localhost:8446 --hostname-strict=false
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
+      KC_HTTP_ENABLED: "false"
+      KC_HOSTNAME: "https://localhost:8446"
+      KC_HOSTNAME_STRICT: "false"
       BILLING_SERVICE_CLIENT_SECRET: "${BILLING_SERVICE_CLIENT_SECRET:?BILLING_SERVICE_CLIENT_SECRET is required}"
       ADMIN_SERVICE_CLIENT_SECRET: "${ADMIN_SERVICE_CLIENT_SECRET:?ADMIN_SERVICE_CLIENT_SECRET is required}"
     volumes:
       - ../idp/realm-export/topic10-realm.json:/opt/keycloak/data/import-template/topic10-sme-api-realm.json:ro
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     ports:
-      - "8080:8080"
+      - "8446:8443"
     networks:
       - default
       - user-identity-internal
@@ -370,7 +312,7 @@ services:
       - billing-identity-internal
       - admin-identity-internal
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1"]
+      test: ["CMD-SHELL", "/bin/bash -c \"cat < /dev/null > /dev/tcp/127.0.0.1/8443\" || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -381,10 +323,27 @@ services:
   # ---------------------------------------------------------------------------
   vault:
     image: hashicorp/vault:1.18
-    command: server -dev -dev-root-token-id=dev-root-token
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat >/tmp/vault.hcl <<'EOF'
+        disable_mlock = true
+        storage "file" { path = "/vault/file" }
+        listener "tcp" {
+          address = "0.0.0.0:8200"
+          tls_disable = 0
+          tls_cert_file = "/etc/internal-tls/vault.crt"
+          tls_key_file = "/etc/internal-tls/vault.key"
+        }
+        api_addr = "https://vault:8200"
+        EOF
+        exec vault server -config=/tmp/vault.hcl
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: dev-root-token
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "https://vault:8200"
+      VAULT_CACERT: "/etc/internal-tls/ca.crt"
+    volumes:
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     ports:
       - "8200:8200"
     networks:
@@ -392,7 +351,7 @@ services:
     cap_add:
       - IPC_LOCK
     healthcheck:
-      test: ["CMD", "vault", "status", "-address=http://localhost:8200"]
+      test: ["CMD", "vault", "status", "-address=https://vault:8200", "-ca-cert=/etc/internal-tls/ca.crt"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -402,6 +361,7 @@ services:
   # TV3 – Loki (log aggregation)
   # ---------------------------------------------------------------------------
   loki:
+    profiles: ["observability"]
     image: grafana/loki:3.2.0
     command: -config.file=/etc/loki/loki-config.yml
     volumes:
@@ -423,6 +383,7 @@ services:
       start_period: 15s
 
   alertmanager:
+    profiles: ["observability"]
     image: prom/alertmanager:v0.27.0
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
@@ -438,6 +399,7 @@ services:
   # TV3 – Promtail (log collector – reads Docker container logs)
   # ---------------------------------------------------------------------------
   promtail:
+    profiles: ["observability"]
     image: grafana/promtail:3.2.0
     command: -config.file=/etc/promtail/promtail-config.yml
     volumes:
@@ -453,6 +415,7 @@ services:
   # TV3 – Grafana (dashboard and alerting)
   # ---------------------------------------------------------------------------
   grafana:
+    profiles: ["observability"]
     image: grafana/grafana:11.3.0
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
@@ -476,6 +439,7 @@ services:
   # TV3 – Jaeger (distributed tracing backend + UI)
   # ---------------------------------------------------------------------------
   jaeger:
+    profiles: ["observability"]
     image: jaegertracing/all-in-one:latest
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
@@ -497,6 +461,7 @@ services:
   # TV3 – OpenTelemetry Collector
   # ---------------------------------------------------------------------------
   otel-collector:
+    profiles: ["observability"]
     <<: *readonly_runtime_hardening
     image: otel/opentelemetry-collector-contrib:0.104.0
     command: ["--config=/etc/otel/otel-collector.yml"]
@@ -514,6 +479,7 @@ volumes:
   loki-data:
   grafana-data:
 
+  vault-data:
 networks:
   default:
     name: infra_default
@@ -524,8 +490,6 @@ networks:
   kong-billing-internal:
     internal: true
   kong-admin-internal:
-    internal: true
-  kong-webhook-internal:
     internal: true
   user-identity-internal:
     internal: true

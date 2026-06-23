@@ -19,7 +19,7 @@ bash tests/security/network-egress-control-tests.sh
 | fixed metadata endpoint with metadata IP | HTTP `403` |
 | backend service networks | internal |
 | Billing and Order plaintext shared network | absent |
-| Billing to Order path | through `order-mtls-proxy` |
+| Billing to Order path | through `order-service` |
 | Admin to metadata target | unreachable in egress test |
 | Admin to public Internet target used by test | unreachable in egress test |
 | egress test summary | `27/27` assertions passed |

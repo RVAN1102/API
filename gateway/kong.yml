@@ -1,9 +1,9 @@
 _format_version: "3.0"
 _transform: true
 
-# Default Gateway-to-Backend mTLS runtime configuration.
-# Kong presents its internal client certificate to backend Nginx sidecars,
-# and verifies sidecar server certificates using the internal demo CA.
+# Default HTTPS/mTLS runtime configuration.
+# Kong presents its internal client certificate directly to backend services,
+# and verifies backend server certificates using the internal demo CA.
 
 # ---------------------------------------------------------------------------
 # Services (upstream backends)
@@ -12,7 +12,7 @@ _transform: true
 services:
   # User Service (FastAPI)
   - name: user-service
-    url: https://user-mtls-proxy:8443
+    url: https://user-service:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -40,7 +40,7 @@ services:
 
   # Order Service (FastAPI)
   - name: order-service
-    url: https://order-mtls-proxy:8443
+    url: https://order-service:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -58,7 +58,7 @@ services:
 
   # Billing Service (FastAPI)
   - name: billing-service
-    url: https://billing-mtls-proxy:8443
+    url: https://billing-service:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -81,7 +81,7 @@ services:
 
   # Admin Service (FastAPI)
   - name: admin-service
-    url: https://admin-mtls-proxy:8443
+    url: https://admin-service:8443
     connect_timeout: 3000
     read_timeout: 10000
     write_timeout: 10000
@@ -97,21 +97,6 @@ services:
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         strip_path: false
 
-  # Webhook demo receiver (HMAC demo)
-  # Billing service also handles /api/v1/webhooks/payment directly,
-  # but the standalone webhook-demo container is kept for HMAC demo scripts.
-  - name: webhook-demo
-    url: http://webhook-demo:8080
-    connect_timeout: 3000
-    read_timeout: 10000
-    write_timeout: 10000
-    retries: 2
-    routes:
-      - name: webhooks-api
-        paths: ["/api/v1/webhooks"]
-        methods: ["POST", "OPTIONS"]
-        strip_path: false
-
 # ---------------------------------------------------------------------------
 # Plugins (global unless route/service specified)
 # Gateway plugin configuration is managed as part of the edge security baseline.
@@ -120,9 +105,9 @@ plugins:
   - name: cors
     config:
       origins:
-        - http://localhost:3000
-        - http://localhost:3002
-        - http://localhost:5173
+        - https://localhost:3000
+        - https://localhost:3002
+        - https://localhost:5173
         - https://app.localhost
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
       headers:
@@ -263,7 +248,7 @@ plugins:
     route: billing-api
     config: *normal_rate_limit
   - name: rate-limiting
-    route: webhooks-api
+    route: billing-webhooks
     config: *normal_rate_limit
 
   - name: rate-limiting

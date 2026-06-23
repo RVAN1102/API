@@ -160,7 +160,7 @@ compose_cmd() {
 }
 
 print_gateway_diagnostics() {
-  local sidecar="${1:-user-mtls-proxy}"
+  local backend="${1:-user-service}"
   local service="${2:-user-service}"
 
   echo "[DIAG] docker compose ps" >&2
@@ -169,15 +169,15 @@ print_gateway_diagnostics() {
   echo "[DIAG] recent kong logs" >&2
   compose_cmd logs --no-color --tail=120 kong >&2 || true
 
-  echo "[DIAG] recent user-mtls-proxy logs" >&2
-  compose_cmd logs --no-color --tail=120 user-mtls-proxy >&2 || true
+  echo "[DIAG] recent user-service logs" >&2
+  compose_cmd logs --no-color --tail=120 user-service >&2 || true
 
   echo "[DIAG] recent user-service logs" >&2
   compose_cmd logs --no-color --tail=120 user-service >&2 || true
 
-  if [ "${sidecar}" != "user-mtls-proxy" ]; then
-    echo "[DIAG] recent ${sidecar} logs" >&2
-    compose_cmd logs --no-color --tail=120 "${sidecar}" >&2 || true
+  if [ "${backend}" != "user-service" ]; then
+    echo "[DIAG] recent ${backend} logs" >&2
+    compose_cmd logs --no-color --tail=120 "${backend}" >&2 || true
   fi
 
   if [ "${service}" != "user-service" ]; then
@@ -186,25 +186,25 @@ print_gateway_diagnostics() {
   fi
 }
 
-wait_for_sidecar_upstream() {
-  local sidecar="$1"
+wait_for_backend_upstream() {
+  local backend="$1"
   local service="$2"
   local health_path="$3"
-  local url="http://${service}:8000${health_path}"
+  local url="https://${service}:8443${health_path}"
 
   for attempt in $(seq 1 45); do
-    if compose_cmd exec -T "${sidecar}" getent hosts "${service}" >/dev/null 2>&1 \
-      && compose_cmd exec -T "${sidecar}" wget -qO- "${url}" >/dev/null 2>&1; then
-      echo "[INFO] ${sidecar} can resolve and reach ${url}"
+    if compose_cmd exec -T "${backend}" getent hosts "${service}" >/dev/null 2>&1 \
+      && compose_cmd exec -T "${backend}" wget --no-check-certificate -qO- "${url}" >/dev/null 2>&1; then
+      echo "[INFO] ${backend} can resolve and reach ${url}"
       return 0
     fi
 
-    echo "[INFO] Upstream readiness attempt ${attempt}/45 failed for ${sidecar} -> ${service}"
+    echo "[INFO] Upstream readiness attempt ${attempt}/45 failed for ${backend} -> ${service}"
     sleep 2
   done
 
-  echo "[ERROR] ${sidecar} could not resolve or reach ${url} after retries." >&2
-  print_gateway_diagnostics "${sidecar}" "${service}"
+  echo "[ERROR] ${backend} could not resolve or reach ${url} after retries." >&2
+  print_gateway_diagnostics "${backend}" "${service}"
   return 1
 }
 
@@ -232,17 +232,17 @@ prepare_gateway_upstreams() {
     billing-service \
     admin-service
 
-  echo "[INFO] Ensuring gateway-backend mTLS sidecars are running before Kong restart"
+  echo "[INFO] Ensuring gateway-backend mTLS backend services are running before Kong restart"
   compose_cmd up -d \
-    user-mtls-proxy \
-    order-mtls-proxy \
-    billing-mtls-proxy \
-    admin-mtls-proxy
+    user-service \
+    order-service \
+    billing-service \
+    admin-service
 
-  wait_for_sidecar_upstream user-mtls-proxy user-service /api/v1/users/health
-  wait_for_sidecar_upstream order-mtls-proxy order-service /api/v1/orders/health
-  wait_for_sidecar_upstream billing-mtls-proxy billing-service /api/v1/billing/health
-  wait_for_sidecar_upstream admin-mtls-proxy admin-service /api/v1/admin/health
+  wait_for_backend_upstream user-service user-service /api/v1/users/health
+  wait_for_backend_upstream order-service order-service /api/v1/orders/health
+  wait_for_backend_upstream billing-service billing-service /api/v1/billing/health
+  wait_for_backend_upstream admin-service admin-service /api/v1/admin/health
 }
 
 reset_kong_after_edge() {
@@ -316,7 +316,7 @@ wait_for_kong() {
   done
 
   echo "[FAIL] Kong readiness failed. Status sequence: ${statuses[*]}" >&2
-  print_gateway_diagnostics user-mtls-proxy user-service
+  print_gateway_diagnostics user-service user-service
   exit 1
 }
 
@@ -335,7 +335,7 @@ ensure_keycloak_ready() {
   for attempt in $(seq 1 60); do
     code="$(curl -sS -o /tmp/final-regression-keycloak-discovery.json -w '%{http_code}' \
       --max-time 5 \
-      "http://localhost:8080/realms/topic10-sme-api/.well-known/openid-configuration" 2>/dev/null || true)"
+      "https://localhost:8446/realms/topic10-sme-api/.well-known/openid-configuration" 2>/dev/null || true)"
     echo "[INFO] Keycloak discovery attempt ${attempt}/60: HTTP ${code}"
     if [ "${code}" = "200" ]; then
       echo "[INFO] Keycloak discovery is ready (HTTP 200)"
@@ -344,7 +344,7 @@ ensure_keycloak_ready() {
     sleep 5
   done
 
-  echo "[FAIL] Keycloak discovery did not become ready at http://localhost:8080" >&2
+  echo "[FAIL] Keycloak discovery did not become ready at https://localhost:8446" >&2
   docker compose -f "${compose_file}" ps keycloak >&2 || true
   docker compose -f "${compose_file}" logs --no-color --tail=120 keycloak >&2 || true
   return 1
@@ -380,17 +380,17 @@ ensure_gateway_backend_mtls_certs() {
   bash "${ensure_script}"
 }
 
-restart_gateway_backend_mtls_proxies() {
+restart_gateway_backend_services() {
   echo ""
-  echo "[INFO] Restarting gateway-backend mTLS sidecars after cert generation"
+  echo "[INFO] Restarting gateway-backend mTLS backend services after cert generation"
   if [ -f "${PROJECT_ROOT}/infra/docker-compose.yml" ]; then
     compose_cmd restart \
-      user-mtls-proxy \
-      order-mtls-proxy \
-      billing-mtls-proxy \
-      admin-mtls-proxy
+      user-service \
+      order-service \
+      billing-service \
+      admin-service
   else
-    echo "[INFO] infra/docker-compose.yml not available; skipping mTLS sidecar restart"
+    echo "[INFO] infra/docker-compose.yml not available; skipping mTLS backend restart"
   fi
 }
 
@@ -401,7 +401,7 @@ echo "=============================================="
 
 ensure_webhook_mtls_certs
 ensure_gateway_backend_mtls_certs
-restart_gateway_backend_mtls_proxies
+restart_gateway_backend_services
 reset_kong_at_start
 ensure_keycloak_ready
 

@@ -12,10 +12,18 @@
 
 set -euo pipefail
 
-KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+KEYCLOAK_CACERT="${KEYCLOAK_CACERT:-${PROJECT_ROOT}/infra/certs/gateway-backend/ca.crt}"
+CURL_TLS_ARGS=()
+if [ -s "${KEYCLOAK_CACERT}" ]; then
+  CURL_TLS_ARGS=(--cacert "${KEYCLOAK_CACERT}")
+fi
+
+
+KEYCLOAK_URL="${KEYCLOAK_URL:-https://localhost:8446}"
 REALM="topic10-sme-api"
 CLIENT_ID="sme-web-client"
-REDIRECT_URI="http://localhost:5173/callback"
+REDIRECT_URI="https://localhost:5173/callback"
 
 ACTION="${1:-url}"
 
@@ -66,7 +74,7 @@ print(challenge)
     fi
     TOKEN_URL="${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token"
     echo "=== Exchanging authorization code for tokens ==="
-    RESPONSE=$(curl -sf -X POST "${TOKEN_URL}" \
+    RESPONSE=$(curl "${CURL_TLS_ARGS[@]}" -sf -X POST "${TOKEN_URL}" \
       -H "Content-Type: application/x-www-form-urlencoded" \
       -d "grant_type=authorization_code" \
       -d "client_id=${CLIENT_ID}" \

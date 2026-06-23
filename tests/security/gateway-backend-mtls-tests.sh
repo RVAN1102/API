@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Runtime evidence for default Gateway-to-Backend mTLS sidecar enforcement.
+# Runtime evidence for default Gateway-to-Backend direct HTTPS/mTLS enforcement.
 #
 # The test starts the default compose stack, verifies that normal Kong routes
-# work through the mTLS sidecars, and verifies that backend sidecar proxies
+# work through direct HTTPS/mTLS upstreams, and verifies that backend HTTPS/mTLS listeners
 # reject TLS callers that do not present Kong's client certificate.
 
 set -euo pipefail
@@ -88,10 +88,10 @@ assert_kong_has_openssl() {
 
 proxy_health_path() {
   case "$1" in
-    user-mtls-proxy) echo "/api/v1/users/health" ;;
-    order-mtls-proxy) echo "/api/v1/orders/health" ;;
-    billing-mtls-proxy) echo "/api/v1/billing/health" ;;
-    admin-mtls-proxy) echo "/api/v1/admin/health" ;;
+    user-service) echo "/api/v1/users/health" ;;
+    order-service) echo "/api/v1/orders/health" ;;
+    billing-service) echo "/api/v1/billing/health" ;;
+    admin-service) echo "/api/v1/admin/health" ;;
     *) echo "/health" ;;
   esac
 }
@@ -190,27 +190,27 @@ bash "${REPO_ROOT}/demo/mtls/ensure-gateway-backend-certs.sh"
 
 compose up -d --build
 
-wait_http_200 "https://localhost:8443/api/v1/users/health" "Kong -> user via mTLS sidecar"
-wait_http_200 "https://localhost:8443/api/v1/orders/health" "Kong -> order via mTLS sidecar"
-wait_http_200 "https://localhost:8443/api/v1/billing/health" "Kong -> billing via mTLS sidecar"
-wait_http_200 "https://localhost:8443/api/v1/admin/health" "Kong -> admin via mTLS sidecar"
+wait_http_200 "https://localhost:8443/api/v1/users/health" "Kong -> user via direct HTTPS/mTLS"
+wait_http_200 "https://localhost:8443/api/v1/orders/health" "Kong -> order via direct HTTPS/mTLS"
+wait_http_200 "https://localhost:8443/api/v1/billing/health" "Kong -> billing via direct HTTPS/mTLS"
+wait_http_200 "https://localhost:8443/api/v1/admin/health" "Kong -> admin via direct HTTPS/mTLS"
 
 assert_kong_has_openssl
 
-assert_proxy_rejects_no_client_cert "user-mtls-proxy"
-assert_proxy_rejects_no_client_cert "order-mtls-proxy"
-assert_proxy_rejects_no_client_cert "billing-mtls-proxy"
-assert_proxy_rejects_no_client_cert "admin-mtls-proxy"
+assert_proxy_rejects_no_client_cert "user-service"
+assert_proxy_rejects_no_client_cert "order-service"
+assert_proxy_rejects_no_client_cert "billing-service"
+assert_proxy_rejects_no_client_cert "admin-service"
 
-assert_proxy_rejects_wrong_client_cert "user-mtls-proxy"
-assert_proxy_rejects_wrong_client_cert "order-mtls-proxy"
-assert_proxy_rejects_wrong_client_cert "billing-mtls-proxy"
-assert_proxy_rejects_wrong_client_cert "admin-mtls-proxy"
+assert_proxy_rejects_wrong_client_cert "user-service"
+assert_proxy_rejects_wrong_client_cert "order-service"
+assert_proxy_rejects_wrong_client_cert "billing-service"
+assert_proxy_rejects_wrong_client_cert "admin-service"
 
-assert_proxy_accepts_kong_client_cert "user-mtls-proxy" "/api/v1/users/health"
-assert_proxy_accepts_kong_client_cert "order-mtls-proxy" "/api/v1/orders/health"
-assert_proxy_accepts_kong_client_cert "billing-mtls-proxy" "/api/v1/billing/health"
-assert_proxy_accepts_kong_client_cert "admin-mtls-proxy" "/api/v1/admin/health"
+assert_proxy_accepts_kong_client_cert "user-service" "/api/v1/users/health"
+assert_proxy_accepts_kong_client_cert "order-service" "/api/v1/orders/health"
+assert_proxy_accepts_kong_client_cert "billing-service" "/api/v1/billing/health"
+assert_proxy_accepts_kong_client_cert "admin-service" "/api/v1/admin/health"
 
 echo
 echo "[OK] Gateway-to-Backend mTLS runtime profile passed"
