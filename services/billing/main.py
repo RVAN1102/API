@@ -41,8 +41,8 @@ from redis.exceptions import RedisError
 # ---------------------------------------------------------------------------
 WEBHOOK_SECRET: str = os.environ.get("WEBHOOK_SECRET", "")
 WEBHOOK_MAX_AGE_SECONDS: int = int(os.environ.get("WEBHOOK_MAX_AGE_SECONDS", "300"))
-WEBHOOK_NONCE_STORE: str = os.environ.get("WEBHOOK_NONCE_STORE", "redis").lower()
-WEBHOOK_NONCE_REDIS_URL: str = os.environ.get("WEBHOOK_NONCE_REDIS_URL", "redis://redis:6379/0")
+WEBHOOK_NONCE_STORE: str = os.environ.get("WEBHOOK_NONCE_STORE", "memory").lower()
+WEBHOOK_NONCE_REDIS_URL: str = os.environ.get("WEBHOOK_NONCE_REDIS_URL", "rediss://redis:6379/0")
 WEBHOOK_NONCE_TTL_SECONDS: int = max(
     int(os.environ.get("WEBHOOK_NONCE_TTL_SECONDS", str(WEBHOOK_MAX_AGE_SECONDS))),
     WEBHOOK_MAX_AGE_SECONDS,
@@ -59,19 +59,20 @@ WEBHOOK_MTLS_REQUIRED: bool = os.environ.get("WEBHOOK_MTLS_REQUIRED", "true").lo
 WEBHOOK_MTLS_HEADER: str = "X-Mtls-Client-Verified"
 WEBHOOK_MTLS_SUCCESS_VALUE: str = "SUCCESS"
 
-KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
+KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "https://keycloak:8443")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 TOKEN_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
-ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "https://order-mtls-proxy:8443").rstrip("/")
-ORDER_SERVICE_TLS_CA_CERT: str = os.environ.get("ORDER_SERVICE_TLS_CA_CERT", "/etc/s2s-mtls/ca.crt")
-ORDER_SERVICE_TLS_CLIENT_CERT: str = os.environ.get("ORDER_SERVICE_TLS_CLIENT_CERT", "/etc/s2s-mtls/billing-client.crt")
-ORDER_SERVICE_TLS_CLIENT_KEY: str = os.environ.get("ORDER_SERVICE_TLS_CLIENT_KEY", "/etc/s2s-mtls/billing-client.key")
+ORDER_SERVICE_URL: str = os.environ.get("ORDER_SERVICE_URL", "https://order-service:8443").rstrip("/")
+ORDER_SERVICE_TLS_CA_CERT: str = os.environ.get("ORDER_SERVICE_TLS_CA_CERT", "/etc/internal-tls/ca.crt")
+ORDER_SERVICE_TLS_CLIENT_CERT: str = os.environ.get("ORDER_SERVICE_TLS_CLIENT_CERT", "/etc/internal-tls/billing-client.crt")
+ORDER_SERVICE_TLS_CLIENT_KEY: str = os.environ.get("ORDER_SERVICE_TLS_CLIENT_KEY", "/etc/internal-tls/billing-client.key")
 BILLING_SERVICE_CLIENT_ID: str = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
 BILLING_SERVICE_CLIENT_SECRET: str = os.environ.get("BILLING_SERVICE_CLIENT_SECRET", "")
-OPA_URL: str = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_URL: str = os.environ.get("OPA_URL", "https://opa:8181").rstrip("/")
 OPA_ALLOW_URL: str = f"{OPA_URL}/v1/data/topic10/authz/allow"
+INTERNAL_TLS_CA_CERT: str = os.environ.get("INTERNAL_TLS_CA_CERT", "/etc/internal-tls/ca.crt")
 ALLOWED_HUMAN_CLIENT_IDS = {"sme-web-client", "sme-lab-automation-client"}
 
 # ---------------------------------------------------------------------------
@@ -130,14 +131,23 @@ _checkout_idempotency_records: Dict[str, Dict[str, Any]] = {}
 _checkout_order_records: Dict[str, Dict[str, Any]] = {}
 _redis_client: Optional[redis.Redis] = None
 if WEBHOOK_NONCE_STORE == "redis":
-    _redis_client = redis.from_url(
-        WEBHOOK_NONCE_REDIS_URL,
-        decode_responses=True,
-        socket_connect_timeout=2,
-        socket_timeout=2,
-    )
+    redis_kwargs = {
+        "decode_responses": True,
+        "socket_connect_timeout": 2,
+        "socket_timeout": 2,
+    }
+    if WEBHOOK_NONCE_REDIS_URL.startswith("rediss://") and Path(INTERNAL_TLS_CA_CERT).is_file():
+        redis_kwargs["ssl_ca_certs"] = INTERNAL_TLS_CA_CERT
+    _redis_client = redis.from_url(WEBHOOK_NONCE_REDIS_URL, **redis_kwargs)
 
 security = HTTPBearer(auto_error=True)
+
+def _internal_tls_verify(url: str):
+    parsed = urlparse(url)
+    if parsed.scheme == "https" and Path(INTERNAL_TLS_CA_CERT).is_file():
+        return INTERNAL_TLS_CA_CERT
+    return True
+
 _jwks_cache: Optional[Dict[str, Any]] = None
 
 ROLE_USER = "user"
@@ -245,7 +255,7 @@ async def _fetch_jwks() -> Dict[str, Any]:
     if _jwks_cache is not None:
         return _jwks_cache
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(JWKS_URL)) as client:
             response = await client.get(JWKS_URL)
             response.raise_for_status()
             _jwks_cache = response.json()
@@ -384,7 +394,7 @@ def _subject_type(payload: Dict[str, Any]) -> str:
 
 async def require_opa_allow(input_data: Dict[str, Any]) -> None:
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
+        async with httpx.AsyncClient(timeout=2.0, verify=_internal_tls_verify(OPA_ALLOW_URL)) as client:
             response = await client.post(OPA_ALLOW_URL, json={"input": input_data})
     except (httpx.HTTPError, OSError, ssl.SSLError, ValueError):
         raise HTTPException(
@@ -491,7 +501,7 @@ async def obtain_billing_service_token() -> str:
         )
 
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(TOKEN_URL)) as client:
             response = await client.post(
                 TOKEN_URL,
                 data={

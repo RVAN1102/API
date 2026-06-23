@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import os
 import logging
+from pathlib import Path
+from urllib.parse import urlparse
 from typing import Any, Dict, List, Optional, Set
 
 import httpx
@@ -22,10 +24,11 @@ from jose.utils import base64url_decode
 # ---------------------------------------------------------------------------
 # Configuration (read from environment; defaults work for Docker Compose)
 # ---------------------------------------------------------------------------
-KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
+KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "https://keycloak:8443")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 EXPECTED_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+INTERNAL_TLS_CA_CERT: str = os.environ.get("INTERNAL_TLS_CA_CERT", "/etc/internal-tls/ca.crt")
 ALLOWED_HUMAN_CLIENT_IDS = {"sme-web-client", "sme-lab-automation-client"}
 
 # In-memory JWKS cache (simple; refreshed on each startup or on key-not-found)
@@ -34,6 +37,12 @@ _jwks_cache: Optional[Dict[str, Any]] = None
 logger = logging.getLogger("user-service")
 
 security = HTTPBearer(auto_error=True)
+
+def _internal_tls_verify(url: str):
+    parsed = urlparse(url)
+    if parsed.scheme == "https" and Path(INTERNAL_TLS_CA_CERT).is_file():
+        return INTERNAL_TLS_CA_CERT
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -46,7 +55,7 @@ async def _fetch_jwks() -> Dict[str, Any]:
     if _jwks_cache is not None:
         return _jwks_cache
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(JWKS_URL)) as client:
             response = await client.get(JWKS_URL)
             response.raise_for_status()
             _jwks_cache = response.json()

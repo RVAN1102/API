@@ -49,3 +49,4 @@ grafana-data/
 # Local review/package archives
 *.tgz
 phase1-review-pack.tgz
+infra/.vault-init.json

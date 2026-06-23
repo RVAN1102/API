@@ -5,8 +5,16 @@
 
 set -euo pipefail
 
-KEYCLOAK_BASE_URL="${KEYCLOAK_BASE_URL:-${KEYCLOAK_URL:-http://localhost:8080}}"
+KEYCLOAK_BASE_URL="${KEYCLOAK_BASE_URL:-${KEYCLOAK_URL:-https://localhost:8446}}"
 KEYCLOAK_REALM="${KEYCLOAK_REALM:-topic10-sme-api}"
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+KEYCLOAK_CACERT="${KEYCLOAK_CACERT:-${PROJECT_ROOT}/infra/certs/gateway-backend/ca.crt}"
+CURL_TLS_ARGS=()
+if [ -s "${KEYCLOAK_CACERT}" ]; then
+  CURL_TLS_ARGS=(--cacert "${KEYCLOAK_CACERT}")
+fi
+
 CLIENT_ID="${REVOCATION_CLIENT_ID:-${SERVICE_CLIENT_ID:-${BILLING_SERVICE_CLIENT_ID:-billing-service-client}}}"
 CLIENT_SECRET="${REVOCATION_CLIENT_SECRET:-${SERVICE_CLIENT_SECRET:-${BILLING_SERVICE_CLIENT_SECRET:-}}}"
 TOKEN_FILE="${TOKEN_FILE:-${ACCESS_TOKEN_FILE:-/tmp/service-token.txt}}"
@@ -58,7 +66,7 @@ if [ -n "${CANONICAL_HOST}" ]; then
 fi
 
 CURL_EXIT=0
-HTTP_STATUS="$(curl -sS -o "${RESPONSE_FILE}" -w "%{http_code}" -X POST "${REVOKE_URL}" \
+HTTP_STATUS="$(curl "${CURL_TLS_ARGS[@]}" -sS -o "${RESPONSE_FILE}" -w "%{http_code}" -X POST "${REVOKE_URL}" \
   "${HOST_HEADER[@]}" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "token@${TOKEN_FILE}" \

@@ -93,7 +93,7 @@ ORDERS: Dict[str, Dict[str, Any]] = {
 }
 
 BILLING_SERVICE_CLIENT_ID = os.environ.get("BILLING_SERVICE_CLIENT_ID", "billing-service-client")
-OPA_URL = os.environ.get("OPA_URL", "http://opa:8181").rstrip("/")
+OPA_URL = os.environ.get("OPA_URL", "https://opa:8181").rstrip("/")
 OPA_ALLOW_URL = f"{OPA_URL}/v1/data/topic10/authz/allow"
 
 

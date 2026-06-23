@@ -12,7 +12,7 @@
 # Requirements:
 #   - Docker running
 #   - Kong Gateway running at https://localhost:8443
-#   - Keycloak running at http://localhost:8080
+#   - Keycloak running at https://localhost:8446
 #
 # Environment variables (optional):
 #   BASE_URL      – Target URL (default: https://localhost:8443)
@@ -31,7 +31,7 @@ BASE_URL="${BASE_URL:-https://localhost:8443}"
 CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
 
 curl() { command curl ${CURL_TLS_OPTS} "$@"; }
-KC_URL="${KC_URL:-http://localhost:8080}"
+KC_URL="${KC_URL:-https://localhost:8446}"
 ZAP_API_KEY="${ZAP_API_KEY:-tv3-zap-api-key}"
 REPORT_DIR="${REPORT_DIR:-.artifacts/test-runs/tv3/zap}"
 LOG_FILE="${REPORT_DIR}/zap-active-run.log"

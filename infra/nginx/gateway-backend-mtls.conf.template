@@ -22,7 +22,12 @@ server {
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-For 127.0.0.1;
         proxy_set_header X-Gateway-Backend-MTLS verified;
-        set $upstream_backend http://${UPSTREAM_HOST}:8000;
+        set $upstream_backend https://${UPSTREAM_HOST}:8443;
+        proxy_ssl_server_name on;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/nginx/certs/ca.crt;
+        proxy_ssl_certificate /etc/nginx/certs/kong-client.crt;
+        proxy_ssl_certificate_key /etc/nginx/certs/kong-client.key;
         proxy_pass $upstream_backend;
     }
 }

@@ -18,7 +18,7 @@ Browser / SPA                  Kong Gateway           Keycloak IdP
      |                              |                      |
      |  2. GET /auth?client_id=sme-web-client              |
      |         &response_type=code                         |
-     |         &redirect_uri=http://localhost:5173/callback|
+     |         &redirect_uri=https://localhost:5173/callback|
      |         &scope=openid profile email                 |
      |         &code_challenge=<B64URL(SHA256(verifier))>  |
      |         &code_challenge_method=S256  ───────────────>|
@@ -52,7 +52,7 @@ Browser / SPA                  Kong Gateway           Keycloak IdP
 |------------------------|-----------------------------------------------|
 | `client_id`            | `sme-web-client`                              |
 | `response_type`        | `code`                                        |
-| `redirect_uri`         | `http://localhost:5173/callback`              |
+| `redirect_uri`         | `https://localhost:5173/callback`              |
 | `scope`                | `openid profile email`                        |
 | `code_challenge_method`| `S256`                                        |
 | `code_challenge`       | `BASE64URL(SHA256(code_verifier))`            |
@@ -86,7 +86,7 @@ curl -s -X POST \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=authorization_code" \
   -d "client_id=sme-web-client" \
-  -d "redirect_uri=http://localhost:5173/callback" \
+  -d "redirect_uri=https://localhost:5173/callback" \
   -d "code=<AUTHORIZATION_CODE>" \
   -d "code_verifier=<CODE_VERIFIER>"
 ```

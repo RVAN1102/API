@@ -3,7 +3,7 @@
 
 set -eu
 
-KEYCLOAK_BASE_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-http://localhost:8080}}"
+KEYCLOAK_BASE_URL="${RESTLER_KEYCLOAK_BASE_URL:-${KEYCLOAK_BASE_URL:-https://localhost:8446}}"
 KEYCLOAK_REALM="${KEYCLOAK_REALM:-topic10-sme-api}"
 RESTLER_AUTH_CLIENT_ID="${RESTLER_AUTH_CLIENT_ID:-sme-lab-automation-client}"
 RESTLER_AUTH_USERNAME="${RESTLER_AUTH_USERNAME:-ci-alice}"
@@ -28,7 +28,7 @@ import sys
 import urllib.parse
 import urllib.request
 
-base_url = os.environ.get("KEYCLOAK_BASE_URL", "http://localhost:8080").rstrip("/")
+base_url = os.environ.get("KEYCLOAK_BASE_URL", "https://localhost:8446").rstrip("/")
 realm = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 client_id = os.environ.get("RESTLER_AUTH_CLIENT_ID", "sme-lab-automation-client")
 username = os.environ.get("RESTLER_AUTH_USERNAME", "ci-alice")

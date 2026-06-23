@@ -9,7 +9,7 @@
 #
 # Environment:
 #   BASE_URL      – default: https://localhost:8443
-#   KEYCLOAK_URL  – default: http://localhost:8080
+#   KEYCLOAK_URL  – default: https://localhost:8446
 #   REALM         – default: topic10-sme-api
 
 set -euo pipefail
@@ -18,7 +18,7 @@ BASE_URL="${BASE_URL:-https://localhost:8443}"
 CURL_TLS_OPTS="${CURL_TLS_OPTS:---insecure}"
 
 curl() { command curl ${CURL_TLS_OPTS} "$@"; }
-KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
+KEYCLOAK_URL="${KEYCLOAK_URL:-https://localhost:8446}"
 REALM="${REALM:-topic10-sme-api}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"

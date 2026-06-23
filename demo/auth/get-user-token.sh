@@ -8,13 +8,21 @@
 #   bash demo/auth/get-user-token.sh [alice|bob|admin01|ci-alice|ci-bob]
 #
 # Environment variables:
-#   KEYCLOAK_URL   – default: http://localhost:8080
+#   KEYCLOAK_URL   – default: https://localhost:8446
 #   USERNAME       – default: alice
 #   PASSWORD       – default: mapped demo/dev password
 
 set -euo pipefail
 
-KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+KEYCLOAK_CACERT="${KEYCLOAK_CACERT:-${PROJECT_ROOT}/infra/certs/gateway-backend/ca.crt}"
+CURL_TLS_ARGS=()
+if [ -s "${KEYCLOAK_CACERT}" ]; then
+  CURL_TLS_ARGS=(--cacert "${KEYCLOAK_CACERT}")
+fi
+
+
+KEYCLOAK_URL="${KEYCLOAK_URL:-https://localhost:8446}"
 REALM="topic10-sme-api"
 CLIENT_ID="sme-lab-automation-client"
 USERNAME="${1:-${USERNAME:-alice}}"
@@ -47,7 +55,7 @@ echo "Flow: local demo/dev automation helper; public clients should use PKCE."
 echo ""
 
 CURL_EXIT=0
-HTTP_STATUS="$(curl -sS -o "${RESPONSE_FILE}" -w "%{http_code}" -X POST "${TOKEN_URL}" \
+HTTP_STATUS="$(curl "${CURL_TLS_ARGS[@]}" -sS -o "${RESPONSE_FILE}" -w "%{http_code}" -X POST "${TOKEN_URL}" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=password" \
   -d "client_id=${CLIENT_ID}" \

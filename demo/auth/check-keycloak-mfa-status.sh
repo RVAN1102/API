@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-KC_BASE="${KC_BASE:-http://localhost:8080}"
+KC_BASE="${KC_BASE:-https://localhost:8446}"
 MASTER_REALM="${MASTER_REALM:-master}"
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+KEYCLOAK_CACERT="${KEYCLOAK_CACERT:-${PROJECT_ROOT}/infra/certs/gateway-backend/ca.crt}"
+CURL_TLS_ARGS=()
+if [ -s "${KEYCLOAK_CACERT}" ]; then
+  CURL_TLS_ARGS=(--cacert "${KEYCLOAK_CACERT}")
+fi
+
 KC_REALM="${KC_REALM:-topic10-sme-api}"
 KC_ADMIN_USER="${KC_ADMIN_USER:-admin}"
 KC_ADMIN_PASSWORD="${KC_ADMIN_PASSWORD:-admin}"
@@ -14,7 +22,7 @@ else
 fi
 
 TOKEN_JSON="$(mktemp)"
-curl -fsS -X POST "${KC_BASE}/realms/${MASTER_REALM}/protocol/openid-connect/token" \
+curl "${CURL_TLS_ARGS[@]}" -fsS -X POST "${KC_BASE}/realms/${MASTER_REALM}/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "client_id=admin-cli" \
   -d "username=${KC_ADMIN_USER}" \
@@ -26,7 +34,7 @@ ADMIN_TOKEN="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["
 for USERNAME in "${USERS[@]}"; do
   USER_JSON="$(mktemp)"
 
-  curl -fsS \
+  curl "${CURL_TLS_ARGS[@]}" -fsS \
     -H "Authorization: Bearer ${ADMIN_TOKEN}" \
     "${KC_BASE}/admin/realms/${KC_REALM}/users?username=${USERNAME}&exact=true" \
     > "$USER_JSON"

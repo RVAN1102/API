@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv3/metrics"
-VAULT_ADDR="${VAULT_ADDR:-http://localhost:8200}"
+VAULT_ADDR="${VAULT_ADDR:-https://localhost:8200}"
 VAULT_TOKEN="${VAULT_TOKEN:-dev-root-token}"
 SAMPLES="${SAMPLES:-30}"
 CSV_FILE="${EVIDENCE_DIR}/vault-kms-overhead.csv"

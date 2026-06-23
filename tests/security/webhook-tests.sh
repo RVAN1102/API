@@ -122,8 +122,8 @@ wait_for_kong() {
   (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml ps) >&2 || true
   echo "[DIAG] recent kong logs" >&2
   (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 kong) >&2 || true
-  echo "[DIAG] recent user-mtls-proxy logs" >&2
-  (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 user-mtls-proxy) >&2 || true
+  echo "[DIAG] recent user-service logs" >&2
+  (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 user-service) >&2 || true
   echo "[DIAG] recent user-service logs" >&2
   (cd "${REPO_ROOT}" && docker compose -f infra/docker-compose.yml logs --no-color --tail=120 user-service) >&2 || true
   die "Kong did not return HTTP 200 from ${health_url} within 60s."

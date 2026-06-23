@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import logging
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
@@ -17,12 +18,13 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwk, jwt
 
-KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "http://keycloak:8080")
+KEYCLOAK_URL: str = os.environ.get("KEYCLOAK_URL", "https://keycloak:8443")
 KEYCLOAK_REALM: str = os.environ.get("KEYCLOAK_REALM", "topic10-sme-api")
 KEYCLOAK_ISSUER: str = os.environ.get("KEYCLOAK_ISSUER", f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}")
 EXPECTED_ISSUER: str = KEYCLOAK_ISSUER
 JWKS_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 INTROSPECTION_URL: str = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
+INTERNAL_TLS_CA_CERT: str = os.environ.get("INTERNAL_TLS_CA_CERT", "/etc/internal-tls/ca.crt")
 TOKEN_INTROSPECTION_ENABLED: bool = (
     os.environ.get("TOKEN_INTROSPECTION_ENABLED", "false").lower() == "true"
 )
@@ -47,13 +49,19 @@ logger = logging.getLogger("order-service")
 
 security = HTTPBearer(auto_error=True)
 
+def _internal_tls_verify(url: str):
+    parsed = urlparse(url)
+    if parsed.scheme == "https" and Path(INTERNAL_TLS_CA_CERT).is_file():
+        return INTERNAL_TLS_CA_CERT
+    return True
+
 
 async def _fetch_jwks() -> Dict[str, Any]:
     global _jwks_cache
     if _jwks_cache is not None:
         return _jwks_cache
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(JWKS_URL)) as client:
             response = await client.get(JWKS_URL)
             response.raise_for_status()
             _jwks_cache = response.json()
@@ -184,7 +192,7 @@ async def require_introspection_active(token: str) -> None:
         raise _introspection_failed_exception()
 
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, verify=_internal_tls_verify(INTROSPECTION_URL)) as client:
             response = await client.post(
                 INTROSPECTION_URL,
                 data={

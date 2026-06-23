@@ -1,22 +1,23 @@
 ============================================================
 Docker Network Egress Control Runtime Evidence
-Date: 2026-06-21T18:33:50Z
+Date: 2026-06-23T10:51:08Z
 Compose file: /home/rvan1102/API/infra/docker-compose.yml
 Evidence file: /home/rvan1102/API/docs/evidence/tv1/ssrf-egress/network-egress-control-runtime-after-fix.txt
 ============================================================
 
-[PASS] kong container is running (4abde650470032a6139bd61aec3003a8ee1209877bd8a4913eeeb246d6e967bc)
-[PASS] user-service container is running (84be003c16c536da2f60e45f257f1c65329ce0bb8781284f7a1d03a3aa4687ae)
-[PASS] order-service container is running (601c4bdff3d0c4e3eb9d0ba351d31fa38ba091439dfd58aa1e410b48e1363639)
-[PASS] order-mtls-proxy container is running (0189f315d8bb0091625a1f097822cedc5d132c5ef7c4b7e3625a67a85e65909c)
-[PASS] billing-service container is running (cc2548c2029ceb69b8c06031884f4ce59a5950c4e56f0b12da469c0189126160)
-[PASS] admin-service container is running (2dc8c396096f5a0f21be71301852411c1aedef9615b3bdff33390440a767ef66)
-[PASS] keycloak container is running (bb41cc5c7824c299d1b4acfa9ddd94059fdda6288ac22d0fe4eaec0bba16614a)
-[PASS] opa container is running (502dcb585473434e176bc0cdffedd738a1a5bcbec8bf63f3709de0ca90bdf313)
+[PASS] kong container is running (2d20305fc69a6cade385b7fc1f6704be21619f9b180dff0576b78bf7ce752355)
+[PASS] user-service container is running (684cc8bb4e41a79ecbd6632082ec4f26c0afc53ee27218dd7dada2cda5081416)
+[PASS] order-service container is running (333aefdd198e4f2b961a0eb0b0690725b097c7a782e47b2910d040d467b2cd96)
+[PASS] order-service container is running (333aefdd198e4f2b961a0eb0b0690725b097c7a782e47b2910d040d467b2cd96)
+[PASS] billing-service container is running (7e0e1a2e43f233648003b6dc5adba175efe0dd86fc5c0f11db33a1f4854c5881)
+[PASS] admin-service container is running (4caecada3b3c3f7f07cc1d776a33bc1df33138c118630bd412e659aa7bc0af06)
+[PASS] keycloak container is running (be81245759e0b5e2ee716108b3a3052b959e825b9e9afbf7cac78c5cd0e1bbf1)
+[PASS] opa container is running (877ce4d5523856a433ca7e6320739b2b7d4f52e5ae1d0e9179edc7a83b92e56f)
 
 ===== Backend network isolation =====
 [PASS] user-service network infra_kong-user-internal is internal=true
 [PASS] user-service network infra_user-identity-internal is internal=true
+[PASS] order-service network infra_billing-order-mtls-internal is internal=true
 [PASS] order-service network infra_kong-order-internal is internal=true
 [PASS] order-service network infra_order-identity-internal is internal=true
 [PASS] order-service network infra_order-policy-internal is internal=true
@@ -28,9 +29,9 @@ Evidence file: /home/rvan1102/API/docs/evidence/tv1/ssrf-egress/network-egress-c
 [PASS] admin-service network infra_admin-identity-internal is internal=true
 [PASS] admin-service network infra_admin-policy-internal is internal=true
 [PASS] admin-service network infra_kong-admin-internal is internal=true
-[PASS] billing-service and order-service do not share a plaintext Docker network
-[PASS] billing-service reaches order-mtls-proxy only through billing-order-mtls-internal
-[PASS] order-mtls-proxy reaches order-service through kong-order-internal
+[PASS] billing-service and order-service share only approved direct HTTPS/mTLS network(s)
+[PASS] billing-service reaches order-service only through billing-order-mtls-internal
+[PASS] kong reaches order-service through kong-order-internal
 
 ===== Direct egress probes from admin-service =====
 cloud metadata 169.254.169.254 probe result: {"reachable": false, "error_type": "URLError", "error": "<urlopen error [Errno 101] Network is unreachable>"}
@@ -39,9 +40,9 @@ public Internet https://example.com probe result: {"reachable": false, "error_ty
 [PASS] admin-service cannot directly reach public Internet https://example.com
 
 ===== Approved internal service-to-service probe =====
-billing-service -> order-mtls-proxy probe result: {"reachable": true, "status": 200, "body": "{\"status\":\"ok\",\"service\":\"order-service\"}"}
-[PASS] billing-service can reach order-service only through the approved mTLS sidecar path
+billing-service -> order-service probe result: {"reachable": true, "status": 200, "body": "{\"status\":\"ok\",\"service\":\"order-service\"}"}
+[PASS] billing-service can reach order-service only through the approved direct HTTPS/mTLS network
 
 ============================================================
-Summary: 27/27 assertions passed, 0 failed
+Summary: 28/28 assertions passed, 0 failed
 ============================================================
