@@ -8,35 +8,33 @@ The public application API is exposed only through Kong:
 https://localhost:8443
 ```
 
-Backend application containers expose ports only inside Docker networks. Users
-and tests should not call backend service containers directly.
+Backend application containers expose port `8443` only inside Docker networks.
+Users and tests should not call backend service containers directly.
 
-## Compose Services
-
-`docker compose -f infra/docker-compose.yml config --services` renders:
+## Runtime Flow
 
 ```text
-loki
-promtail
-user-service
-user-service
-opa
-order-service
-admin-service
-redis
-billing-service
-billing-service
-admin-service
-order-service
-kong
-vault
-webhook-demo
-alertmanager
-jaeger
-otel-collector
-grafana
-keycloak
+client or test runner
+    |
+    | HTTPS
+    v
+Kong API Gateway :8443
+    |
+    | direct HTTPS/mTLS
+    v
+User, Order, Billing, Admin FastAPI services :8443
 ```
+
+Kong runs in DB-less mode from `gateway/kong.yml`. It terminates the public
+HTTPS listener, applies edge controls, and routes to direct HTTPS/mTLS
+upstreams:
+
+| Upstream | Kong target |
+|---|---|
+| User | `https://user-service:8443` |
+| Order | `https://order-service:8443` |
+| Billing | `https://billing-service:8443` |
+| Admin | `https://admin-service:8443` |
 
 ## Application Services
 
@@ -47,48 +45,44 @@ keycloak
 | Billing | `/api/v1/billing/*`, `/api/v1/webhooks/payment` | checkout, Order ownership verification, signed webhook handling |
 | Admin | `/api/v1/admin/*` | maintenance and SSRF demonstration/fixed metadata fetch endpoints |
 
-## Gateway
-
-Kong runs in DB-less mode from `gateway/kong.yml`. It terminates the public TLS
-listener, applies edge controls, and routes to direct HTTPS/mTLS upstreams:
-
-| Upstream | Kong target |
-|---|---|
-| User | `https://user-service:8443` |
-| Order | `https://order-service:8443` |
-| Billing | `https://billing-service:8443` |
-| Admin | `https://admin-service:8443` |
-| Webhook demo container | Docker-internal `webhook-demo:8080` |
+Each FastAPI service runs uvicorn with its own service certificate, private key,
+trusted CA, and required client certificate validation on port `8443`.
 
 ## Supporting Services
 
-| Component | Purpose |
-|---|---|
-| Keycloak | local OIDC issuer, realm roles, human users, service clients |
-| OPA | selected policy decisions for service authorization |
-| Redis | webhook nonce TTL storage |
-| Vault | local dev-mode secret workflow surface |
-| Loki, Promtail, Alertmanager, Grafana | local logs, alerts, dashboards |
-| Jaeger, OpenTelemetry Collector | local tracing |
+| Component | Runtime endpoint | Purpose |
+|---|---|---|
+| Keycloak | `https://keycloak:8443` internal, `https://localhost:8446` local host access | OIDC issuer, realm roles, human users, service clients |
+| OPA | `https://opa:8181` | selected policy decisions for service authorization |
+| Redis | Docker-internal | webhook nonce TTL storage when enabled |
+| Vault | `https://vault:8200` | local dev-mode secret workflow surface |
+| Loki, Promtail, Alertmanager, Grafana | local observability profile | logs, alerts, dashboards |
+| Jaeger, OpenTelemetry Collector | local observability profile | tracing |
 
-## Local Control Plane
+The expected JWT issuer is:
 
-These endpoints are not public application APIs:
+```text
+https://localhost:8446/realms/topic10-sme-api
+```
 
-| Component | URL |
-|---|---|
-| Kong Admin API | `http://127.0.0.1:8001` |
-| Keycloak | `http://localhost:8080` |
-| Vault | `http://localhost:8200` |
-| Grafana | `http://localhost:3001` |
+## Network Layout
+
+Application services are attached to internal Docker networks for their
+required communication paths. Billing and Order share only the approved
+`billing-order-mtls-internal` network for Billing-to-Order ownership
+verification.
+
+Kong has one internal network per backend service. Services that call OPA or
+Keycloak have dedicated policy and identity networks. This keeps backend egress
+constrained to documented runtime dependencies.
 
 ## Trust Boundaries
 
-- Client to Kong uses HTTPS/TLS at the public gateway.
-- Kong to backends uses gateway-backend direct HTTPS/mTLS upstreams.
+- Client to Kong uses HTTPS at the public gateway.
+- Kong to backend services uses direct HTTPS/mTLS on port `8443`.
 - Billing to Order ownership verification uses `https://order-service:8443`.
-- Webhook uses HMAC timestamp/nonce validation plus mTLS client certificate.
-- Keycloak tokens and selected OPA decisions enforce identity and authorization.
-
-mTLS coverage is limited to those scoped paths.
-
+- Backend to Keycloak uses `https://keycloak:8443`.
+- Backend to OPA uses `https://opa:8181`.
+- Vault defaults to `https://vault:8200`.
+- Webhook security combines mTLS, HMAC, timestamp freshness, and nonce replay
+  protection.

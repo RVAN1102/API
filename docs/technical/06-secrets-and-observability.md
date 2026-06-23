@@ -17,10 +17,10 @@ not evidence.
 
 ## Vault Scope
 
-Vault runs in dev mode at `http://localhost:8200` as a lab-local secret workflow
-surface. The Compose runtime still uses ignored local environment values for
-required local secrets. The docs do not claim every runtime secret is fetched
-from Vault.
+Vault runs in dev mode with runtime URL `https://vault:8200` as a lab-local
+secret workflow surface. The Compose runtime still uses ignored local
+environment values for required local secrets. The docs do not claim every
+runtime secret is fetched from Vault.
 
 ## Observability
 
@@ -28,7 +28,7 @@ from Vault.
 |---|---|
 | Promtail | reads Docker logs |
 | Loki | stores and queries logs |
-| Grafana | local dashboard and alert UI at `http://localhost:3001` |
+| Grafana | local dashboard and alert UI |
 | Jaeger | local trace UI |
 | OpenTelemetry Collector | trace pipeline |
 
@@ -44,5 +44,6 @@ bash tests/security/verify-no-tracked-secrets.sh
 bash tests/metrics/measure-mttd-mttr.sh
 ```
 
-Curated evidence records source-package secret checks and states that no current
-MTTD or MTTR timing value is claimed.
+Curated evidence records source-package secret checks and states that no
+current MTTD or MTTR timing value is claimed unless generated metrics evidence
+is present and reviewed.

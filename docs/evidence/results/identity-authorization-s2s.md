@@ -9,6 +9,7 @@ service-to-service access are enforced on covered paths.
 
 ```bash
 bash tests/security/s2s-ownership-tests.sh
+bash tests/security/opa-authz-tests.sh
 ```
 
 Configuration sources:
@@ -21,9 +22,9 @@ Configuration sources:
 
 | Check | Observed result |
 |---|---|
-| Billing uses Order mTLS URL and client certificate material | pass |
+| Billing uses `https://order-service:8443` and client certificate material | pass |
 | Billing cannot use plaintext Order application port directly | pass |
-| Billing reaches Order sidecar over verified mTLS | HTTP `200` |
+| Billing reaches Order over verified HTTPS/mTLS | HTTP `200` |
 | Alice checkout for Alice order | HTTP `202` |
 | Alice checkout for Bob order | HTTP `403` |
 | wrong amount checkout | HTTP `409` |
@@ -33,15 +34,10 @@ Configuration sources:
 | Admin service client on Order ownership endpoint | HTTP `403` |
 | Admin service client on Admin maintenance endpoint | HTTP `200` |
 | Billing service client on Admin maintenance endpoint | HTTP `403` |
-
-Recorded suite summary:
-
-```text
-25/25 passed, 0 failed
-```
+| S2S suite summary | `25/25` passed |
+| OPA authorization suite summary | `22/22` passed |
 
 ## Scope And Limitation
 
 The result covers the local realm, service clients, and API paths exercised by
-the S2S suite. It does not claim behavior for untested paths.
-
+the S2S and OPA suites. It does not claim behavior for untested paths.

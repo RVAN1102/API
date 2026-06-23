@@ -1,96 +1,95 @@
-# IDP – Keycloak Identity Provider
+# IDP - Keycloak Identity Provider
 
 ## Overview
 
-The prototype uses **Keycloak 26.0** as the OpenID Connect / OAuth2 Identity Provider.
-All API services (user, order, billing, admin) delegate authentication to Keycloak.
-Kong Gateway does **not** verify JWTs – verification is performed by the backend services.
-
----
+The runtime uses Keycloak 26.0 as the OpenID Connect / OAuth2 identity
+provider. Backend services validate JWTs themselves; Kong does not perform JWT
+verification.
 
 ## Realm
 
 ```text
-Name:    topic10-sme-api
-URL:     http://localhost:8080/realms/topic10-sme-api
+Name: topic10-sme-api
+Internal URL: https://keycloak:8443/realms/topic10-sme-api
+Local host URL: https://localhost:8446/realms/topic10-sme-api
+Expected issuer: https://localhost:8446/realms/topic10-sme-api
 ```
 
----
+Backend containers use `https://keycloak:8443` for discovery, JWKS, token, and
+introspection calls. The issuer remains the local host URL because Keycloak is
+started with `--hostname=https://localhost:8446`.
 
 ## Roles
 
-| Role              | Description                                      |
-|-------------------|--------------------------------------------------|
-| `user`            | Standard authenticated user                      |
-| `admin`           | Administrative user with elevated access         |
-| `billing-service` | Service account role for billing service         |
-| `internal-service`| Service account role for internal services       |
-
----
+| Role | Description |
+|---|---|
+| `user` | Standard authenticated user |
+| `admin` | Administrative user with elevated access |
+| `billing-service` | Service account role for billing service |
+| `internal-service` | Service account role for internal service access |
+| `order-ownership-read` | Billing service permission for Order ownership verification |
+| `admin-maintenance` | Admin service maintenance permission |
 
 ## Test Users
 
-| Username | Password            | Roles        |
-|----------|---------------------|--------------|
-| alice    | alice-password-123  | user         |
-| bob      | bob-password-123    | user         |
-| admin01  | admin-password-123  | user, admin  |
+| Username | Purpose | Roles |
+|---|---|---|
+| `alice` | human demo user | `user` |
+| `bob` | human demo user | `user` |
+| `admin01` | human admin demo user | `user`, `admin` |
+| `ci-alice` | repeatable automation user | `user` |
+| `ci-bob` | repeatable automation user | `user` |
 
----
+Do not commit passwords or access tokens.
 
 ## Clients
 
-### sme-web-client (Public – Authorization Code + PKCE)
+### `sme-web-client`
 
 ```text
-client_id:   sme-web-client
-type:        public
-flow:        Authorization Code + PKCE
+type: public
+flow: Authorization Code + PKCE
 pkce_method: S256
 redirect_uris:
-  - http://localhost:3000/*
-  - http://localhost:5173/*
+  - https://localhost:3000/*
+  - https://localhost:5173/*
   - https://app.localhost/*
 ```
 
-### billing-service-client (Confidential – Client Credentials)
+### `billing-service-client`
 
 ```text
-client_id:    billing-service-client
-type:         confidential
-flow:         Client Credentials
-client_secret: <redacted>
-roles:        order-ownership-read
+type: confidential
+flow: Client Credentials
+secret: supplied from ignored local runtime values
+roles: order-ownership-read
 ```
 
-### admin-service-client (Confidential – Client Credentials)
+### `admin-service-client`
 
 ```text
-client_id:    admin-service-client
-type:         confidential
-flow:         Client Credentials
-client_secret: <redacted>
-roles:        admin-maintenance
+type: confidential
+flow: Client Credentials
+secret: supplied from ignored local runtime values
+roles: admin-maintenance
 ```
 
----
+## OIDC Endpoints
 
-## Endpoints
+| Endpoint | URL |
+|---|---|
+| Authorization | `https://localhost:8446/realms/topic10-sme-api/protocol/openid-connect/auth` |
+| Token | `https://localhost:8446/realms/topic10-sme-api/protocol/openid-connect/token` |
+| UserInfo | `https://localhost:8446/realms/topic10-sme-api/protocol/openid-connect/userinfo` |
+| JWKS | `https://localhost:8446/realms/topic10-sme-api/protocol/openid-connect/certs` |
+| End Session | `https://localhost:8446/realms/topic10-sme-api/protocol/openid-connect/logout` |
+| Discovery | `https://localhost:8446/realms/topic10-sme-api/.well-known/openid-configuration` |
 
-| Endpoint                | URL |
-|------------------------|-----|
-| Authorization           | `http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/auth` |
-| Token                   | `http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/token` |
-| UserInfo                | `http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/userinfo` |
-| JWKS                    | `http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/certs` |
-| End Session             | `http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/logout` |
-| Discovery               | `http://localhost:8080/realms/topic10-sme-api/.well-known/openid-configuration` |
+Backend services use the same paths on `https://keycloak:8443`.
 
----
+## JWT Claims
 
-## JWT Claims (Access Token)
-
-The backend services read the following claims:
+The backend services read claims like:
 
 ```json
 {
@@ -103,13 +102,11 @@ The backend services read the following claims:
   "resource_access": {},
   "scope": "openid profile email",
   "azp": "sme-web-client",
-  "iss": "http://keycloak:8080/realms/topic10-sme-api",
+  "iss": "https://localhost:8446/realms/topic10-sme-api",
   "exp": 1718272800,
   "iat": 1718272500
 }
 ```
-
----
 
 ## MFA / OTP Requirement
 
@@ -131,53 +128,33 @@ To re-apply MFA required actions after a fresh realm import:
 bash demo/auth/enforce-keycloak-mfa.sh
 ```
 
-Manual check: open Keycloak Admin UI → Users → alice/bob/admin01 → Required
-Actions and verify `Configure OTP` / `CONFIGURE_TOTP` is present.
-
----
-
 ## Import / Export Realm
 
-### Import (first run via Docker Compose volume mount)
-Keycloak is configured with `--import-realm`. The realm JSON at
-`idp/realm-export/topic10-realm.json` is mounted to `/opt/keycloak/data/import/`.
+Compose starts Keycloak with `--import-realm`. The realm template at
+`idp/realm-export/topic10-realm.json` is mounted read-only, and Compose injects
+ignored local service-client secrets into the runtime import copy.
 
-### Manual import via Admin UI
-1. Open `http://localhost:8080/admin`
-2. Login: admin / admin
-3. Create realm → Import from file → select `idp/realm-export/topic10-realm.json`
+Manual Admin UI access:
 
-### Export realm
-```bash
-docker exec -it infra-keycloak-1 \
-  /opt/keycloak/bin/kc.sh export \
-  --dir /tmp/realm-export \
-  --realm topic10-sme-api
-
-docker cp infra-keycloak-1:/tmp/realm-export/topic10-sme-api-realm.json \
-  idp/realm-export/topic10-realm.json
+```text
+https://localhost:8446/admin
 ```
 
----
+## Token Helpers
 
-## Test Token (Password Grant – dev only)
-
-> **Note**: password-grant login is disabled for normal human users in the realm.
-> For demo token testing, use the `demo/auth/` scripts or the Admin UI token generation.
+Use the scripts under `demo/auth/` for repeatable local tokens:
 
 ```bash
-# Get token using password grant (if enabled for testing)
-curl -s -X POST \
-  http://localhost:8080/realms/topic10-sme-api/protocol/openid-connect/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=password&client_id=sme-web-client&username=alice&password=alice-password-123&scope=openid"
+bash demo/auth/get-user-token.sh ci-alice
+bash demo/auth/get-billing-service-token.sh
+bash demo/auth/get-admin-service-token.sh
 ```
 
----
+Do not print or commit token values.
 
 ## References
 
-- `idp/pkce-flow.md` – Authorization Code + PKCE flow
-- `idp/client-credentials-flow.md` – Client Credentials flow
-- `idp/jwt-claims.md` – JWT claims spec
-- `demo/auth/` – Demo token scripts
+- `idp/pkce-flow.md` - Authorization Code + PKCE flow.
+- `idp/client-credentials-flow.md` - Client Credentials flow.
+- `idp/jwt-claims.md` - JWT claims contract.
+- `demo/auth/` - Demo token scripts.

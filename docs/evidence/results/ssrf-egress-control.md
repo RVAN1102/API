@@ -18,14 +18,13 @@ bash tests/security/network-egress-control-tests.sh
 |---|---|
 | fixed metadata endpoint with metadata IP | HTTP `403` |
 | backend service networks | internal |
-| Billing and Order plaintext shared network | absent |
-| Billing to Order path | through `order-service` |
+| Billing and Order unapproved shared network | absent |
+| Billing to Order path | `billing-order-mtls-internal` and `https://order-service:8443` |
 | Admin to metadata target | unreachable in egress test |
 | Admin to public Internet target used by test | unreachable in egress test |
-| egress test summary | `27/27` assertions passed |
+| egress test summary | `28/28` assertions passed |
 
 ## Scope And Limitation
 
 The vulnerable endpoint remains available as a controlled demonstration path.
 The defense claim is based on the fixed endpoint and network egress test.
-

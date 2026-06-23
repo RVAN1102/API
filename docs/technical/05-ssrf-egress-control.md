@@ -17,9 +17,10 @@ addresses, null network, dangerous schemes, and non-HTTP schemes.
 
 ## Network Controls
 
-Compose attaches application services to internal networks. Redis is
-Docker-internal. Billing reaches Order through `billing-order-mtls-internal` and
-the Order direct HTTPS/mTLS path.
+Compose attaches application services to internal networks. Billing and Order
+share only `billing-order-mtls-internal`, and Billing uses
+`https://order-service:8443` with client certificate material for ownership
+verification.
 
 ## Evidence
 
@@ -31,10 +32,9 @@ bash tests/security/network-egress-control-tests.sh
 ```
 
 Curated evidence records the fixed metadata endpoint blocking metadata access
-with HTTP `403` and network egress checks passing `27/27` assertions.
+with HTTP `403` and network egress checks passing `28/28` assertions.
 
 ## Scope
 
 The vulnerable endpoint exists only as a controlled risk demonstration. The
 current defense claim is based on the fixed endpoint and network egress test.
-
