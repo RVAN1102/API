@@ -15,6 +15,19 @@ export const users_me_status_other = new Counter('users_me_status_other');
 const tokenFile = __ENV.TOKEN_FILE || '/token/user-token.txt';
 const baseUrl = __ENV.BASE_URL || 'https://localhost:8443';
 const token = open(tokenFile).trim();
+const clientCertFile = __ENV.CLIENT_CERT_FILE || '';
+const clientKeyFile = __ENV.CLIENT_KEY_FILE || '';
+const clientCertDomains = (__ENV.CLIENT_CERT_DOMAINS || 'user-service')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
+const tlsAuth = clientCertFile && clientKeyFile
+  ? [{
+      domains: clientCertDomains,
+      cert: open(clientCertFile),
+      key: open(clientKeyFile),
+    }]
+  : [];
 
 export const options = {
   insecureSkipTLSVerify: true,
@@ -32,6 +45,7 @@ export const options = {
     users_me_error_rate: ['rate<0.01'],
     checks: ['rate>0.99'],
   },
+  tlsAuth,
 };
 
 export default function () {

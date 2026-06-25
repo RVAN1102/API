@@ -10,7 +10,7 @@ RESTler rendered all 16 OpenAPI operations and network logs show requests reachi
 | RESTler rendered requests | 16/16 |
 | Network-observed operation reachability | 16/16 |
 | RESTler-native valid-status coverage | 8/16 |
-| Parsed HTTP responses | 289 |
+| Parsed HTTP responses | 290 |
 | 5xx/crash indicators | 0 |
 | RESTler bug buckets | 0 |
 

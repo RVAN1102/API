@@ -55,7 +55,7 @@ trusted CA, and required client certificate validation on port `8443`.
 | Keycloak | `https://keycloak:8443` internal, `https://localhost:8446` local host access | OIDC issuer, realm roles, human users, service clients |
 | OPA | `https://opa:8181` | selected policy decisions for service authorization |
 | Redis | Docker-internal | webhook nonce TTL storage when enabled |
-| Vault | `https://vault:8200` | local dev-mode secret workflow surface |
+| Vault | `https://vault:8200` | local persistent secret workflow surface |
 | Loki, Promtail, Alertmanager, Grafana | local observability profile | logs, alerts, dashboards |
 | Jaeger, OpenTelemetry Collector | local observability profile | tracing |
 

@@ -194,7 +194,9 @@ wait_for_backend_upstream() {
 
   for attempt in $(seq 1 45); do
     if compose_cmd exec -T "${backend}" getent hosts "${service}" >/dev/null 2>&1 \
-      && compose_cmd exec -T "${backend}" wget --no-check-certificate -qO- "${url}" >/dev/null 2>&1; then
+      && compose_cmd exec -T "${backend}" python -c \
+        "import ssl,urllib.request; ctx=ssl.create_default_context(cafile='/etc/internal-tls/ca.crt'); ctx.load_cert_chain('/etc/internal-tls/kong-client.crt','/etc/internal-tls/kong-client.key'); urllib.request.urlopen('${url}',context=ctx,timeout=3).read()" \
+        >/dev/null 2>&1; then
       echo "[INFO] ${backend} can resolve and reach ${url}"
       return 0
     fi
@@ -335,6 +337,7 @@ ensure_keycloak_ready() {
   for attempt in $(seq 1 60); do
     code="$(curl -sS -o /tmp/final-regression-keycloak-discovery.json -w '%{http_code}' \
       --max-time 5 \
+      --cacert "${PROJECT_ROOT}/infra/certs/gateway-backend/ca.crt" \
       "https://localhost:8446/realms/topic10-sme-api/.well-known/openid-configuration" 2>/dev/null || true)"
     echo "[INFO] Keycloak discovery attempt ${attempt}/60: HTTP ${code}"
     if [ "${code}" = "200" ]; then

@@ -1,0 +1,506 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:82ad2a30-d27f-4e6b-a68a-5904d31d308d",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-06-25T03:11:48+00:00",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "manufacturer": {
+            "name": "Aqua Security Software Ltd."
+          },
+          "group": "aquasecurity",
+          "name": "trivy",
+          "version": "0.71.1"
+        }
+      ]
+    },
+    "component": {
+      "bom-ref": "d25c9cda-68bb-44a6-9801-9a0fde0c8ba0",
+      "type": "application",
+      "name": ".",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SchemaVersion",
+          "value": "2"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "0e0c8e12-bed3-41a4-a497-72330a8f629d",
+      "type": "library",
+      "name": "fastapi",
+      "version": "0.115.5",
+      "purl": "pkg:pypi/fastapi@0.115.5",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "19c9dda2-3ba5-4057-8580-34da30314bb1",
+      "type": "application",
+      "name": "services/user/requirements.txt",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:Class",
+          "value": "lang-pkgs"
+        },
+        {
+          "name": "aquasecurity:trivy:Type",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "294ac043-e3cd-4c39-bb90-3219da0a443a",
+      "type": "library",
+      "name": "uvicorn",
+      "version": "0.32.1",
+      "purl": "pkg:pypi/uvicorn@0.32.1",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "37a42735-b3b7-40d1-9668-701d795dcdb1",
+      "type": "library",
+      "name": "pydantic",
+      "version": "2.10.3",
+      "purl": "pkg:pypi/pydantic@2.10.3",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "423c7a60-3eec-49ae-9b7c-a19ca441a02f",
+      "type": "application",
+      "name": "services/admin/requirements.txt",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:Class",
+          "value": "lang-pkgs"
+        },
+        {
+          "name": "aquasecurity:trivy:Type",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "432e303c-12f6-42aa-b12b-bce5153a0990",
+      "type": "library",
+      "name": "httpx",
+      "version": "0.28.0",
+      "purl": "pkg:pypi/httpx@0.28.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "46aaa394-4fa3-4d32-88ed-984616d4d405",
+      "type": "library",
+      "name": "uvicorn",
+      "version": "0.32.1",
+      "purl": "pkg:pypi/uvicorn@0.32.1",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "49511ef3-f1ae-4650-a963-3a4be5e58e41",
+      "type": "library",
+      "name": "pydantic",
+      "version": "2.10.3",
+      "purl": "pkg:pypi/pydantic@2.10.3",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "5128e543-1f4b-4deb-8156-b1947ce1683c",
+      "type": "library",
+      "name": "httpx",
+      "version": "0.28.0",
+      "purl": "pkg:pypi/httpx@0.28.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "53dd0c35-345a-472e-8bf4-79f945e78e66",
+      "type": "library",
+      "name": "uvicorn",
+      "version": "0.32.1",
+      "purl": "pkg:pypi/uvicorn@0.32.1",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "63511e3d-e03a-40f2-ae81-7bca306e4f92",
+      "type": "library",
+      "name": "python-jose",
+      "version": "3.4.0",
+      "purl": "pkg:pypi/python-jose@3.4.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "6f3580ff-1013-4504-b4cb-54ef5e40eb73",
+      "type": "library",
+      "name": "python-jose",
+      "version": "3.4.0",
+      "purl": "pkg:pypi/python-jose@3.4.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "736fc36e-ef07-4bbb-ad81-03df4c40ef6b",
+      "type": "library",
+      "name": "uvicorn",
+      "version": "0.32.1",
+      "purl": "pkg:pypi/uvicorn@0.32.1",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "880fb9d5-6ae2-4957-9159-fd794b374d93",
+      "type": "application",
+      "name": "services/billing/requirements.txt",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:Class",
+          "value": "lang-pkgs"
+        },
+        {
+          "name": "aquasecurity:trivy:Type",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "9286e3d0-968f-4def-a46a-75de2cbc772e",
+      "type": "library",
+      "name": "fastapi",
+      "version": "0.115.5",
+      "purl": "pkg:pypi/fastapi@0.115.5",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "b2384b97-e893-410d-93bd-0dc8c51a70bb",
+      "type": "library",
+      "name": "pydantic",
+      "version": "2.10.3",
+      "purl": "pkg:pypi/pydantic@2.10.3",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "b6a9bb3a-ccf5-46a3-8d63-257fcab3176e",
+      "type": "library",
+      "name": "httpx",
+      "version": "0.28.0",
+      "purl": "pkg:pypi/httpx@0.28.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "bc9ff70a-cb0b-4dac-8015-b36576dd46a2",
+      "type": "library",
+      "name": "fastapi",
+      "version": "0.115.5",
+      "purl": "pkg:pypi/fastapi@0.115.5",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "d146d1d1-f6c0-4af2-a34f-6d35904a8751",
+      "type": "library",
+      "name": "httpx",
+      "version": "0.28.0",
+      "purl": "pkg:pypi/httpx@0.28.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "e0b4f6a6-9ba0-44c0-8d24-c10068297114",
+      "type": "application",
+      "name": "services/order/requirements.txt",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:Class",
+          "value": "lang-pkgs"
+        },
+        {
+          "name": "aquasecurity:trivy:Type",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "e6e856a3-6c18-44d0-b5cd-9ead772fe51a",
+      "type": "library",
+      "name": "fastapi",
+      "version": "0.115.5",
+      "purl": "pkg:pypi/fastapi@0.115.5",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "eb6be70b-8476-476f-a810-be984a705cf1",
+      "type": "library",
+      "name": "python-jose",
+      "version": "3.4.0",
+      "purl": "pkg:pypi/python-jose@3.4.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "f834a52d-5ee0-4d01-9d6f-66fb3bfe2fa3",
+      "type": "library",
+      "name": "python-jose",
+      "version": "3.4.0",
+      "purl": "pkg:pypi/python-jose@3.4.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "fe074f33-1f9c-446f-8224-24394d84e70b",
+      "type": "library",
+      "name": "pydantic",
+      "version": "2.10.3",
+      "purl": "pkg:pypi/pydantic@2.10.3",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:pypi/redis@5.2.1",
+      "type": "library",
+      "name": "redis",
+      "version": "5.2.1",
+      "purl": "pkg:pypi/redis@5.2.1",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "0e0c8e12-bed3-41a4-a497-72330a8f629d",
+      "dependsOn": []
+    },
+    {
+      "ref": "19c9dda2-3ba5-4057-8580-34da30314bb1",
+      "dependsOn": [
+        "37a42735-b3b7-40d1-9668-701d795dcdb1",
+        "432e303c-12f6-42aa-b12b-bce5153a0990",
+        "53dd0c35-345a-472e-8bf4-79f945e78e66",
+        "6f3580ff-1013-4504-b4cb-54ef5e40eb73",
+        "9286e3d0-968f-4def-a46a-75de2cbc772e"
+      ]
+    },
+    {
+      "ref": "294ac043-e3cd-4c39-bb90-3219da0a443a",
+      "dependsOn": []
+    },
+    {
+      "ref": "37a42735-b3b7-40d1-9668-701d795dcdb1",
+      "dependsOn": []
+    },
+    {
+      "ref": "423c7a60-3eec-49ae-9b7c-a19ca441a02f",
+      "dependsOn": [
+        "63511e3d-e03a-40f2-ae81-7bca306e4f92",
+        "736fc36e-ef07-4bbb-ad81-03df4c40ef6b",
+        "bc9ff70a-cb0b-4dac-8015-b36576dd46a2",
+        "d146d1d1-f6c0-4af2-a34f-6d35904a8751",
+        "fe074f33-1f9c-446f-8224-24394d84e70b"
+      ]
+    },
+    {
+      "ref": "432e303c-12f6-42aa-b12b-bce5153a0990",
+      "dependsOn": []
+    },
+    {
+      "ref": "46aaa394-4fa3-4d32-88ed-984616d4d405",
+      "dependsOn": []
+    },
+    {
+      "ref": "49511ef3-f1ae-4650-a963-3a4be5e58e41",
+      "dependsOn": []
+    },
+    {
+      "ref": "5128e543-1f4b-4deb-8156-b1947ce1683c",
+      "dependsOn": []
+    },
+    {
+      "ref": "53dd0c35-345a-472e-8bf4-79f945e78e66",
+      "dependsOn": []
+    },
+    {
+      "ref": "63511e3d-e03a-40f2-ae81-7bca306e4f92",
+      "dependsOn": []
+    },
+    {
+      "ref": "6f3580ff-1013-4504-b4cb-54ef5e40eb73",
+      "dependsOn": []
+    },
+    {
+      "ref": "736fc36e-ef07-4bbb-ad81-03df4c40ef6b",
+      "dependsOn": []
+    },
+    {
+      "ref": "880fb9d5-6ae2-4957-9159-fd794b374d93",
+      "dependsOn": [
+        "0e0c8e12-bed3-41a4-a497-72330a8f629d",
+        "294ac043-e3cd-4c39-bb90-3219da0a443a",
+        "5128e543-1f4b-4deb-8156-b1947ce1683c",
+        "b2384b97-e893-410d-93bd-0dc8c51a70bb",
+        "eb6be70b-8476-476f-a810-be984a705cf1",
+        "pkg:pypi/redis@5.2.1"
+      ]
+    },
+    {
+      "ref": "9286e3d0-968f-4def-a46a-75de2cbc772e",
+      "dependsOn": []
+    },
+    {
+      "ref": "b2384b97-e893-410d-93bd-0dc8c51a70bb",
+      "dependsOn": []
+    },
+    {
+      "ref": "b6a9bb3a-ccf5-46a3-8d63-257fcab3176e",
+      "dependsOn": []
+    },
+    {
+      "ref": "bc9ff70a-cb0b-4dac-8015-b36576dd46a2",
+      "dependsOn": []
+    },
+    {
+      "ref": "d146d1d1-f6c0-4af2-a34f-6d35904a8751",
+      "dependsOn": []
+    },
+    {
+      "ref": "d25c9cda-68bb-44a6-9801-9a0fde0c8ba0",
+      "dependsOn": [
+        "19c9dda2-3ba5-4057-8580-34da30314bb1",
+        "423c7a60-3eec-49ae-9b7c-a19ca441a02f",
+        "880fb9d5-6ae2-4957-9159-fd794b374d93",
+        "e0b4f6a6-9ba0-44c0-8d24-c10068297114"
+      ]
+    },
+    {
+      "ref": "e0b4f6a6-9ba0-44c0-8d24-c10068297114",
+      "dependsOn": [
+        "46aaa394-4fa3-4d32-88ed-984616d4d405",
+        "49511ef3-f1ae-4650-a963-3a4be5e58e41",
+        "b6a9bb3a-ccf5-46a3-8d63-257fcab3176e",
+        "e6e856a3-6c18-44d0-b5cd-9ead772fe51a",
+        "f834a52d-5ee0-4d01-9d6f-66fb3bfe2fa3"
+      ]
+    },
+    {
+      "ref": "e6e856a3-6c18-44d0-b5cd-9ead772fe51a",
+      "dependsOn": []
+    },
+    {
+      "ref": "eb6be70b-8476-476f-a810-be984a705cf1",
+      "dependsOn": []
+    },
+    {
+      "ref": "f834a52d-5ee0-4d01-9d6f-66fb3bfe2fa3",
+      "dependsOn": []
+    },
+    {
+      "ref": "fe074f33-1f9c-446f-8224-24394d84e70b",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:pypi/redis@5.2.1",
+      "dependsOn": []
+    }
+  ],
+  "vulnerabilities": []
+}

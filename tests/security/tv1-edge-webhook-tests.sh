@@ -185,12 +185,12 @@ log "===== P0.4 CORS strict ====="
 {
   echo "===== TV1 P0.4 Allowed origin ====="
   allowed=$(curl -si -X OPTIONS "${GATEWAY_URL}/api/v1/users/health" \
-    -H "Origin: http://localhost:3000" \
+    -H "Origin: https://localhost:3000" \
     -H "Access-Control-Request-Method: GET" 2>/dev/null \
     | grep -i "HTTP/\|access-control-allow-origin\|access-control-allow-methods\|vary" || true)
   echo "${allowed}"
   if echo "${allowed}" | grep -iq "access-control-allow-origin"; then
-    pass "Allowed origin http://localhost:3000 is permitted"
+    pass "Allowed origin https://localhost:3000 is permitted"
   else
     fail "Allowed origin not reflected in CORS response"
   fi

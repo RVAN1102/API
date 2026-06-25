@@ -1,11 +1,10 @@
 # RESTler Execution Summary
 
-**Date:** 2026-06-22T13:56:48Z  
-**RESTler:** Docker image `mcr.microsoft.com/restlerfuzzer/restler:v8.5.0`  
-**Target URL:** `https://localhost:8443`  
-**Docker network:** `host`  
-**TLS trust:** Kong self-signed certificate mounted with `RESTLER_CA_CERT_FILE=/tmp/kong-leaf.pem`  
-**Auth/token handling:** external RESTler token refresh command; tokens are omitted from logs.
+**Date:** 2026-06-25T03:08:09Z
+**RESTler:** Docker image: mcr.microsoft.com/restlerfuzzer/restler:v8.5.0
+**OpenAPI path:** `services/openapi.yaml`
+**Target URL:** `https://kong:8443`
+**Auth/token handling:** RESTler test and fuzz-lean use an external token refresh command. The password is read from `RESTLER_AUTH_PASSWORD` by `tests/restler/fetch-restler-auth.sh`; no password or token is written intentionally to evidence.
 
 ## Results
 
@@ -13,32 +12,31 @@
 |---|---:|
 | Compile succeeded | yes |
 | Test succeeded | yes |
-| Fuzz-lean completed normally | interrupted after HTTP evidence collection |
-| Request coverage | Request coverage (successful / total): 8 / 16 |
-| HTTP status-code observations parsed | 289 |
-| 5xx/crash indicator count | 0 |
-| Bug result | No bugs were found. |
-| Evidence validity | valid |
+| Fuzz-lean succeeded | yes |
+| OpenAPI operations count | 16 |
+| Rendered/sent request count | 16 / 16 |
+| Requests actually sent or status evidence parsed | yes |
+| Status-code observations parsed | 290 |
+| Bug bucket count | 0 |
+| 5xx/crash indicator count in logs | 0 |
+| Evidence validity | valid request/status evidence present |
 
-## Status-Code Distribution
+## Status-Code Evidence
 
-- 200: 14
-- 202: 2
-- 401: 51
-- 403: 77
-- 404: 6
-- 422: 60
-- 429: 79
+Status-code evidence: see RESTler logs; no compact status-code sample was parsed.
 
-## Notes
+| Status | Count |
+|---|---:|
+| 200 | 14 |
+| 202 | 2 |
+| 401 | 51 |
+| 403 | 77 |
+| 404 | 6 |
+| 422 | 60 |
+| 429 | 80 |
 
-RESTler sent authenticated HTTPS requests through Kong and received real HTTP responses from the API gateway/backend path. The run was manually interrupted after HTTP evidence was collected because Kong rate limiting produced repeated `429 Too Many Requests` retry behavior. This is treated as evidence that fuzz traffic reached the protected edge, not as a service crash.
+RESTler evidence is valid only when the final output proves requests were sent beyond pure 401/403 gateway rejection. Protected-route 401 or 403 responses can still be valid fail-closed behavior when RESTler intentionally exercises unauthenticated or unauthorized cases.
 
+## Raw Artifact Handling
 
-## Coverage Clarification
-
-RESTler rendered all 16 OpenAPI operations and the network logs show requests reaching all 16 operation paths through the protected HTTPS Kong edge.
-
-The `8/16` value is RESTler-native valid-status coverage under the user-token fuzzing scope. It is not endpoint reachability. Several operations intentionally returned fail-closed security responses such as `401`, `403`, `422`, and `429` because they require mTLS webhook credentials, service-client credentials, admin authorization, valid schema input, or rate-limit compliance.
-
-Therefore, full successful business-flow coverage is not claimed. This evidence demonstrates authenticated fuzzing reachability, security fail-closed behavior, no observed 5xx/crash behavior, and no RESTler bug bucket.
+The runner sanitizes raw logs and machine-readable outputs into ignored `.artifacts/test-runs/tv3/restler/`; the compact summary is the tracked evidence.

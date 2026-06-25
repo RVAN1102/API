@@ -1,4 +1,4 @@
-[INFO] Running edge protected via Kong using Docker network infra_kong-user-internal: https://kong:8443
+[INFO] Running direct backend baseline on Docker internal network infra_kong-user-internal: https://user-service:8443
 
           /\      |‾‾| /‾‾/   /‾‾/
      /\  /  \     |  |/  /   /  /
@@ -13,6 +13,7 @@
      scenarios: (100.00%) 1 scenario, 2 max VUs, 3m30s max duration (incl. graceful stop):
               * users_me_low_load: 0.10 iterations/s for 3m0s (maxVUs: 1-2, gracefulStop: 30s)
 
+time="2026-06-25T02:49:41Z" level=warning msg="tlsAuth.domains option could be removed in the next releases, it's recommended to leave it empty and let k6 automatically detect from the provided certificate. It follows the Go's NameToCertificate deprecation - https://pkg.go.dev/crypto/tls@go1.17#Config."
 
 running (0m01.0s), 0/1 VUs, 1 complete and 0 interrupted iterations
 users_me_low_load   [   1% ] 0/1 VUs  0m01.0s/3m0s  0.10 iters/s
@@ -556,28 +557,28 @@ users_me_low_load   [ 100% ] 0/1 VUs  3m00.0s/3m0s  0.10 iters/s
 
      ✓ users/me returns 200
 
-   ✓ checks.........................: 100.00% ✓ 19       ✗ 0
-     data_received..................: 18 kB   101 B/s
-     data_sent......................: 26 kB   145 B/s
-     http_req_blocked...............: avg=390.24µs min=4.61µs  med=12.84µs  max=7.09ms   p(90)=43.37µs  p(95)=785.21µs
-     http_req_connecting............: avg=54.34µs  min=0s      med=0s       max=1.03ms   p(90)=0s       p(95)=103.25µs
-     http_req_duration..............: avg=15.92ms  min=3.17ms  med=16.68ms  max=25.27ms  p(90)=22.44ms  p(95)=24.35ms
-       { expected_response:true }...: avg=15.92ms  min=3.17ms  med=16.68ms  max=25.27ms  p(90)=22.44ms  p(95)=24.35ms
-     http_req_failed................: 0.00%   ✓ 0        ✗ 19
-     http_req_receiving.............: avg=173.59µs min=70.39µs med=152.51µs max=751.42µs p(90)=205.4µs  p(95)=280.53µs
-     http_req_sending...............: avg=71.01µs  min=21.56µs med=53.29µs  max=164.73µs p(90)=147.76µs p(95)=150.02µs
-     http_req_tls_handshaking.......: avg=257.35µs min=0s      med=0s       max=4.88ms   p(90)=0s       p(95)=488.97µs
-     http_req_waiting...............: avg=15.67ms  min=2.92ms  med=16.48ms  max=25.14ms  p(90)=22.14ms  p(95)=24.06ms
-     http_reqs......................: 19      0.105547/s
-     iteration_duration.............: avg=16.95ms  min=10.43ms med=17.64ms  max=25.59ms  p(90)=23.3ms   p(95)=25.13ms
-     iterations.....................: 19      0.105547/s
-   ✓ users_me_error_rate............: 0.00%   ✓ 0        ✗ 19
-     users_me_latency_ms............: avg=15.92ms  min=3.17ms  med=16.68ms  max=25.27ms  p(90)=22.44ms  p(95)=24.35ms
-     users_me_status_200............: 19      0.105547/s
-     users_me_status_count..........: 19      0.105547/s
+   ✓ checks.........................: 100.00% ✓ 18       ✗ 0
+     data_received..................: 90 kB   499 B/s
+     data_sent......................: 53 kB   295 B/s
+     http_req_blocked...............: avg=9.35ms   min=4.69ms   med=9.65ms   max=17.88ms  p(90)=11.29ms  p(95)=12.89ms
+     http_req_connecting............: avg=449.71µs min=156.89µs med=326.69µs max=1.06ms   p(90)=941.94µs p(95)=1ms
+     http_req_duration..............: avg=5.35ms   min=2.22ms   med=5.23ms   max=10.45ms  p(90)=7.57ms   p(95)=8.57ms
+       { expected_response:true }...: avg=5.35ms   min=2.22ms   med=5.23ms   max=10.45ms  p(90)=7.57ms   p(95)=8.57ms
+     http_req_failed................: 0.00%   ✓ 0        ✗ 18
+     http_req_receiving.............: avg=539.67µs min=87.58µs  med=273.86µs max=3.94ms   p(90)=698.43µs p(95)=1.32ms
+     http_req_sending...............: avg=143.57µs min=44.26µs  med=76.01µs  max=686.53µs p(90)=371.33µs p(95)=420.05µs
+     http_req_tls_handshaking.......: avg=8.66ms   min=3.85ms   med=8.72ms   max=17.29ms  p(90)=10.91ms  p(95)=12.5ms
+     http_req_waiting...............: avg=4.67ms   min=1.97ms   med=4.51ms   max=10.04ms  p(90)=6.42ms   p(95)=7.41ms
+     http_reqs......................: 18      0.099999/s
+     iteration_duration.............: avg=15.43ms  min=10.42ms  med=16.14ms  max=21.44ms  p(90)=19.98ms  p(95)=20.74ms
+     iterations.....................: 18      0.099999/s
+   ✓ users_me_error_rate............: 0.00%   ✓ 0        ✗ 18
+     users_me_latency_ms............: avg=5.35ms   min=2.22ms   med=5.23ms   max=10.45ms  p(90)=7.57ms   p(95)=8.57ms
+     users_me_status_200............: 18      0.099999/s
+     users_me_status_count..........: 18      0.099999/s
      vus............................: 0       min=0      max=0
      vus_max........................: 1       min=1      max=1
 
 
-running (3m00.0s), 0/1 VUs, 19 complete and 0 interrupted iterations
+running (3m00.0s), 0/1 VUs, 18 complete and 0 interrupted iterations
 users_me_low_load ✓ [ 100% ] 0/1 VUs  3m0s  0.10 iters/s

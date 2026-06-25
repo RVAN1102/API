@@ -13,20 +13,20 @@ K6_IMAGE="${K6_IMAGE:-grafana/k6:0.49.0}"
 PREFLIGHT_IMAGE="${PREFLIGHT_IMAGE:-curlimages/curl:8.10.1}"
 BASELINE_URL="https://user-service:8443"
 EDGE_BASE_URL="${EDGE_BASE_URL:-https://kong:8443}"
+RUN_DIR="$(mktemp -d /tmp/topic10-k6-overhead.XXXXXX)"
 
-BASELINE_SUMMARY="${EVIDENCE_DIR}/k6-baseline-users-me-summary.json"
-BASELINE_RESULT="${EVIDENCE_DIR}/k6-baseline-users-me-result.txt"
-EDGE_SUMMARY="${EVIDENCE_DIR}/k6-edge-users-me-summary.json"
-EDGE_RESULT="${EVIDENCE_DIR}/k6-edge-users-me-result.txt"
-ANALYSIS_FILE="${EVIDENCE_DIR}/k6-users-me-overhead-analysis.md"
+BASELINE_SUMMARY="${RUN_DIR}/k6-baseline-users-me-summary.json"
+BASELINE_RESULT="${RUN_DIR}/k6-baseline-users-me-result.txt"
+EDGE_SUMMARY="${RUN_DIR}/k6-edge-users-me-summary.json"
+EDGE_RESULT="${RUN_DIR}/k6-edge-users-me-result.txt"
+ANALYSIS_FILE="${RUN_DIR}/k6-users-me-overhead-analysis.md"
 
 mkdir -p "${EVIDENCE_DIR}"
-rm -f \
-  "${BASELINE_SUMMARY}" \
-  "${BASELINE_RESULT}" \
-  "${EDGE_SUMMARY}" \
-  "${EDGE_RESULT}" \
-  "${ANALYSIS_FILE}"
+
+cleanup() {
+  rm -rf "${RUN_DIR}"
+}
+trap cleanup EXIT
 
 die() {
   echo "[ERROR] $*" >&2
@@ -66,6 +66,7 @@ preflight_endpoint() {
   local name="$1"
   local network="$2"
   local url="$3"
+  local tls_mode="${4:-edge}"
   local output_file
   local status
   local body
@@ -74,12 +75,17 @@ preflight_endpoint() {
   if ! docker run --rm \
     --network "${network}" \
     -v "${TOKEN_FILE}:/token/user-token.txt:ro" \
+    -v "${REPO_ROOT}/infra/certs/gateway-backend:/client-certs:ro" \
     --entrypoint sh \
     "${PREFLIGHT_IMAGE}" -c '
       token="$(cat /token/user-token.txt)"
       body_file="$(mktemp)"
       auth_header="Authorization:"
-      status="$(curl -k -sS -o "${body_file}" -w "%{http_code}" \
+      tls_args="-k"
+      if [ "$2" = "direct-mtls" ]; then
+        tls_args="--cacert /client-certs/ca.crt --cert /client-certs/kong-client.crt --key /client-certs/kong-client.key"
+      fi
+      status="$(curl ${tls_args} -sS -o "${body_file}" -w "%{http_code}" \
         -H "${auth_header} Bearer ${token}" \
         -H "X-Correlation-ID: k6-overhead-preflight" \
         "$1" 2>/dev/null || true)"
@@ -88,7 +94,7 @@ preflight_endpoint() {
       head -c 500 "${body_file}" || true
       rm -f "${body_file}"
       [ "${status}" = "200" ]
-    ' sh "${url}" >"${output_file}"
+    ' sh "${url}" "${tls_mode}" >"${output_file}"
   then
     status="$(sed -n '1p' "${output_file}" || true)"
     body="$(sed -n '2,$p' "${output_file}" | head -c 500 || true)"
@@ -161,6 +167,17 @@ run_k6() {
   local base_url="$3"
   local summary_path="$4"
   local result_path="$5"
+  local tls_mode="${6:-edge}"
+  local client_tls_args=()
+
+  if [ "${tls_mode}" = "direct-mtls" ]; then
+    client_tls_args=(
+      -e "CLIENT_CERT_FILE=/client-certs/kong-client.crt"
+      -e "CLIENT_KEY_FILE=/client-certs/kong-client.key"
+      -e "CLIENT_CERT_DOMAINS=user-service"
+      -v "${REPO_ROOT}/infra/certs/gateway-backend:/client-certs:ro"
+    )
+  fi
 
   rm -f "${summary_path}" "${result_path}"
   echo "[INFO] Running ${scenario}: ${base_url}" | tee "${result_path}"
@@ -172,7 +189,8 @@ run_k6() {
     -e "TOKEN_FILE=/token/user-token.txt" \
     -v "${TOKEN_FILE}:/token/user-token.txt:ro" \
     -v "${SCRIPT_DIR}:/scripts:ro" \
-    -v "${EVIDENCE_DIR}:/out" \
+    -v "${RUN_DIR}:/out" \
+    "${client_tls_args[@]}" \
     "${K6_IMAGE}" run \
       --insecure-skip-tls-verify \
       --summary-export "/out/$(basename "${summary_path}")" \
@@ -181,13 +199,14 @@ run_k6() {
 
 refresh_token
 [ -s "${TOKEN_FILE}" ] || die "Token helper did not create a non-empty ${TOKEN_FILE} before direct phase."
-preflight_endpoint "direct users/me" "${internal_network}" "${BASELINE_URL}/api/v1/users/me"
+preflight_endpoint "direct users/me" "${internal_network}" "${BASELINE_URL}/api/v1/users/me" "direct-mtls"
 if ! run_k6 \
   "direct backend baseline on Docker internal network ${internal_network}" \
   "${internal_network}" \
   "${BASELINE_URL}" \
   "${BASELINE_SUMMARY}" \
-  "${BASELINE_RESULT}"; then
+  "${BASELINE_RESULT}" \
+  "direct-mtls"; then
   echo "[ERROR] Direct k6 run failed. Status distribution: $(status_distribution "${BASELINE_SUMMARY}")" >&2
   die "Direct k6 run failed; latency overhead evidence was not generated."
 fi
@@ -290,7 +309,7 @@ with open(output_path, "w", encoding="utf-8") as f:
     f.write("## Command Or Evidence Source\n\n")
     f.write("`bash tests/metrics/run-k6-overhead.sh`\n\n")
     f.write("## Methodology\n\n")
-    f.write("Both direct and edge runs use the same constant-arrival-rate scenario: 6 requests per minute for 3 minutes, with 1 pre-allocated VU and 2 maximum VUs. This should produce about 18 requests per run, intentionally runs below the observed Kong rate-limit threshold, and is not a stress test.\n\n")
+    f.write("Both direct and edge runs use the same constant-arrival-rate scenario: 6 requests per minute for 3 minutes, with 1 pre-allocated VU and 2 maximum VUs. The direct phase presents the generated Kong client certificate because the backend is mTLS-only; the edge phase enters through HTTPS Kong. This should produce about 18 requests per run, intentionally runs below the observed Kong rate-limit threshold, and is not a stress test.\n\n")
     f.write("## Observed Result\n\n")
     f.write("| Scenario | Requests | p50 ms | p95 ms |\n")
     f.write("|---|---:|---:|---:|\n")
@@ -300,5 +319,14 @@ with open(output_path, "w", encoding="utf-8") as f:
     f.write("## Scope And Limitation\n\n")
     f.write(f"Latency source: direct `{baseline['latency_source']}`, edge `{edge['latency_source']}`. This compares the Kong-protected edge path with the direct backend path for one authenticated endpoint. It does not isolate mTLS overhead from other gateway, TLS, policy, network, or container-runtime effects.\n")
 PY
+
+for evidence_file in \
+  "${BASELINE_SUMMARY}" \
+  "${BASELINE_RESULT}" \
+  "${EDGE_SUMMARY}" \
+  "${EDGE_RESULT}" \
+  "${ANALYSIS_FILE}"; do
+  cp "${evidence_file}" "${EVIDENCE_DIR}/$(basename "${evidence_file}")"
+done
 
 echo "[INFO] k6 overhead evidence written under ${EVIDENCE_DIR}"

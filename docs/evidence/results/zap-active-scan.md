@@ -2,8 +2,8 @@
 
 ## Requirement Proven
 
-The repository has ZAP active scan support for the HTTPS gateway and a curated
-recorded alert summary.
+The repository has ZAP active scan support for the HTTPS gateway. The counts
+below are copied from the currently generated local ZAP summary.
 
 ## Command Or Evidence Source
 
@@ -17,6 +17,10 @@ Recorded target:
 https://localhost:8443
 ```
 
+Generated source:
+
+`.artifacts/test-runs/tv3/zap/zap-active-summary.md`
+
 ## Observed Result
 
 | Risk level | Count |
@@ -28,7 +32,8 @@ https://localhost:8443
 
 ## Scope And Limitation
 
-The recorded alerts are informational, including expected client-error
-responses from invalid or unauthorized paths. Re-run ZAP before making a new
-scan result claim.
-
+The generated report supports `0 High / 0 Medium / 0 Low` and 8 informational
+alert types. It includes protected-path `401`/`403` responses, showing the scan
+reached HTTPS Kong, but those responses do not prove successful authorized
+business flows. Re-run the command and update this file from the generated
+summary before making a newer scan claim.
