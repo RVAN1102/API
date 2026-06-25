@@ -12,6 +12,9 @@
 # Usage (local key – lab demo):
 #   bash scripts/security/cosign-sign.sh local <image>
 #
+# Usage (local blob signing – lab demo):
+#   bash scripts/security/cosign-sign.sh sign-blob [artifact]
+#
 # Usage (generate evidence only):
 #   bash scripts/security/cosign-sign.sh evidence
 #
@@ -32,7 +35,7 @@ set -uo pipefail
 MODE="${1:-evidence}"
 IMAGE="${2:-}"
 REPORT_DIR="${REPORT_DIR:-.artifacts/test-runs/tv3/supply-chain}"
-KEY_DIR="${TMPDIR:-/tmp}/cosign-lab-keys"
+KEY_DIR="${KEY_DIR:-.artifacts/cosign-lab-keys}"
 
 mkdir -p "${REPORT_DIR}"
 mkdir -p "${KEY_DIR}"
@@ -108,6 +111,48 @@ case "${MODE}" in
     ;;
 
   # --------------------------------------------------
+  # Local blob signing (lab demo; public evidence only)
+  # --------------------------------------------------
+  sign-blob)
+    ARTIFACT="${IMAGE:-docs/evidence/tv3/supply-chain/sbom-cyclonedx.json}"
+    if ! command -v cosign > /dev/null 2>&1; then
+      echo "[ERROR] cosign not installed."
+      exit 1
+    fi
+    if [ ! -f "${ARTIFACT}" ]; then
+      echo "[ERROR] Artifact not found: ${ARTIFACT}. Generate the SBOM first or pass a harmless local file."
+      exit 1
+    fi
+
+    KEY_FILE="${KEY_DIR}/cosign-blob.key"
+    PUB_FILE="${KEY_DIR}/cosign-blob.pub"
+    SIGNATURE_FILE="${REPORT_DIR}/cosign-blob.signature"
+    PUBLIC_KEY_FILE="${REPORT_DIR}/cosign-blob.pub"
+
+    echo "--- Generating ignored local blob-signing key ---"
+    rm -f "${KEY_FILE}" "${PUB_FILE}"
+    COSIGN_PASSWORD="" cosign generate-key-pair \
+      --output-key-prefix "${KEY_DIR}/cosign-blob" >/dev/null
+
+    echo "--- Signing local artifact blob ---"
+    COSIGN_PASSWORD="" cosign sign-blob \
+      --yes \
+      --key "${KEY_FILE}" \
+      --output-signature "${SIGNATURE_FILE}" \
+      "${ARTIFACT}" >/dev/null
+
+    cp "${PUB_FILE}" "${PUBLIC_KEY_FILE}"
+    echo "--- Verifying local artifact blob signature ---"
+    COSIGN_PASSWORD="" cosign verify-blob \
+      --key "${PUBLIC_KEY_FILE}" \
+      --signature "${SIGNATURE_FILE}" \
+      "${ARTIFACT}" 2>&1 | tee "${REPORT_DIR}/cosign-verify-output.txt"
+
+    rm -f "${KEY_FILE}" "${PUB_FILE}"
+    echo "[SECURITY] Private key deleted after successful verification."
+    ;;
+
+  # --------------------------------------------------
   # Dry-run / CI readiness check
   # --------------------------------------------------
   dry-run)
@@ -154,6 +199,10 @@ Expected keyless verification command:
 TXT
     echo "[OK] Readiness evidence created; no image was signed."
     ;;
+  *)
+    echo "[ERROR] Unknown mode: ${MODE}" >&2
+    exit 1
+    ;;
 esac
 
 # --------------------------------------------------
@@ -172,7 +221,8 @@ cat > "${REPORT_DIR}/cosign-signing-summary.md" <<MD
 | Mode | What Happens |
 |------|--------------|
 | \`keyless <image>\` | Runs real Cosign keyless sign and verify against a published image reference. Intended for CI with GitHub OIDC identity. |
-| \`local <image>\` | Runs a local lab signing demo with a temporary key under \`/tmp\`, then deletes the private key. |
+| \`local <image>\` | Runs a local lab signing demo with a key under ignored \`.artifacts\`, then deletes the private key. |
+| \`sign-blob [artifact]\` | Signs and verifies a local SBOM or harmless artifact; generated keys, signature, and public key stay under ignored \`.artifacts\`, and the private key is deleted after verification. |
 | \`dry-run <image>\` | Checks/document expected commands only; no image is signed. |
 | \`evidence\` | Writes readiness evidence only; no image is signed. |
 
@@ -190,6 +240,7 @@ pin the expected workflow identity and OIDC issuer.
 
 - ✅ Private key **NOT committed** to repository
 - ✅ Local demo private key deleted immediately after signing in \`local\` mode
+- ✅ Blob-signing material is generated only under ignored \`.artifacts\`
 - ✅ Dry-run/evidence modes do not create signatures or credentials
 - ✅ No secrets exposed in this file
 
@@ -201,6 +252,9 @@ bash scripts/security/cosign-sign.sh dry-run ghcr.io/example/topic10-api:sha-pla
 
 # Local lab signing demo:
 cosign verify --key cosign-lab.pub <image>
+
+# Local SBOM blob signing and verification:
+bash scripts/security/cosign-sign.sh sign-blob docs/evidence/tv3/supply-chain/sbom-cyclonedx.json
 
 # Keyless (production/CI):
 cosign verify \\
@@ -215,12 +269,13 @@ cosign verify \\
 |------|----------|
 | \`cosign-signing-summary.md\` | This file |
 | \`cosign-verify-output.txt\` | Cosign output for the selected mode; dry-run/evidence output is readiness-only |
+| \`cosign-blob.signature\`, \`cosign-blob.pub\` | Public verification material created only by successful \`sign-blob\` mode |
 
 ## Output Note
 
 Do not claim that an image was signed unless this script was run in \`keyless\`
-or \`local\` mode against a real image and the resulting verify output is
-preserved.
+or \`local\` mode against a real image. A successful \`sign-blob\` run proves
+only that the selected local artifact blob was signed and verified.
 MD
 
 echo ""

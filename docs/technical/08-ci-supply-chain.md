@@ -22,16 +22,20 @@ tracked/non-ignored source package.
 
 Curated evidence records no Bandit High severity issues and Trivy filesystem
 scan results with `0` vulnerabilities across listed Python requirements files.
+This repository uses Trivy for SCA/container/filesystem scanning; it does not
+claim Snyk evidence.
 
 ## SBOM
 
 `scripts/security/generate-sbom.sh` generates CycloneDX and SPDX JSON SBOMs.
-Curated evidence records 28 Python package components and 4 Docker base image
-components in the recorded SBOM summary.
+The current filesystem run records 25 Python components. Image SBOM generation
+is optional and was not requested in that run.
 
 ## Cosign
 
-`scripts/security/cosign-sign.sh` supports readiness, dry-run, local lab
-signing, and keyless modes. The curated evidence claims readiness dry-run only.
-It does not claim a signed production artifact.
-
+`scripts/security/cosign-sign.sh` supports readiness, dry-run, local image,
+local `sign-blob`, and keyless modes. `sign-blob` can sign and verify a local
+SBOM while keeping generated material under ignored `.artifacts` and deleting
+the private key afterward. The curated evidence claims readiness dry-run only
+unless generated verification output proves a successful blob run. It does not
+claim a signed production image.

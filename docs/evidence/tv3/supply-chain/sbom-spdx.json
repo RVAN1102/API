@@ -1,0 +1,824 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": ".",
+  "documentNamespace": "http://trivy.dev/repository/.-388c0a50-ef64-4ba0-98cb-44baea1307d8",
+  "creationInfo": {
+    "creators": [
+      "Organization: aquasecurity",
+      "Tool: trivy-0.71.1"
+    ],
+    "created": "2026-06-25T03:11:48Z"
+  },
+  "packages": [
+    {
+      "name": "services/admin/requirements.txt",
+      "SPDXID": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Class: lang-pkgs"
+        },
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Type: pip"
+        }
+      ]
+    },
+    {
+      "name": "services/billing/requirements.txt",
+      "SPDXID": "SPDXRef-Application-d1aaf1e90032d627",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Class: lang-pkgs"
+        },
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Type: pip"
+        }
+      ]
+    },
+    {
+      "name": "services/order/requirements.txt",
+      "SPDXID": "SPDXRef-Application-bd73b76dfb0d412a",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Class: lang-pkgs"
+        },
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Type: pip"
+        }
+      ]
+    },
+    {
+      "name": "services/user/requirements.txt",
+      "SPDXID": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Class: lang-pkgs"
+        },
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "Type: pip"
+        }
+      ]
+    },
+    {
+      "name": "fastapi",
+      "SPDXID": "SPDXRef-Package-75635e302a0df9c2",
+      "versionInfo": "0.115.5",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/order/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/fastapi@0.115.5"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "fastapi",
+      "SPDXID": "SPDXRef-Package-83dff6caa61dc7db",
+      "versionInfo": "0.115.5",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/admin/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/fastapi@0.115.5"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "fastapi",
+      "SPDXID": "SPDXRef-Package-b16a5ed22083b1fc",
+      "versionInfo": "0.115.5",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/billing/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/fastapi@0.115.5"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "fastapi",
+      "SPDXID": "SPDXRef-Package-bde8a8ae4d7f98e4",
+      "versionInfo": "0.115.5",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/user/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/fastapi@0.115.5"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "httpx",
+      "SPDXID": "SPDXRef-Package-184eeecccc9b2f12",
+      "versionInfo": "0.28.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/user/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/httpx@0.28.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "httpx",
+      "SPDXID": "SPDXRef-Package-314050ce0f0a6ef8",
+      "versionInfo": "0.28.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/billing/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/httpx@0.28.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "httpx",
+      "SPDXID": "SPDXRef-Package-418e3e9ef1a99269",
+      "versionInfo": "0.28.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/admin/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/httpx@0.28.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "httpx",
+      "SPDXID": "SPDXRef-Package-526d8803da12fbd5",
+      "versionInfo": "0.28.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/order/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/httpx@0.28.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "pydantic",
+      "SPDXID": "SPDXRef-Package-3a3ef09f4e3417f7",
+      "versionInfo": "2.10.3",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/admin/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/pydantic@2.10.3"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "pydantic",
+      "SPDXID": "SPDXRef-Package-8dbf3f21279294d0",
+      "versionInfo": "2.10.3",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/billing/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/pydantic@2.10.3"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "pydantic",
+      "SPDXID": "SPDXRef-Package-d50a543db664a206",
+      "versionInfo": "2.10.3",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/user/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/pydantic@2.10.3"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "pydantic",
+      "SPDXID": "SPDXRef-Package-d74ddc28bf41273d",
+      "versionInfo": "2.10.3",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/order/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/pydantic@2.10.3"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "python-jose",
+      "SPDXID": "SPDXRef-Package-3fd27a963f518b89",
+      "versionInfo": "3.4.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/user/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/python-jose@3.4.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "python-jose",
+      "SPDXID": "SPDXRef-Package-6d8c083807a76ca6",
+      "versionInfo": "3.4.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/admin/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/python-jose@3.4.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "python-jose",
+      "SPDXID": "SPDXRef-Package-86cfeca733a74d21",
+      "versionInfo": "3.4.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/order/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/python-jose@3.4.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "python-jose",
+      "SPDXID": "SPDXRef-Package-e7606d67cc6503f",
+      "versionInfo": "3.4.0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/billing/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/python-jose@3.4.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "redis",
+      "SPDXID": "SPDXRef-Package-f48c56d0b8dc24eb",
+      "versionInfo": "5.2.1",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/billing/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/redis@5.2.1"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "uvicorn",
+      "SPDXID": "SPDXRef-Package-3d763459e60ae58d",
+      "versionInfo": "0.32.1",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/admin/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/uvicorn@0.32.1"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "uvicorn",
+      "SPDXID": "SPDXRef-Package-7f664d7a2bc5ee83",
+      "versionInfo": "0.32.1",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/user/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/uvicorn@0.32.1"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "uvicorn",
+      "SPDXID": "SPDXRef-Package-d86fe53946c8c7d8",
+      "versionInfo": "0.32.1",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/order/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/uvicorn@0.32.1"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": "uvicorn",
+      "SPDXID": "SPDXRef-Package-da4b26ba65a5c361",
+      "versionInfo": "0.32.1",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "sourceInfo": "package found in: services/billing/requirements.txt",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:pypi/uvicorn@0.32.1"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "PkgType: pip"
+        }
+      ]
+    },
+    {
+      "name": ".",
+      "SPDXID": "SPDXRef-Repository-741c5ff31ac42f2e",
+      "downloadLocation": "git+.",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "primaryPackagePurpose": "SOURCE",
+      "annotations": [
+        {
+          "annotator": "Tool: trivy-0.71.1",
+          "annotationDate": "2026-06-25T03:11:48Z",
+          "annotationType": "OTHER",
+          "comment": "SchemaVersion: 2"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "relatedSpdxElement": "SPDXRef-Package-3a3ef09f4e3417f7",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "relatedSpdxElement": "SPDXRef-Package-3d763459e60ae58d",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "relatedSpdxElement": "SPDXRef-Package-418e3e9ef1a99269",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "relatedSpdxElement": "SPDXRef-Package-6d8c083807a76ca6",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "relatedSpdxElement": "SPDXRef-Package-83dff6caa61dc7db",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "relatedSpdxElement": "SPDXRef-Package-184eeecccc9b2f12",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "relatedSpdxElement": "SPDXRef-Package-3fd27a963f518b89",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "relatedSpdxElement": "SPDXRef-Package-7f664d7a2bc5ee83",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "relatedSpdxElement": "SPDXRef-Package-bde8a8ae4d7f98e4",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "relatedSpdxElement": "SPDXRef-Package-d50a543db664a206",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-bd73b76dfb0d412a",
+      "relatedSpdxElement": "SPDXRef-Package-526d8803da12fbd5",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-bd73b76dfb0d412a",
+      "relatedSpdxElement": "SPDXRef-Package-75635e302a0df9c2",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-bd73b76dfb0d412a",
+      "relatedSpdxElement": "SPDXRef-Package-86cfeca733a74d21",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-bd73b76dfb0d412a",
+      "relatedSpdxElement": "SPDXRef-Package-d74ddc28bf41273d",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-bd73b76dfb0d412a",
+      "relatedSpdxElement": "SPDXRef-Package-d86fe53946c8c7d8",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-d1aaf1e90032d627",
+      "relatedSpdxElement": "SPDXRef-Package-314050ce0f0a6ef8",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-d1aaf1e90032d627",
+      "relatedSpdxElement": "SPDXRef-Package-8dbf3f21279294d0",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-d1aaf1e90032d627",
+      "relatedSpdxElement": "SPDXRef-Package-b16a5ed22083b1fc",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-d1aaf1e90032d627",
+      "relatedSpdxElement": "SPDXRef-Package-da4b26ba65a5c361",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-d1aaf1e90032d627",
+      "relatedSpdxElement": "SPDXRef-Package-e7606d67cc6503f",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Application-d1aaf1e90032d627",
+      "relatedSpdxElement": "SPDXRef-Package-f48c56d0b8dc24eb",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-Repository-741c5ff31ac42f2e",
+      "relationshipType": "DESCRIBES"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository-741c5ff31ac42f2e",
+      "relatedSpdxElement": "SPDXRef-Application-8c58a814a4c5d1c0",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository-741c5ff31ac42f2e",
+      "relatedSpdxElement": "SPDXRef-Application-a0ce1cd192d3aa7e",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository-741c5ff31ac42f2e",
+      "relatedSpdxElement": "SPDXRef-Application-bd73b76dfb0d412a",
+      "relationshipType": "CONTAINS"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository-741c5ff31ac42f2e",
+      "relatedSpdxElement": "SPDXRef-Application-d1aaf1e90032d627",
+      "relationshipType": "CONTAINS"
+    }
+  ]
+}

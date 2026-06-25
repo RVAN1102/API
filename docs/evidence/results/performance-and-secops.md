@@ -13,6 +13,7 @@ ACCESS_TOKEN="${ALICE_TOKEN}" k6 run tests/performance/k6-phase3.js
 bash tests/metrics/execute-mttd-scenario.sh
 bash tests/metrics/measure-kms-overhead.sh
 bash tests/metrics/measure-mttd-mttr.sh
+bash tests/metrics/run-k6-overhead.sh
 ```
 
 ## Observed Result
@@ -38,12 +39,13 @@ Additional quantitative automation:
 
 | Area | Methodology | Current curated result |
 |---|---|---|
+| Direct-vs-edge k6 overhead | `tests/metrics/run-k6-overhead.sh` runs the same authenticated `/api/v1/users/me` low-load scenario directly and through HTTPS Kong, then computes p50/p95 deltas | generated values are published only in `docs/evidence/tv3/metrics/k6-users-me-overhead-analysis.md` after both runs pass |
 | MTTD/MTTR | `tests/metrics/execute-mttd-scenario.sh` runs Loki LogQL threshold polling and captures one correlation-ID log sample | no timing value is claimed unless generated metrics evidence exists |
-| Vault/KMS-style overhead | `tests/metrics/measure-kms-overhead.sh` measures local Vault dev-mode KV reads for `/v1/secret/data/api/webhook` without writing secret values | generated only when `docs/evidence/tv3/metrics/vault-kms-overhead-summary.md` exists |
+| Vault/KMS-style overhead | `tests/metrics/measure-kms-overhead.sh` measures HTTPS Vault KV reads for `/v1/secret/data/api/webhook` without writing secret values | no value is claimed unless the summary records successful HTTP `200` samples and numeric p50/p95/average latency |
 
 ## Scope And Limitation
 
-The k6 result is a low-load secured gateway baseline, not a stress test. No
-current MTTD or MTTR timing value is claimed in this curated summary. The
-MTTD/MTTR source of truth is Loki LogQL threshold polling unless separate
-Grafana firing state evidence is explicitly captured.
+The recorded gateway result and the direct-vs-edge comparison are low-load
+measurements, not stress tests. The comparison does not isolate mTLS from
+gateway, TLS, policy, network, or container-runtime overhead. No current MTTD
+or MTTR timing value is claimed in this curated summary.

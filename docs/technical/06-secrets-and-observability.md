@@ -17,10 +17,10 @@ not evidence.
 
 ## Vault Scope
 
-Vault runs in dev mode with runtime URL `https://vault:8200` as a lab-local
-secret workflow surface. The Compose runtime still uses ignored local
-environment values for required local secrets. The docs do not claim every
-runtime secret is fetched from Vault.
+Vault runs as a persistent sealed lab server with runtime URL
+`https://vault:8200`. The Compose runtime still uses ignored local environment
+values for required local secrets. The docs do not claim every runtime secret
+is fetched from Vault.
 
 ## Observability
 

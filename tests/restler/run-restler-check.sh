@@ -10,8 +10,9 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TARGET_URL="${TARGET_URL:-${BASE_URL:-}}"
 OPENAPI_SPEC="${OPENAPI_SPEC:-${REPO_ROOT}/services/openapi.yaml}"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv3/restler"
-mkdir -p "${EVIDENCE_DIR}"
-TMP_DIR="$(mktemp -d "${REPO_ROOT}/docs/evidence/tv3/restler/tmp.XXXXXX")"
+RAW_EVIDENCE_DIR="${RAW_EVIDENCE_DIR:-${REPO_ROOT}/.artifacts/test-runs/tv3/restler}"
+mkdir -p "${EVIDENCE_DIR}" "${RAW_EVIDENCE_DIR}"
+TMP_DIR="$(mktemp -d /tmp/topic10-restler.XXXXXX)"
 WORK_DIR="${TMP_DIR}/work"
 COMPILE_LOG="${TMP_DIR}/restler-compile.log"
 TEST_LOG="${TMP_DIR}/restler-test.log"
@@ -155,10 +156,18 @@ EOF
   RESTLER_TARGET_HOST="${RESTLER_TARGET_HOST:-${parsed_host}}"
   RESTLER_TARGET_IP="${RESTLER_TARGET_IP:-${parsed_host}}"
   RESTLER_TARGET_PORT="${RESTLER_TARGET_PORT:-${parsed_port}}"
+
+  if [ "${RESTLER_RUNTIME}" = "docker" ] \
+    && [ "${RESTLER_DOCKER_NETWORK}" != "host" ] \
+    && [ "${parsed_host}" = "kong" ]; then
+    RESTLER_TARGET_HOST="${RESTLER_TARGET_HOST_OVERRIDE:-localhost}"
+  fi
 }
 
 prepare_restler_ca_cert() {
   local extracted_cert="${TMP_DIR}/kong-leaf.pem"
+  local ca_bundle="${TMP_DIR}/restler-ca-bundle.pem"
+  local internal_ca="${REPO_ROOT}/infra/certs/gateway-backend/ca.crt"
 
   RESTLER_EFFECTIVE_CA_CERT_FILE=""
   RESTLER_CA_DOCKER_ARGS=()
@@ -166,10 +175,17 @@ prepare_restler_ca_cert() {
 
   if [ -n "${RESTLER_CA_CERT_FILE:-}" ]; then
     [ -f "${RESTLER_CA_CERT_FILE}" ] || die "RESTLER_CA_CERT_FILE does not exist: ${RESTLER_CA_CERT_FILE}"
-    RESTLER_EFFECTIVE_CA_CERT_FILE="${RESTLER_CA_CERT_FILE}"
+    python3 - "${RESTLER_CA_CERT_FILE}" "${internal_ca}" "${ca_bundle}" <<'PY'
+import pathlib
+import sys
+
+sources = [pathlib.Path(path) for path in sys.argv[1:3] if pathlib.Path(path).is_file()]
+pathlib.Path(sys.argv[3]).write_bytes(b"\n".join(path.read_bytes().rstrip() for path in sources) + b"\n")
+PY
+    RESTLER_EFFECTIVE_CA_CERT_FILE="${ca_bundle}"
   else
     case "${TARGET_URL}" in
-      https://localhost:8443|https://localhost:8443/*)
+      https://*)
         command -v openssl >/dev/null 2>&1 || die "openssl is required to extract Kong TLS certificate."
         if ! printf '' | openssl s_client \
           -connect localhost:8443 \
@@ -179,7 +195,14 @@ prepare_restler_ca_cert() {
           die "Failed to extract Kong TLS certificate from localhost:8443."
         fi
         [ -s "${extracted_cert}" ] || die "Extracted Kong TLS certificate is empty."
-        RESTLER_EFFECTIVE_CA_CERT_FILE="${extracted_cert}"
+        python3 - "${extracted_cert}" "${internal_ca}" "${ca_bundle}" <<'PY'
+import pathlib
+import sys
+
+sources = [pathlib.Path(path) for path in sys.argv[1:3] if pathlib.Path(path).is_file()]
+pathlib.Path(sys.argv[3]).write_bytes(b"\n".join(path.read_bytes().rstrip() for path in sources) + b"\n")
+PY
+        RESTLER_EFFECTIVE_CA_CERT_FILE="${ca_bundle}"
         ;;
     esac
   fi
@@ -214,7 +237,7 @@ preflight_restler_target() {
     -e "RESTLER_AUTH_CLIENT_ID=${RESTLER_AUTH_CLIENT_ID:-sme-lab-automation-client}" \
     -e "RESTLER_AUTH_USERNAME=${RESTLER_AUTH_USERNAME:-ci-alice}" \
     -e "RESTLER_AUTH_PASSWORD=${RESTLER_AUTH_PASSWORD:-}" \
-    "${PREFLIGHT_IMAGE}" python - "${TARGET_URL%/}" >"${output_file}" <<'PY'
+    "${PREFLIGHT_IMAGE}" python - "${TARGET_URL%/}" "${RESTLER_TARGET_HOST}" >"${output_file}" <<'PY'
 import json
 import os
 import ssl
@@ -224,6 +247,7 @@ import urllib.parse
 import urllib.request
 
 base_url = sys.argv[1].rstrip("/")
+tls_server_name = sys.argv[2]
 keycloak_url = (
     os.environ.get("RESTLER_KEYCLOAK_BASE_URL")
     or os.environ.get("KEYCLOAK_BASE_URL")
@@ -241,6 +265,8 @@ if not password:
 
 cafile = os.environ.get("SSL_CERT_FILE") or os.environ.get("REQUESTS_CA_BUNDLE")
 context = ssl.create_default_context(cafile=cafile) if cafile else ssl.create_default_context()
+if urllib.parse.urlparse(base_url).hostname != tls_server_name:
+    context.check_hostname = False
 
 def short_body(raw):
     return raw.decode("utf-8", errors="replace")[:500]
@@ -339,6 +365,7 @@ run_restler() {
       esac
     done
     docker run --rm \
+      -u "$(id -u):$(id -g)" \
       --network "${RESTLER_DOCKER_NETWORK}" \
       --add-host=host.docker.internal:host-gateway \
       "${RESTLER_CA_DOCKER_ARGS[@]}" \
@@ -649,8 +676,8 @@ BUG_BUCKETS="$(find_first "bug_buckets.txt")"
 ERROR_BUCKETS="$(find_first "errorBuckets.json")"
 
 if [ -n "${TESTING_SUMMARY}" ]; then
-  REQUESTS_RENDERED="$(json_value "${TESTING_SUMMARY}" "total_requests_sent")"
-  [ -z "${REQUESTS_RENDERED}" ] && REQUESTS_RENDERED="$(json_value "${TESTING_SUMMARY}" "rendered_requests")"
+  REQUESTS_RENDERED="$(json_value "${TESTING_SUMMARY}" "rendered_requests")"
+  [ -z "${REQUESTS_RENDERED}" ] && REQUESTS_RENDERED="$(json_value "${TESTING_SUMMARY}" "total_requests_sent")"
   [ -z "${REQUESTS_RENDERED}" ] && REQUESTS_RENDERED="$(json_value "${TESTING_SUMMARY}" "executed_requests")"
 fi
 if [ -n "${RUN_SUMMARY}" ]; then
@@ -693,7 +720,7 @@ fi
   echo ""
   echo "**Date:** $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   echo "**RESTler:** ${RESTLER_LABEL}"
-  echo "**OpenAPI path:** \`${OPENAPI_SPEC}\`"
+  echo "**OpenAPI path:** \`${OPENAPI_SPEC#"${REPO_ROOT}/"}\`"
   echo "**Target URL:** \`${TARGET_URL}\`"
   echo "**Auth/token handling:** RESTler test and fuzz-lean use an external token refresh command. The password is read from \`RESTLER_AUTH_PASSWORD\` by \`tests/restler/fetch-restler-auth.sh\`; no password or token is written intentionally to evidence."
   echo ""
@@ -720,25 +747,20 @@ fi
   echo ""
   echo "RESTler evidence is valid only when the final output proves requests were sent beyond pure 401/403 gateway rejection. Protected-route 401 or 403 responses can still be valid fail-closed behavior when RESTler intentionally exercises unauthenticated or unauthorized cases."
   echo ""
-  echo "## Generated Files Copied"
+  echo "## Raw Artifact Handling"
   echo ""
-  for name in restler-compile.log restler-test.log restler-fuzz-lean.log restler-summary.md testing_summary.json runSummary.json bug_buckets.txt errorBuckets.json; do
-    [ -f "${TMP_DIR}/${name}" ] && echo "- \`${name}\`"
-  done
-  for artifact in "${TMP_DIR}"/restler-artifact-*; do
-    [ -f "${artifact}" ] && echo "- \`$(basename "${artifact}")\`"
-  done
+  echo "The runner sanitizes raw logs and machine-readable outputs into ignored \`.artifacts/test-runs/tv3/restler/\`; the compact summary is the tracked evidence."
 } > "${SUMMARY_FILE}"
 
-sanitize_copy "${COMPILE_LOG}" "${EVIDENCE_DIR}/restler-compile.log"
-sanitize_copy "${TEST_LOG}" "${EVIDENCE_DIR}/restler-test.log"
-sanitize_copy "${FUZZ_LEAN_LOG}" "${EVIDENCE_DIR}/restler-fuzz-lean.log"
+sanitize_copy "${COMPILE_LOG}" "${RAW_EVIDENCE_DIR}/restler-compile.log"
+sanitize_copy "${TEST_LOG}" "${RAW_EVIDENCE_DIR}/restler-test.log"
+sanitize_copy "${FUZZ_LEAN_LOG}" "${RAW_EVIDENCE_DIR}/restler-fuzz-lean.log"
 sanitize_copy "${SUMMARY_FILE}" "${EVIDENCE_DIR}/restler-summary.md"
 for name in testing_summary.json runSummary.json bug_buckets.txt errorBuckets.json; do
-  [ -f "${TMP_DIR}/${name}" ] && sanitize_copy "${TMP_DIR}/${name}" "${EVIDENCE_DIR}/${name}"
+  [ -f "${TMP_DIR}/${name}" ] && sanitize_copy "${TMP_DIR}/${name}" "${RAW_EVIDENCE_DIR}/${name}"
 done
 for artifact in "${TMP_DIR}"/restler-artifact-*; do
-  [ -f "${artifact}" ] && sanitize_copy "${artifact}" "${EVIDENCE_DIR}/$(basename "${artifact}")"
+  [ -f "${artifact}" ] && sanitize_copy "${artifact}" "${RAW_EVIDENCE_DIR}/$(basename "${artifact}")"
 done
 
 if [ "${REQUESTS_ACTUALLY_SENT}" != "yes" ]; then

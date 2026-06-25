@@ -2,11 +2,11 @@
 
 ## Overview
 
-HashiCorp Vault (dev mode) is used to centralize secrets for the prototype.
+HashiCorp Vault is used as a persistent, sealed lab secret store for the prototype.
 In production this would be Vault cluster or a managed service (AWS KMS / Secrets Manager).
 
-Vault runs at: `http://localhost:8200`
-Dev root token: `dev-root-token` (dev mode only, never commit to production)
+Vault runs at `https://localhost:8200` from the host and
+`https://vault:8200` inside Compose. Both paths trust the generated local CA.
 
 ---
 
@@ -15,42 +15,28 @@ Dev root token: `dev-root-token` (dev mode only, never commit to production)
 | Path                            | Contents                         | Reader              |
 |---------------------------------|----------------------------------|---------------------|
 | `secret/data/api/webhook`       | `webhook_secret` (HMAC key)      | billing-service / webhook demo |
-| `secret/data/api/service-clients`| billing/admin client IDs and redacted client secret placeholders | billing-service, admin-service |
-| `secret/data/api/order-service` | Order service credentials        | order-service       |
-| `secret/data/api/user-service`  | User service credentials         | user-service        |
 
 ---
 
 ## Init Script
 
-Run after `docker compose up`:
+Run after generating certificates and starting Vault:
 
 ```bash
-bash vault/scripts/init-dev-vault.sh
+bash demo/mtls/ensure-gateway-backend-certs.sh
+docker compose -f infra/docker-compose.yml up -d vault
+bash vault/scripts/ensure-vault-ready.sh
 ```
 
 This script:
-1. Enables the KV v2 secrets engine.
-2. Creates placeholder secrets at all required paths.
-3. Applies the app policy from `vault/policies/app-policy.hcl`.
+1. Initializes Vault only when needed.
+2. Unseals Vault when needed.
+3. Enables the required KV v2 mount and seeds only `secret/data/api/webhook`.
+4. Stores init material only in ignored `infra/.vault-init.json` with mode `0600`.
 
----
-
-## Manual Operations
-
-```bash
-export VAULT_ADDR=http://localhost:8200
-export VAULT_TOKEN=dev-root-token
-
-# Health check
-vault status
-
-# Read webhook secret
-vault kv get secret/api/webhook
-
-# Write secret (dev only, never commit real values)
-vault kv put secret/api/webhook webhook_secret="dev-webhook-secret-change-me"
-```
+The script does not print the root token, unseal key, or secret value. Supply
+`VAULT_TOKEN` and `VAULT_UNSEAL_KEY` explicitly only when recovering an
+already-initialized Vault whose ignored init file is unavailable.
 
 ---
 

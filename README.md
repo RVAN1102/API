@@ -30,7 +30,7 @@ Supporting services:
 | Keycloak | OIDC realm, human users, realm roles, service clients |
 | OPA | selected authorization policy decisions over HTTPS |
 | Redis | webhook nonce TTL storage when enabled |
-| Vault | lab-local dev-mode secret workflow surface over HTTPS |
+| Vault | lab-local persistent secret workflow surface over HTTPS |
 | Loki, Promtail, Alertmanager, Grafana | local logs, alerting, dashboards |
 | Jaeger, OpenTelemetry Collector | local tracing |
 
@@ -98,7 +98,7 @@ Backend services and OPA are expected to run with:
 
 Keycloak, Kong, and Vault are intentionally not read-only because they need
 writable runtime state for realm import/runtime files, gateway runtime state,
-and dev-mode Vault storage or lock behavior.
+and persistent Vault storage or lock behavior.
 
 ## Quick Start
 

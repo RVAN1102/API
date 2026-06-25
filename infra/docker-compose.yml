@@ -119,7 +119,6 @@ services:
       - "8443"
     volumes:
       - ../infra/certs/gateway-backend:/etc/internal-tls:ro
-      - vault-data:/vault/file
     healthcheck:
       test: ["CMD", "python", "-c", "import ssl,urllib.request; ctx=ssl.create_default_context(cafile='/etc/internal-tls/ca.crt'); ctx.load_cert_chain('/etc/internal-tls/kong-client.crt','/etc/internal-tls/kong-client.key'); urllib.request.urlopen('https://user-service:8443/api/v1/users/health',context=ctx,timeout=3)"]
       interval: 10s
@@ -190,12 +189,14 @@ services:
       ORDER_SERVICE_TLS_CLIENT_KEY: "/etc/internal-tls/billing-client.key"
       OPA_URL: "https://opa:8181"
       WEBHOOK_SECRET: "${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}"
-      WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-memory}"
+      WEBHOOK_NONCE_STORE: "${WEBHOOK_NONCE_STORE:-redis}"
       WEBHOOK_NONCE_REDIS_URL: "${WEBHOOK_NONCE_REDIS_URL:-rediss://redis:6379/0}"
       WEBHOOK_NONCE_TTL_SECONDS: "${WEBHOOK_NONCE_TTL_SECONDS:-300}"
     depends_on:
       opa:
         condition: service_started
+      redis:
+        condition: service_healthy
     networks:
       - kong-billing-internal
       - billing-identity-internal
@@ -215,15 +216,34 @@ services:
   # Webhook replay nonce store – Redis-backed TTL store for lab regression
   # ---------------------------------------------------------------------------
   redis:
-    profiles: ["optional-tls-redis"]
+    <<: *no_new_privileges_runtime_hardening
     image: redis:7.4-alpine
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    command:
+      - redis-server
+      - --port
+      - "0"
+      - --tls-port
+      - "6379"
+      - --tls-cert-file
+      - /etc/internal-tls/redis.crt
+      - --tls-key-file
+      - /etc/internal-tls/redis.key
+      - --tls-ca-cert-file
+      - /etc/internal-tls/ca.crt
+      - --tls-auth-clients
+      - "no"
+      - --save
+      - ""
+      - --appendonly
+      - "no"
     expose:
       - "6379"
+    volumes:
+      - ../infra/certs/gateway-backend:/etc/internal-tls:ro
     networks:
       - billing-nonce-internal
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--tls", "--cacert", "/etc/internal-tls/ca.crt", "-h", "redis", "--sni", "redis", "-p", "6379", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -319,7 +339,7 @@ services:
       start_period: 60s
 
   # ---------------------------------------------------------------------------
-  # TV2 – HashiCorp Vault (dev mode)
+  # TV2 – HashiCorp Vault (persistent sealed lab server)
   # ---------------------------------------------------------------------------
   vault:
     image: hashicorp/vault:1.18
@@ -344,6 +364,7 @@ services:
       VAULT_CACERT: "/etc/internal-tls/ca.crt"
     volumes:
       - ../infra/certs/gateway-backend:/etc/internal-tls:ro
+      - vault-data:/vault/file
     ports:
       - "8200:8200"
     networks:

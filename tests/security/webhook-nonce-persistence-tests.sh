@@ -84,7 +84,13 @@ wait_for_billing() {
 
 wait_for_redis() {
   for attempt in $(seq 1 30); do
-    if compose exec -T redis redis-cli ping >/dev/null 2>&1; then
+    if compose exec -T redis redis-cli \
+      --tls \
+      --cacert /etc/internal-tls/ca.crt \
+      -h redis \
+      --sni redis \
+      -p 6379 \
+      ping >/dev/null 2>&1; then
       echo "[INFO] redis readiness attempt ${attempt}/30: PONG"
       return 0
     fi

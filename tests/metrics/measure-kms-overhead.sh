@@ -7,11 +7,21 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EVIDENCE_DIR="${REPO_ROOT}/docs/evidence/tv3/metrics"
 VAULT_ADDR="${VAULT_ADDR:-https://localhost:8200}"
-VAULT_TOKEN="${VAULT_TOKEN:-dev-root-token}"
+VAULT_CA_CERT="${VAULT_CACERT:-${REPO_ROOT}/infra/certs/gateway-backend/ca.crt}"
+VAULT_INIT_FILE="${VAULT_INIT_FILE:-${REPO_ROOT}/infra/.vault-init.json}"
+VAULT_TOKEN="${VAULT_TOKEN:-}"
 SAMPLES="${SAMPLES:-30}"
 CSV_FILE="${EVIDENCE_DIR}/vault-kms-overhead.csv"
 SUMMARY_FILE="${EVIDENCE_DIR}/vault-kms-overhead-summary.md"
 VAULT_PATH="/v1/secret/data/api/webhook"
+TMP_DIR="$(mktemp -d /tmp/topic10-vault-metrics.XXXXXX)"
+TMP_CSV="${TMP_DIR}/vault-kms-overhead.csv"
+TMP_SUMMARY="${TMP_DIR}/vault-kms-overhead-summary.md"
+
+cleanup() {
+  rm -rf "${TMP_DIR}"
+}
+trap cleanup EXIT
 
 mkdir -p "${EVIDENCE_DIR}"
 
@@ -22,12 +32,26 @@ die() {
 
 command -v curl >/dev/null 2>&1 || die "curl is required."
 command -v python3 >/dev/null 2>&1 || die "python3 is required."
+[ -s "${VAULT_CA_CERT}" ] || die "Vault CA certificate not found: ${VAULT_CA_CERT}."
 
-printf 'run,http_status,time_total_seconds,latency_ms\n' > "${CSV_FILE}"
+if [ -z "${VAULT_TOKEN}" ] && [ -s "${VAULT_INIT_FILE}" ]; then
+  VAULT_TOKEN="$(
+    python3 - "${VAULT_INIT_FILE}" <<'PY'
+import json
+import sys
+
+print(json.load(open(sys.argv[1], encoding="utf-8")).get("root_token", ""))
+PY
+  )"
+fi
+[ -n "${VAULT_TOKEN}" ] || die "Set VAULT_TOKEN or run vault/scripts/ensure-vault-ready.sh to create ignored local init material."
+
+printf 'run,http_status,time_total_seconds,latency_ms\n' > "${TMP_CSV}"
 
 for run in $(seq 1 "${SAMPLES}"); do
   result="$(
     curl -sS \
+      --cacert "${VAULT_CA_CERT}" \
       -H "X-Vault-Token: ${VAULT_TOKEN}" \
       -o /dev/null \
       -w "%{http_code},%{time_total}" \
@@ -43,10 +67,10 @@ except Exception:
     print("0.000")
 PY
 )"
-  printf '%s,%s,%s,%s\n' "${run}" "${http_status}" "${time_total}" "${latency_ms}" >> "${CSV_FILE}"
+  printf '%s,%s,%s,%s\n' "${run}" "${http_status}" "${time_total}" "${latency_ms}" >> "${TMP_CSV}"
 done
 
-python3 - "${CSV_FILE}" "${SUMMARY_FILE}" "${VAULT_ADDR%/}${VAULT_PATH}" <<'PY'
+python3 - "${TMP_CSV}" "${TMP_SUMMARY}" "${VAULT_ADDR%/}${VAULT_PATH}" <<'PY'
 import csv
 import statistics
 import sys
@@ -73,12 +97,15 @@ p95 = percentile(success, 95)
 avg = statistics.mean(success) if success else None
 
 def fmt(value):
-    return "n/a" if value is None else f"{value:.3f}"
+    return f"{value:.3f}"
+
+if not success:
+    raise SystemExit("No successful HTTP 200 Vault samples were collected; no latency summary was published.")
 
 with open(summary_path, "w", encoding="utf-8") as f:
     f.write("# Vault/KMS-style Secret Retrieval Overhead\n\n")
     f.write("## Requirement Proven\n\n")
-    f.write("Measures HashiCorp Vault dev-mode KV secret-read latency as a lab proxy for KMS-style secret retrieval overhead.\n\n")
+    f.write("Measures local HashiCorp Vault KV secret-read latency as a lab proxy for KMS-style secret retrieval overhead.\n\n")
     f.write("## Command Or Evidence Source\n\n")
     f.write("`bash tests/metrics/measure-kms-overhead.sh`\n\n")
     f.write("## Observed Result\n\n")
@@ -91,10 +118,10 @@ with open(summary_path, "w", encoding="utf-8") as f:
     f.write(f"| p95 latency ms | {fmt(p95)} |\n")
     f.write(f"| average latency ms | {fmt(avg)} |\n\n")
     f.write("## Scope And Limitation\n\n")
-    f.write("This is not an AWS KMS measurement. It uses local HashiCorp Vault dev-mode secret reads as a lab proxy for secret-retrieval overhead. The script writes only HTTP status and timing data; no secret value or response body is written to evidence.\n")
+    f.write("This is not an AWS KMS measurement. It uses local HashiCorp Vault secret reads as a lab proxy for secret-retrieval overhead. The script writes only HTTP status and timing data; no secret value or response body is written to evidence.\n")
 
-if not success:
-    raise SystemExit(5)
 PY
 
+mv "${TMP_CSV}" "${CSV_FILE}"
+mv "${TMP_SUMMARY}" "${SUMMARY_FILE}"
 echo "[INFO] Vault/KMS-style overhead evidence written under ${EVIDENCE_DIR}"

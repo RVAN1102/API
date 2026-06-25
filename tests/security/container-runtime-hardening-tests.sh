@@ -67,7 +67,7 @@ cap_drop_services = readonly_services
 intentionally_not_readonly = {
     "kong": "Kong writes runtime prefix files and nginx state.",
     "keycloak": "Keycloak dev mode imports realm data into a writable runtime directory.",
-    "vault": "Vault dev server and IPC_LOCK behavior require runtime write/lock support.",
+    "vault": "Vault persistent storage and IPC_LOCK behavior require runtime write/lock support.",
     "redis": "Redis is the runtime nonce TTL store.",
     "loki": "Loki writes log index/chunk data to its volume.",
     "grafana": "Grafana writes dashboard/database state to its volume.",
