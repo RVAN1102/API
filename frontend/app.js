@@ -181,7 +181,7 @@ async function testInvalidWebhook() {
   } catch (err) {
     let msg = err.message;
     if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-      msg = "CORS preflight blocked. Make sure http://localhost:3002 is in Kong CORS origins.";
+      msg = "CORS preflight blocked. Make sure https://localhost:3002 is in Kong CORS origins.";
     }
     logToConsole('fail', `Webhook request failed`, msg);
   }

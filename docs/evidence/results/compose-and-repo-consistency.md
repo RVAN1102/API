@@ -18,7 +18,7 @@ bash scripts/audit/repo-consistency-audit.sh
 
 | Check | Observed result |
 |---|---|
-| branch | `docs/sync-no-plaintext-runtime` |
+| branch | `main` |
 | Compose config | expected exit `0` |
 | repo consistency audit | expected `FAIL=0` |
 
