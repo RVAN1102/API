@@ -57,6 +57,35 @@
       "config": {}
     }
   ],
+  "components": {
+    "org.keycloak.keys.KeyProvider": [
+      {
+        "name": "rsa-generated",
+        "providerId": "rsa-generated",
+        "subComponents": {},
+        "config": {
+          "priority": [
+            "100"
+          ],
+          "enabled": [
+            "true"
+          ],
+          "active": [
+            "true"
+          ],
+          "keyUse": [
+            "SIG"
+          ],
+          "algorithm": [
+            "RS256"
+          ],
+          "keySize": [
+            "4096"
+          ]
+        }
+      }
+    ]
+  },
   "roles": {
     "realm": [
       {

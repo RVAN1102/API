@@ -19,6 +19,9 @@ Backend containers use `https://keycloak:8443` for discovery, JWKS, token, and
 introspection calls. The issuer remains the local host URL because Keycloak is
 started with `--hostname=https://localhost:8446`.
 
+JWT signing uses RS256 with RSA-4096 signing key. RS256 is the JWT/JWS
+algorithm, and RSA-4096 is the RSA modulus size exposed through JWKS.
+
 ## Roles
 
 | Role | Description |

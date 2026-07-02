@@ -61,7 +61,8 @@ All services perform these steps:
 2. Decode header without trust to get `kid`.
 3. Fetch JWKS from `{KEYCLOAK_URL}/realms/{REALM}/protocol/openid-connect/certs`.
 4. Find matching key by `kid`.
-5. Verify JWT signature with RS256.
+5. Verify JWT signature from JWKS: RS256 with RSA-4096 signing key. RS256 is
+   the JWT/JWS algorithm, and RSA-4096 is the RSA modulus size.
 6. Verify `exp`.
 7. Verify `iss` equals `https://localhost:8446/realms/topic10-sme-api`.
 8. Enforce token-client binding with `azp` / `client_id` and audience fallback
