@@ -151,9 +151,9 @@ request_json "users-me" "${BASE_URL}/api/v1/users/me" "${USERS_ME_BODY}" "200"
 assert_contract "users-me" "${USERS_ME_BODY}" \
   user_id username email roles correlation_id
 
-request_json "order-detail" "${BASE_URL}/api/v1/orders/ord-alice-1001" "${ORDER_BODY}" "200"
+request_json "order-detail" "${BASE_URL}/api/v1/orders/ord-alice-1001/fixed" "${ORDER_BODY}" "200"
 assert_contract "order-detail" "${ORDER_BODY}" \
-  order_id owner_id amount status currency correlation_id
+  order_id owner_id amount status currency note correlation_id
 
 echo ""
 echo "[OK] OpenAPI/excessive-data contract tests passed"
